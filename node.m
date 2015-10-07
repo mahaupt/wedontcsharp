@@ -26,9 +26,9 @@ classdef node
         function erg=eq(a, b)
             erg = false;
             
-            if (a.gridX == b.gridX && a.gridY == b.gridY)
-                erg = true;
-            end
+            %if (a.gridX == b.gridX && a.gridY == b.gridY)
+            %    erg = true;
+            %end
         end
         
         function erg=compareTo(obj, item)
