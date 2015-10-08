@@ -1,7 +1,7 @@
 function bes = beschleunigung(spiel, farbe)
     %Konstanten
-    constSafeBorder = 0.001;
-    constGridRadius = 0.01;
+    constSafeBorder = 0.005;
+    constGridRadius = 0.005;
    
     %statische variablen definieren
     persistent nodeGrid;
@@ -35,11 +35,6 @@ function bes = beschleunigung(spiel, farbe)
             return;
         end
         
-        %%Überprüfen, ob Wegpunkt erreicht wurde, dann 1. Punkt löschen
-        if norm(me.pos-waypointList{1}) < 0.01
-            waypointList(1) = [];
-        end
-        
         corr = vecNorm(waypointList{1}-me.pos)-vecNorm(me.ges);
         dir = vecNorm(waypointList{1}-me.pos);
         erg = dir + corr;
@@ -47,6 +42,11 @@ function bes = beschleunigung(spiel, farbe)
         distancetowaypoint=norm(waypointList{1}-me.pos);
         if (norm(me.ges) / (spiel.bes)) * (norm(me.ges) / 2) > distancetowaypoint
             erg=-me.ges+ corr*0.5;
+        end
+        
+        %%Überprüfen, ob Wegpunkt erreicht wurde, dann 1. Punkt löschen
+        if norm(me.pos-waypointList{1}) < 0.01
+            waypointList(1) = [];
         end
     end
         
@@ -196,11 +196,14 @@ function bes = beschleunigung(spiel, farbe)
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     %get node neighbours
     function erg = getNeighbourNodes(node)
+        gridSizeX = round(1/(constGridRadius*2));
+        gridSizeY = round(1/(constGridRadius*2));
+        
         i = 1;
         for x = node.gridPos(1) -1 : node.gridPos(1) +1
             for y = node.gridPos(2) -1 : node.gridPos(2) + 1
                 %check if grid coors are valid
-                if (x >= 1 && x <= 50 && y >= 1 && y <= 50)
+                if (x >= 1 && x <= gridSizeX && y >= 1 && y <= gridSizeY)
                 
                     if (equalsNode(nodeGrid(x, y), node))
                         continue;
