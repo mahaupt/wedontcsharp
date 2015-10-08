@@ -3,10 +3,14 @@ function bes = beschleunigung(spiel, farbe)
     constSafeBorder = 0.01;
     constGridRadius = 0.005;
     constNavSecurity = 0.001;
+    WayPointReachedBorder = 0.01;
    
     %statische variablen definieren
     persistent nodeGrid;
     persistent waypointList;
+    persistent waypointList2;
+    persistent waypointList3;
+    persistent waypointList4;
     
     %%Farbe prüfen und zuweisen
     if strcmp (farbe, 'rot')
@@ -20,7 +24,15 @@ function bes = beschleunigung(spiel, farbe)
     %%wird einmal am Anfang ausgeführt
     if spiel.i_t==1
         setupNodeGrid()
-        waypointList = findPath(me.pos, spiel.tanke(1).pos);
+        first_tanke = 3;
+        second_tanke = 5;
+        third_tanke = 2;
+        fourth_tanke = 8;
+        waypointList = findPath(me.pos, spiel.tanke(first_tanke).pos);
+        waypointList2 = findPath(spiel.tanke(first_tanke).pos, spiel.tanke(second_tanke).pos);
+        waypointList3 = findPath(spiel.tanke(second_tanke).pos, spiel.tanke(third_tanke).pos);
+        waypointList4 = findPath(spiel.tanke(third_tanke).pos, spiel.tanke(fourth_tanke).pos);
+        waypointList = {waypointList{:},waypointList2{:},waypointList3{:},waypointList4{:}};
         debugDRAW();
     end
 
@@ -45,7 +57,7 @@ function bes = beschleunigung(spiel, farbe)
         end
         
         %%Überprüfen, ob Wegpunkt erreicht wurde, dann 1. Punkt löschen
-        if norm(me.pos-waypointList{1}) < 0.02
+        if norm(me.pos-waypointList{1}) < WayPointReachedBorder
             waypointList(1) = [];
         end
     end
