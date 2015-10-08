@@ -1,7 +1,8 @@
 function bes = beschleunigung(spiel, farbe)
     %Konstanten
-    constSafeBorder = 0.005;
+    constSafeBorder = 0.01;
     constGridRadius = 0.005;
+    constNavSecurity = 0.001;
    
     %statische variablen definieren
     persistent nodeGrid;
@@ -16,17 +17,16 @@ function bes = beschleunigung(spiel, farbe)
         enemy = spiel.rot;
     end
     
-    
     %%wird einmal am Anfang ausgeführt
-    if (isempty(nodeGrid))
+    if spiel.i_t==1
         setupNodeGrid()
-        waypointList = findPath(me.pos, [0.2, 0.8]);
+        waypointList = findPath(me.pos, spiel.tanke(1).pos);
+        debugDRAW();
     end
 
     %%Beschleunigung berechnen:
     bes=calculateBES();
-    
-    
+
     
     %%%%%%%%%%%%%%%%%%%%%%%%PathToBes%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     function erg=calculateBES()
@@ -45,7 +45,7 @@ function bes = beschleunigung(spiel, farbe)
         end
         
         %%Überprüfen, ob Wegpunkt erreicht wurde, dann 1. Punkt löschen
-        if norm(me.pos-waypointList{1}) < 0.01
+        if norm(me.pos-waypointList{1}) < 0.02
             waypointList(1) = [];
         end
     end
@@ -219,7 +219,20 @@ function bes = beschleunigung(spiel, farbe)
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % simplify path
     function erg = simplifyPath(path)
-        erg = path;
+        %erg=path;
+        %return
+        ergIndex = 1;
+        lastvec=[0,0];
+        for i=2:numel(path)
+            thisvec = path{i}-path{i-1};
+            if (~(abs(thisvec(1)-lastvec(1)) < constNavSecurity && abs(thisvec(2)-lastvec(2)) < constNavSecurity))
+                erg{ergIndex} = path{i-1};
+                ergIndex = ergIndex + 1;
+            end
+            lastvec=thisvec;
+        end
+        
+        erg{ergIndex} = path{numel(path)};
     end
 
 
@@ -244,6 +257,23 @@ function bes = beschleunigung(spiel, farbe)
         
         if (n == 0)
             erg = 0;
+        end
+    end
+
+%%%%%%%%%DEBUGGING%%%%%%%
+    function debugDRAW()
+        for i = 1 : numel(waypointList)
+
+            rectangle ( ...
+                'Parent', spiel.spielfeld_handle, ...
+                'Position', [...
+                waypointList{i}, ...
+                0.01, ...
+                0.01], ...
+                'Curvature', [1 1], ...
+                'FaceColor', spiel.farbe.rot, ...
+                'EdgeColor', 'none' ...
+                );
         end
     end
 end
