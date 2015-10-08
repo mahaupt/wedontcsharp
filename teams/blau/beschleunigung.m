@@ -11,10 +11,15 @@ function bes = beschleunigung(spiel, farbe)
     %%wird einmal am Anfang ausgeführt
     if (isempty(nodeGrid))
         setupNodeGrid()
-        findPath([0.5,0.5], [0.3, 0.3]);
     end
     
+    
+    
     bes = [0, 1];
+    
+    
+    
+    
     
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     function setupNodeGrid()
@@ -64,21 +69,20 @@ function bes = beschleunigung(spiel, farbe)
         
         startPos = worldPosToGridPos(startp);
         endPos = worldPosToGridPos(endp);
-        startNode = nodeGrid(startPos(1),startPos(2));
-        endNode = nodeGrid(endPos(1),endPos(2));
         
-        openSet = [startNode];
-        %closedSet = [];
+        openSet = {startPos};
+        closedSet = {};
         closedSetIndex = 1;
         
         while(numel(openSet) > 0)
-            currentNode = openSet(1);
+            currentNode = nodeFromGridCoords(openSet{1});
             openSetIndex = 1;
             
             %get node woth lowest fcost (or hcost) and remove it from openlist
-            for i=1:numel(openSet)    
-                if (openSet(i).fCost < currentNode.fCost || openSet(i).fCost == currentNode.fCost && openSet(i).hCost > currentNode.hCost)
-                    currentNode = openSet(i);    
+            for i=1:numel(openSet)
+                cn = nodeFromGridCoords(openSet{i});
+                if (cn.fCost < currentNode.fCost || cn.fCost == currentNode.fCost && cn.hCost < currentNode.hCost)
+                    currentNode = nodeFromGridCoords(openSet{i});    
                     openSetIndex = i;
                 end
             end
@@ -86,11 +90,11 @@ function bes = beschleunigung(spiel, farbe)
             %remove node from open set
             openSet(openSetIndex) = [];
             %add node to closed set
-            closedSet(closedSetIndex) = currentNode;
+            closedSet{closedSetIndex} = currentNode.gridPos;
             closedSetIndex = closedSetIndex + 1;
             
             %if it is target - close - path found!
-            if (equalsNode(currentNode, endNode))
+            if (currentNode.gridPos == endPos)
                 pathSuccess = true;
                 break;
             end
@@ -99,24 +103,22 @@ function bes = beschleunigung(spiel, farbe)
             neighbours = getNeighbourNodes(currentNode);
             for i = 1 : numel(neighbours)
                 neighbour = neighbours(i);
-                if (~neighbour.isWalkable || containsNode(closedSet, currentNode))
+                if (~neighbour.isWalkable || containsNode(closedSet, neighbour.gridPos))
                     continue;
                 end
                 
                 %update costs for neighbours
                 movementCostToNeighbour = currentNode.gCost + norm(currentNode.worldPos - neighbour.worldPos);
-                if (movementCostToNeighbour < neighbour.gCost && ~containsNode(openSet, neighbour))
-                    neighbour.gCost = movementCostToNeighbour;
-                    neighbour.hCost = norm(endNode.worldPos - neighbour.worldPos);
-                    neighbour.fCost = neighbour.gCost + neighbour.hCost;
-                    neighbour.parent = currentNode;
-
-                    %write update
-                    nodeGrid(neighbour.gridX, neighbour.gridY) = neighbour;
+                if (movementCostToNeighbour < neighbour.gCost || ~containsNode(openSet, neighbour.gridPos))
+                    nodeGrid(neighbour.gridPos(1), neighbour.gridPos(2)).gCost = movementCostToNeighbour;
+                    nodeGrid(neighbour.gridPos(1), neighbour.gridPos(2)).hCost = norm(endp - neighbour.worldPos);
+                    nodeGrid(neighbour.gridPos(1), neighbour.gridPos(2)).fCost = neighbour.gCost + neighbour.hCost;
+                    nodeGrid(neighbour.gridPos(1), neighbour.gridPos(2)).parent = currentNode.gridPos;
 
                     %add neighbour to openSet
-                    if (~ismember(openSet, neighbour))
-                        append(openSet, neighbour);
+                    if (~containsNode(openSet, neighbour.gridPos))
+                        insertIndex = numel(openSet)+1;
+                        openSet{insertIndex} = neighbour.gridPos;
                     end
                 end
             end
@@ -125,12 +127,14 @@ function bes = beschleunigung(spiel, farbe)
         %finished pathfinding
         if (pathSuccess)
             %retrace path
-            currentNode = endNode;
+            currentNode = nodeFromGridCoords(endPos);
             waypoints = [];
+            waypointIndex = 1;
             
-            while (~equalsNode(currentNode,startNode))
-               append(waypoints, currentNode.worldPos);
-               currentNode = currentNode.parent;
+            while (currentNode.gridPos ~= startPos)
+               waypoints{waypointIndex} = currentNode.worldPos;
+               waypointIndex = waypointIndex + 1;
+               currentNode = nodeFromGridCoords(currentNode.parent);
             end
             
             %flip waypoints
@@ -145,6 +149,10 @@ function bes = beschleunigung(spiel, farbe)
         erg = [round(pos(1)/constGridRadius/2), round(pos(2)/constGridRadius/2)];
     end
 
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    function erg = nodeFromGridCoords(pos)
+        erg = nodeGrid(pos(1), pos(2));
+    end
 
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     %check if nodes are equal
@@ -180,10 +188,11 @@ function bes = beschleunigung(spiel, farbe)
 
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     %check if array contains node
-    function erg = containsNode(nodes, node)
+    function erg = containsNode(nodes, pos)
         erg = false;
+        
         for i=1:numel(nodes)
-            if (equalsNode(nodes(i), node))
+            if (nodes{i}(1) == pos(1) && nodes{i}(2) == pos(2))
                 erg = true;
                 return;
             end
