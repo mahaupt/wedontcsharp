@@ -2,8 +2,6 @@ function bes = beschleunigung(spiel, farbe)
     %Konstanten
     constSafeBorder = 0.001;
     constGridRadius = 0.01;
-    bes             = [0, 0];       %%am Anfang 0 setzen
-              
    
     %statische variablen definieren
     persistent nodeGrid;
@@ -22,6 +20,7 @@ function bes = beschleunigung(spiel, farbe)
     %%wird einmal am Anfang ausgeführt
     if (isempty(nodeGrid))
         setupNodeGrid()
+        waypointList = findPath(me.pos, [0.2, 0.8]);
     end
 
     %%Beschleunigung berechnen:
@@ -200,12 +199,16 @@ function bes = beschleunigung(spiel, farbe)
         i = 1;
         for x = node.gridPos(1) -1 : node.gridPos(1) +1
             for y = node.gridPos(2) -1 : node.gridPos(2) + 1
-                if (equalsNode(nodeGrid(x, y), node))
-                    continue;
-                end
+                %check if grid coors are valid
+                if (x >= 1 && x <= 50 && y >= 1 && y <= 50)
                 
-                erg(i) = nodeGrid(x, y);
-                i = i + 1;
+                    if (equalsNode(nodeGrid(x, y), node))
+                        continue;
+                    end
+
+                    erg(i) = nodeGrid(x, y);
+                    i = i + 1;
+                end
             end
         end
     end
@@ -233,11 +236,11 @@ function bes = beschleunigung(spiel, farbe)
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     %normalize 2D vector
     function erg = vecNorm(vec)
-        norm = norm(vec);
-        erg = [vec(1)/norm, vec(2)/norm];
+        n = norm(vec);
+        erg = [vec(1)/n, vec(2)/n];
         
-        if (norm == 0)
-            erg = 0
+        if (n == 0)
+            erg = 0;
         end
     end
 end
