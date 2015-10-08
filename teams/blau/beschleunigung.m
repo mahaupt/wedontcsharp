@@ -7,6 +7,7 @@ function bes = beschleunigung(spiel, farbe)
     %statische variablen definieren
     persistent nodeGrid;
     persistent waypointList;
+    persistent visited_tanke
     
     %%Farbe prüfen und zuweisen
     if strcmp (farbe, 'rot')
@@ -19,33 +20,43 @@ function bes = beschleunigung(spiel, farbe)
     
     %%wird einmal am Anfang ausgeführt
     if spiel.i_t==1
-        setupNodeGrid()
+        setupNodeGrid();
         waypointList = findPath(me.pos, spiel.tanke(1).pos);
+        visited_tanke = 1;
         debugDRAW();
     end
+    
+    %%%Nach Erreichen des ersten Wegpunktes: Waypointlist neu aufbauen
 
+
+    if numel(waypointList) <= 0 && visited_tanke <= spiel.n_tanke
+        waypointList = findPath(me.pos, spiel.tanke(visited_tanke).pos);
+        visited_tanke=visited_tanke+1;
+    end
+         
+    
     %%Beschleunigung berechnen:
     bes=calculateBES();
 
     
     %%%%%%%%%%%%%%%%%%%%%%%%PathToBes%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     function erg=calculateBES()
-        if (numel(waypointList) <= 0)
-            erg = -me.ges;
-            return;
-        end
+    %    if (numel(waypointList) <= 0)
+    %        erg = -me.ges;
+    %        return;
+    %    end
         
         corr = vecNorm(waypointList{1}-me.pos)-vecNorm(me.ges);
         dir = vecNorm(waypointList{1}-me.pos);
         erg = dir + corr;
-        
         distancetowaypoint=norm(waypointList{1}-me.pos);
+       
         if (norm(me.ges) / (spiel.bes)) * (norm(me.ges) / 2) > distancetowaypoint
             erg=-me.ges+ corr*0.5;
         end
         
         %%Überprüfen, ob Wegpunkt erreicht wurde, dann 1. Punkt löschen
-        if norm(me.pos-waypointList{1}) < 0.02
+        if norm(me.pos-waypointList{1}) < 0.01
             waypointList(1) = [];
         end
     end
