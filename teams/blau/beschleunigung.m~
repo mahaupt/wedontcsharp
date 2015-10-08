@@ -29,7 +29,12 @@ function bes = beschleunigung(spiel, farbe)
     if spiel.i_t==1
     waypointList = {[0.8,0.5],[0.2,0.2]};  %findPath(me.pos, [0.5, 0.5]);
     end
-
+    
+    %%%%%%%%%%%%%%Bremsformel, einfachste Ausführung%%%%%%%%%%%%%
+    
+    %Entfernung zum Wegpunkt berechnen
+    
+    
     
     %%Überprüfen, ob Wegpunkt erreicht wurde, dann 1. Punkt löschen
     if norm(me.pos-waypointList{1}) < 0.1
@@ -42,11 +47,6 @@ function bes = beschleunigung(spiel, farbe)
     %%%%%%%%%%%%%%%%%%%%%%%%PathToBes%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     function erg=calculateBES()
         erg=waypointList{1}-me.pos;
-        
-        distancetowaypoint=norm(waypointList{1}-me.pos);
-        if (norm(me.ges) / (spiel.bes)) * (norm(me.ges) / 2) > distancetowaypoint
-            erg=-erg;
-        end
     end
         
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
