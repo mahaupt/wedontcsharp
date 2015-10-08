@@ -45,7 +45,7 @@ function bes = beschleunigung(spiel, farbe)
         %border check
         if (pos(1) > 1-secureSpaceballRadius || pos(1) < secureSpaceballRadius || pos(2) > 1-secureSpaceballRadius || pos(2) < secureSpaceballRadius)
             erg = false;
-            return
+            return;
         end
         
         %mine check
@@ -68,18 +68,26 @@ function bes = beschleunigung(spiel, farbe)
         endNode = nodeGrid(endPos(1),endPos(2));
         
         openSet = [startNode];
-        closedSet = [];
+        %closedSet = [];
+        closedSetIndex = 1;
         
         while(numel(openSet) > 0)
             currentNode = openSet(1);
-            openSet(1) = [];
+            openSetIndex = 1;
             
             %get node woth lowest fcost (or hcost) and remove it from openlist
             for i=1:numel(openSet)    
                 if (openSet(i).fCost < currentNode.fCost || openSet(i).fCost == currentNode.fCost && openSet(i).hCost > currentNode.hCost)
                     currentNode = openSet(i);    
+                    openSetIndex = i;
                 end
             end
+            
+            %remove node from open set
+            openSet(openSetIndex) = [];
+            %add node to closed set
+            closedSet(closedSetIndex) = currentNode;
+            closedSetIndex = closedSetIndex + 1;
             
             %if it is target - close - path found!
             if (equalsNode(currentNode, endNode))
@@ -91,26 +99,24 @@ function bes = beschleunigung(spiel, farbe)
             neighbours = getNeighbourNodes(currentNode);
             for i = 1 : numel(neighbours)
                 neighbour = neighbours(i);
-                if (~neighbour.isWalkable)
+                if (~neighbour.isWalkable || containsNode(closedSet, currentNode))
                     continue;
                 end
                 
                 %update costs for neighbours
                 movementCostToNeighbour = currentNode.gCost + norm(currentNode.worldPos - neighbour.worldPos);
-                if (movementCostToNeighbour < neighbour.gCost)
+                if (movementCostToNeighbour < neighbour.gCost && ~containsNode(openSet, neighbour))
+                    neighbour.gCost = movementCostToNeighbour;
+                    neighbour.hCost = norm(endNode.worldPos - neighbour.worldPos);
+                    neighbour.fCost = neighbour.gCost + neighbour.hCost;
+                    neighbour.parent = currentNode;
+
+                    %write update
+                    nodeGrid(neighbour.gridX, neighbour.gridY) = neighbour;
+
+                    %add neighbour to openSet
                     if (~ismember(openSet, neighbour))
-                        neighbour.gCost = movementCostToNeighbour;
-                        neighbour.hCost = norm(endNode.worldPos - neighbour.worldPos);
-                        neighbour.fCost = neighbour.gCost + neighbour.hCost;
-                        neighbour.parent = currentNode;
-
-                        %write update
-                        nodeGrid(neighbour.gridX, neighbour.gridY) = neighbour;
-
-                        %add neighbour to openSet
-                        if (~ismember(openSet, neighbour))
-                            append(openSet, neighbour);
-                        end
+                        append(openSet, neighbour);
                     end
                 end
             end
@@ -169,5 +175,18 @@ function bes = beschleunigung(spiel, farbe)
     % simplify path
     function erg = simplifyPath(path)
         erg = path;
+    end
+
+
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    %check if array contains node
+    function erg = containsNode(nodes, node)
+        erg = false;
+        for i=1:numel(nodes)
+            if (equalsNode(nodes(i), node))
+                erg = true;
+                return;
+            end
+        end
     end
 end
