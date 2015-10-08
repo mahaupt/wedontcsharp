@@ -5,7 +5,6 @@ function bes = beschleunigung(spiel, farbe)
     bes             = [0, 0];       %%am Anfang 0 setzen
               
    
-    
     %statische variablen definieren
     persistent nodeGrid;
     persistent waypointList;
@@ -24,28 +23,33 @@ function bes = beschleunigung(spiel, farbe)
     if (isempty(nodeGrid))
         setupNodeGrid()
     end
-    
-    %%Am Spielanfang die Wegpunktliste füllen -- ZUM TEST
-    if spiel.i_t==1
-    waypointList = {[0.8,0.5],[0.2,0.2]};  %findPath(me.pos, [0.5, 0.5]);
-    end
 
-    
-    %%Überprüfen, ob Wegpunkt erreicht wurde, dann 1. Punkt löschen
-    if norm(me.pos-waypointList{1}) < 0.1
-            waypointList(1) = [];
-    end
-    
     %%Beschleunigung berechnen:
     bes=calculateBES();
     
+    
+    
+    
+    
     %%%%%%%%%%%%%%%%%%%%%%%%PathToBes%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     function erg=calculateBES()
-        erg=waypointList{1}-me.pos;
+        if (numel(waypointList) <= 0)
+            erg = -me.ges;
+            return;
+        end
+        
+        %%Überprüfen, ob Wegpunkt erreicht wurde, dann 1. Punkt löschen
+        if norm(me.pos-waypointList{1}) < 0.01
+            waypointList(1) = [];
+        end
+        
+        corr = vecNorm(waypointList{1}-me.pos)-vecNorm(me.ges);
+        dir = vecNorm(waypointList{1}-me.pos);
+        erg = dir + corr;
         
         distancetowaypoint=norm(waypointList{1}-me.pos);
         if (norm(me.ges) / (spiel.bes)) * (norm(me.ges) / 2) > distancetowaypoint
-            erg=-erg;
+            erg=-me.ges+ corr*0.5;
         end
     end
         
@@ -220,6 +224,17 @@ function bes = beschleunigung(spiel, farbe)
                 erg = true;
                 return;
             end
+        end
+    end
+
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    %normalize 2D vector
+    function erg = vecNorm(vec)
+        norm = norm(vec);
+        erg = [vec(1)/norm, vec(2)/norm];
+        
+        if (norm == 0)
+            erg = 0
         end
     end
 end
