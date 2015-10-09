@@ -5,6 +5,7 @@ function bes = beschleunigung(spiel, farbe)
     constNavSecurity = 0.03; %simplify path
     constWayPointReachedRadius = 0.02; %0.01
     constMineProxPenality = 0.0006;
+    constCornerBreaking = 0.02;
    
     %statische variablen definieren
     persistent nodeGrid;
@@ -13,19 +14,22 @@ function bes = beschleunigung(spiel, farbe)
     %%Farbe prüfen und zuweisen
     if strcmp (farbe, 'rot')
         me = spiel.rot;
-        %enemy = spiel.blau;
+        enemy = spiel.blau;
     else
         me = spiel.blau;
-        %enemy = spiel.rot;
+        enemy = spiel.rot;
     end
     
     %%wird einmal am Anfang ausgeführt
     if spiel.i_t==1
         setupNodeGrid()
-        createPathToTanken()
-        debugDRAW();
     end
 
+    checkTankPath()
+    
+    %%Pfad zur nächstbesten Tankstelle
+    createPathToNextTanke()
+    
     %%Beschleunigung berechnen:
     bes=calculateBES();
 
@@ -42,18 +46,13 @@ function bes = beschleunigung(spiel, farbe)
         dir = vecNorm(waypointList{1}-me.pos);
         erg = dir + corr*5;
         
-        %decelerating to stop
-        decellerateBias = 0;
-        if (numel(waypointList) > 1)
-            decellerateBias = 0.01;
-            if (decellerateBias > norm(me.ges))
-                decellerateBias = norm(me.ges);
-            end
-        end
+        %calculate breaking endvelocity
+        breakingEndVel = calcBreakingEndVel();
         
         %decelleration
-        distancetowaypoint=norm(waypointList{1}-me.pos);
-        if ((norm(me.ges) - decellerateBias) / (spiel.bes) * (norm(me.ges) - decellerateBias)/2) > distancetowaypoint
+        distanceToWaypoint=norm(waypointList{1}-me.pos);
+        breakDistance = calcBreakDistance(norm(me.ges), breakingEndVel);
+        if (breakDistance > distanceToWaypoint)
             erg=-dir + corr*5;
         end
         
@@ -61,6 +60,55 @@ function bes = beschleunigung(spiel, farbe)
         if norm(me.pos-waypointList{1}) < constWayPointReachedRadius
             waypointList(1) = [];
         end
+    end
+
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    function erg=calcBreakingEndVel()
+        erg = 0;
+        
+        if (numel(waypointList) <= 1)
+            return;
+        end
+        
+        length = norm(waypointList{1} - me.pos);
+        lastDir = vecNorm(waypointList{1} - me.pos);
+        waypointIndex = 2;
+        
+        %return values
+        globalMinSpeed = 100;
+        globalBreakStartPoint = 100;
+        
+        nullBreakDistance = calcBreakDistance(norm(me.ges), 0);
+        while(length < nullBreakDistance && waypointIndex <= numel(waypointList))
+            nextDist = norm(waypointList{waypointIndex} - waypointList{waypointIndex-1});
+            nextDir = vecNorm(waypointList{waypointIndex} - waypointList{waypointIndex-1});
+            angle = acosd(dot(lastDir, nextDir));
+            
+            %calculate minimal speed
+            minSpeed = 0;
+            if (angle < 90 && waypointIndex < numel(waypointList))
+                minSpeed = constCornerBreaking/sind(angle);
+            end
+            
+            %get the point where i have to start breaking first
+            breakStartPoint = length-calcBreakDistance(norm(me.ges), minSpeed);
+            if (breakStartPoint < globalBreakStartPoint)
+                globalBreakStartPoint = breakStartPoint;
+                globalMinSpeed = minSpeed;
+            end
+            
+            length = length + nextDist;
+            lastDir = nextDir;
+            waypointIndex = waypointIndex +1;
+        end
+        
+        erg = globalMinSpeed;
+    end
+
+
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    function erg = calcBreakDistance(vel, endvel)
+        erg = ((vel)^2 - (endvel)^2)/(2*spiel.bes);
     end
         
 
@@ -280,8 +328,9 @@ function bes = beschleunigung(spiel, farbe)
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % simplify path
     function erg = simplifyPath(path)
-        if (numel(path) == 1)
-            erg = path;
+        
+        erg = path;
+        if (numel(path) <= 1)
             return;
         end
         
@@ -292,7 +341,7 @@ function bes = beschleunigung(spiel, farbe)
                 %no collision detected start to end
                 erg = {path{1}, path{i}};
                 endIndex = numel(path);
-                erg = appendToArray(erg, simplifyPath(path(i:endIndex)));
+                erg = appendToArray(erg, simplifyPath(path(i+1:endIndex)));
                 return;
             end
         end
@@ -319,7 +368,7 @@ function bes = beschleunigung(spiel, farbe)
         erg = [vec(1)/n, vec(2)/n];
         
         if (n == 0)
-            erg = 0;
+            erg = [0 , 0];
         end
     end
 
@@ -336,32 +385,48 @@ function bes = beschleunigung(spiel, farbe)
     end
     
 %%%Search for nearest Tanken and create Path between them
-    function createPathToTanken()
-        tankdistance=createtankdistance();
-        first_tanke = tankdistance(1,1);
-        second_tanke = tankdistance(2,1);
-        third_tanke = tankdistance(3,1);
-        fourth_tanke = tankdistance(4,1);
-        fifth_tanke = tankdistance(5,1);
-        sixth_tanke = tankdistance(6,1);
-        waypointList = findPath(me.pos, spiel.tanke(first_tanke).pos);
-        waypointList = appendToArray(waypointList, findPath(spiel.tanke(first_tanke).pos, spiel.tanke(second_tanke).pos));
-        waypointList = appendToArray(waypointList, findPath(spiel.tanke(second_tanke).pos, spiel.tanke(third_tanke).pos));
-        waypointList = appendToArray(waypointList, findPath(spiel.tanke(third_tanke).pos, spiel.tanke(fourth_tanke).pos));
-        waypointList = appendToArray(waypointList, findPath(spiel.tanke(fourth_tanke).pos, spiel.tanke(fifth_tanke).pos));
-        waypointList = appendToArray(waypointList, findPath(spiel.tanke(fifth_tanke).pos, spiel.tanke(sixth_tanke).pos));
+    function createPathToNextTanke()
+        if numel(waypointList)<=1 && spiel.n_tanke>=1
+            tankdistance=createTankEvaluation(me.pos);
+            next_tanke = tankdistance(1,1);
+            waypointList = appendToArray(waypointList,findPath(me.pos, spiel.tanke(next_tanke).pos));
+            debugDRAW();
+        end
     end
 
 %%%%%%%%%%%%%
 %create Tank Distance Table
-    function tankdistance=createtankdistance()
+    function erg=createTankEvaluation(position)
 
-        tankdistance = zeros(spiel.n_tanke,2);
+        erg = zeros(spiel.n_tanke,4);
         for i=1:spiel.n_tanke
-            tankdistance(i,1) = i;
-            tankdistance(i,2) = norm(spiel.tanke(i).pos-me.pos);
+            erg(i,1) = i;                                   %Spalte 1: Tankstellennummer
+            erg(i,2) = norm(spiel.tanke(i).pos-position);   %Spalte 2: Entfernung zu "position"
+            erg(i,3) = norm(spiel.tanke(i).pos-enemy.pos);  %Spalte 3: Entfernung zum Gegner
+            a=-1;
+            for j=1:spiel.n_tanke
+                if i==j
+                    continue
+                end
+                a=a+1/norm(spiel.tanke(i).pos-spiel.tanke(j).pos);
+            end
+            erg(i,4) = a*0.4+(1/erg(i,2))-0.5*(1/erg(i,3));                                   %Spalte 4: Anzahl Tankstellen in der Nähe und deren Dichte und deren Dichte zum Gegner
         end
-        tankdistance=sortrows(tankdistance,[2 1]);
+        erg=sortrows(erg,[-4 2 -3 1])
+    end
+
+    function checkTankPath()
+        %%Tankstellenliste Aktualisieren
+        endIndex=numel(waypointList);
+        if endIndex >= 1
+            lastWayPoint=waypointList{endIndex};
+            for i=1:spiel.n_tanke
+                if norm(spiel.tanke(i).pos-lastWayPoint) <= spiel.tanke_radius+constGridRadius
+                    return
+                end
+            end
+            waypointList=[];
+        end 
     end
 
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -376,26 +441,17 @@ function bes = beschleunigung(spiel, farbe)
             for i = 1:spiel.n_mine
                 if (norm(pos-spiel.mine(i).pos)-spiel.mine_radius < radius)
                     erg = true;
+                    return;
                 end
             end
-            length = length + radius;
+            length = length + radius/2;
         end
     end
 
 %%%%%%%%%DEBUGGING%%%%%%%
     function debugDRAW()
         for i = 1 : numel(waypointList)
-
-            rectangle ( ...
-                'Parent', spiel.spielfeld_handle, ...
-                'Position', [...
-                waypointList{i}-0.0025, ...
-                0.005, ...
-                0.005], ...
-                'Curvature', [1 1], ...
-                'FaceColor', spiel.farbe.rot, ...
-                'EdgeColor', 'none' ...
-                );
+            rectangle ('Parent', spiel.spielfeld_handle, 'Position', [waypointList{i}-0.0025, 0.005, 0.005], 'Curvature', [1 1], 'FaceColor', spiel.farbe.rot, 'EdgeColor', 'none');
         end
     end
 end
