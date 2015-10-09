@@ -22,6 +22,7 @@ function bes = beschleunigung(spiel, farbe)
     %%wird einmal am Anfang ausgeführt
     if spiel.i_t==1
         setupNodeGrid()
+<<<<<<< HEAD
         first_tanke = 3;
         second_tanke = 5;
         third_tanke = 2;
@@ -31,6 +32,9 @@ function bes = beschleunigung(spiel, farbe)
         waypointList = appendToArray(waypointList, findPath(spiel.tanke(second_tanke).pos, spiel.tanke(third_tanke).pos));
         waypointList = appendToArray(waypointList, findPath(spiel.tanke(third_tanke).pos, spiel.tanke(fourth_tanke).pos));
         
+=======
+        createPathToTanken()
+>>>>>>> master
         debugDRAW();
     end
 
@@ -305,7 +309,11 @@ function bes = beschleunigung(spiel, farbe)
             end
         end
         
+<<<<<<< HEAD
         
+=======
+        erg{ergIndex} = path{numel(path)}; %%%%%%%%%%%%%%%%%HIER OFT ERROR
+>>>>>>> master
     end
 
 
@@ -343,6 +351,35 @@ function bes = beschleunigung(spiel, farbe)
             erg{array1index} = array2{i};
             array1index = array1index + 1;
         end
+    end
+    
+%%%Search for nearest Tanken and create Path between them
+    function createPathToTanken()
+        tankdistance=createtankdistance();
+        first_tanke = tankdistance(1,1);
+        second_tanke = tankdistance(2,1);
+        third_tanke = tankdistance(3,1);
+        fourth_tanke = tankdistance(4,1);
+        fifth_tanke = tankdistance(5,1);
+        sixth_tanke = tankdistance(6,1);
+        waypointList = findPath(me.pos, spiel.tanke(first_tanke).pos);
+        waypointList = appendToArray(waypointList, findPath(spiel.tanke(first_tanke).pos, spiel.tanke(second_tanke).pos));
+        waypointList = appendToArray(waypointList, findPath(spiel.tanke(second_tanke).pos, spiel.tanke(third_tanke).pos));
+        waypointList = appendToArray(waypointList, findPath(spiel.tanke(third_tanke).pos, spiel.tanke(fourth_tanke).pos));
+        waypointList = appendToArray(waypointList, findPath(spiel.tanke(fourth_tanke).pos, spiel.tanke(fifth_tanke).pos));
+        waypointList = appendToArray(waypointList, findPath(spiel.tanke(fifth_tanke).pos, spiel.tanke(sixth_tanke).pos));
+    end
+
+%%%%%%%%%%%%%
+%create Tank Distance Table
+    function tankdistance=createtankdistance()
+
+        tankdistance = zeros(spiel.n_tanke,2);
+        for i=1:spiel.n_tanke
+            tankdistance(i,1) = i;
+            tankdistance(i,2) = norm(spiel.tanke(i).pos-me.pos);
+        end
+        tankdistance=sortrows(tankdistance,[2 1]);
     end
 
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
