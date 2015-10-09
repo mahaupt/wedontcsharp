@@ -1,9 +1,9 @@
 function bes = beschleunigung(spiel, farbe)
     %Konstanten
-    constSafeBorder = 0.01;
+    constSafeBorder = 0.015;
     constGridRadius = 0.005;
     constNavSecurity = 0.001;
-    WayPointReachedRadius = 0.01;
+    WayPointReachedRadius = 0.008;
    
     %statische variablen definieren
     persistent nodeGrid;
@@ -80,10 +80,12 @@ function bes = beschleunigung(spiel, farbe)
                 nodeGrid(x,y).fCost = 0;
                 nodeGrid(x,y).gCost = 0;
                 
-                %Je dichter an Mine, desto teurer!
+           %Je dichter an Mine, desto teurer!
                 for i=1:spiel.n_mine
-                   if norm([x,y]-spiel.mine(i).pos) < 1
+                   if norm([x,y]-spiel.mine(i).pos) < 0.05
                       nodeGrid(x,y).fCost = nodeGrid(x,y).fCost + (1/(spiel.mine_radius+norm([x,y]-spiel.mine(i).pos)));
+                      nodeGrid(x,y).fCost = nodeGrid(x,y).hCost + (1/(spiel.mine_radius+norm([x,y]-spiel.mine(i).pos)));
+                      nodeGrid(x,y).fCost = nodeGrid(x,y).gCost + (1/(spiel.mine_radius+norm([x,y]-spiel.mine(i).pos)));
                    end
                 end
                 
