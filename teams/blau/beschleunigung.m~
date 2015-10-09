@@ -1,29 +1,8 @@
 function bes = beschleunigung(spiel, farbe)
-<<<<<<< HEAD
-    bes = [0, 1];
-    
-    % Teamfarben-Abfrage und Parameter-Zuweisung
-    if strcmp(farbe, 'blau')
-        ich = spiel.blau;
-        gegner = spiel.rot;
-    else
-        ich = spiel.rot
-        gegner = spiel.blau
-    end
-   
-    % Blödsinniger Test xD
-    if spiel.i_t<120
-        bes=[0,1];
-    else
-        bes = [-1,-0.5]; 
-    end
-    
-    
-=======
     %Konstanten
     constSafeBorder = 0.005; %collision border around mines
     constGridRadius = 0.005; 
-    constNavSecurity = 0.03; %simplify path
+    constNavSecurity = 0.001; %simplify path
     constWayPointReachedRadius = 0.02; %0.01
     constMineProxPenality = 0.0006;
    
@@ -43,7 +22,15 @@ function bes = beschleunigung(spiel, farbe)
     %%wird einmal am Anfang ausgeführt
     if spiel.i_t==1
         setupNodeGrid()
-        createPathToTanken()
+        first_tanke = 3;
+        second_tanke = 5;
+        third_tanke = 2;
+        fourth_tanke = 8;
+        waypointList = findPath(me.pos, spiel.tanke(first_tanke).pos);
+        %waypointList = appendToArray(waypointList, findPath(spiel.tanke(first_tanke).pos, spiel.tanke(second_tanke).pos));
+        %waypointList = appendToArray(waypointList, findPath(spiel.tanke(second_tanke).pos, spiel.tanke(third_tanke).pos));
+        %waypointList = appendToArray(waypointList, findPath(spiel.tanke(third_tanke).pos, spiel.tanke(fourth_tanke).pos));
+        
         debugDRAW();
     end
 
@@ -308,15 +295,14 @@ function bes = beschleunigung(spiel, farbe)
         
         %check collision tube
         for i=fliplr(1:numel(path))
-            if (~corridorColliding(path{i}, path{1}, constNavSecurity) || ... 
-                    i == 2)
+            if (~corridorColliding(path{i}, path{1}, 0.03))
                 %no collision detected start to end
                 erg = {path{1}, path{i}};
-                endIndex = numel(path);
-                erg = appendToArray(erg, simplifyPath(path(i:endIndex)));
-                return;
+                erg = appendToArray(erg, simplifyPath());
             end
         end
+        
+        
     end
 
 
@@ -355,41 +341,12 @@ function bes = beschleunigung(spiel, farbe)
             array1index = array1index + 1;
         end
     end
-    
-%%%Search for nearest Tanken and create Path between them
-    function createPathToTanken()
-        tankdistance=createtankdistance();
-        first_tanke = tankdistance(1,1);
-        second_tanke = tankdistance(2,1);
-        third_tanke = tankdistance(3,1);
-        fourth_tanke = tankdistance(4,1);
-        fifth_tanke = tankdistance(5,1);
-        sixth_tanke = tankdistance(6,1);
-        waypointList = findPath(me.pos, spiel.tanke(first_tanke).pos);
-        waypointList = appendToArray(waypointList, findPath(spiel.tanke(first_tanke).pos, spiel.tanke(second_tanke).pos));
-        waypointList = appendToArray(waypointList, findPath(spiel.tanke(second_tanke).pos, spiel.tanke(third_tanke).pos));
-        waypointList = appendToArray(waypointList, findPath(spiel.tanke(third_tanke).pos, spiel.tanke(fourth_tanke).pos));
-        waypointList = appendToArray(waypointList, findPath(spiel.tanke(fourth_tanke).pos, spiel.tanke(fifth_tanke).pos));
-        waypointList = appendToArray(waypointList, findPath(spiel.tanke(fifth_tanke).pos, spiel.tanke(sixth_tanke).pos));
-    end
-
-%%%%%%%%%%%%%
-%create Tank Distance Table
-    function tankdistance=createtankdistance()
-
-        tankdistance = zeros(spiel.n_tanke,2);
-        for i=1:spiel.n_tanke
-            tankdistance(i,1) = i;
-            tankdistance(i,2) = norm(spiel.tanke(i).pos-me.pos);
-        end
-        tankdistance=sortrows(tankdistance,[2 1]);
-    end
 
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     %corridor colliding
     function erg = corridorColliding(startp, endp, radius)
         length = 0;
-        dir = vecNorm(endp-startp);
+        dir = normVec(endp-startp);
         erg = false;
         
         while(length < norm(startp - endp))
@@ -419,5 +376,4 @@ function bes = beschleunigung(spiel, farbe)
                 );
         end
     end
->>>>>>> master
 end
