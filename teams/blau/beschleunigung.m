@@ -1,25 +1,4 @@
 function bes = beschleunigung(spiel, farbe)
-<<<<<<< HEAD
-    bes = [0, 1];
-    
-    % Teamfarben-Abfrage und Parameter-Zuweisung
-    if strcmp(farbe, 'blau')
-        ich = spiel.blau;
-        gegner = spiel.rot;
-    else
-        ich = spiel.rot
-        gegner = spiel.blau
-    end
-   
-    % Blödsinniger Test xD
-    if spiel.i_t<120
-        bes=[0,1];
-    else
-        bes = [-1,-0.5]; 
-    end
-    
-    
-=======
     %Konstanten
     constSafeBorder = 0.005; %collision border around mines
     constGridRadius = 0.005; 
@@ -34,19 +13,22 @@ function bes = beschleunigung(spiel, farbe)
     %%Farbe prüfen und zuweisen
     if strcmp (farbe, 'rot')
         me = spiel.rot;
-        %enemy = spiel.blau;
+        enemy = spiel.blau;
     else
         me = spiel.blau;
-        %enemy = spiel.rot;
+        enemy = spiel.rot;
     end
     
     %%wird einmal am Anfang ausgeführt
     if spiel.i_t==1
         setupNodeGrid()
-        createPathToTanken()
-        debugDRAW();
     end
 
+    checkTankPath()
+    
+    %%Pfad zur nächstbesten Tankstelle
+    createPathToNextTanke()
+    
     %%Beschleunigung berechnen:
     bes=calculateBES();
 
@@ -301,8 +283,9 @@ function bes = beschleunigung(spiel, farbe)
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % simplify path
     function erg = simplifyPath(path)
-        if (numel(path) == 1)
-            erg = path;
+        
+        erg = path;
+        if (numel(path) <= 1)
             return;
         end
         
@@ -357,32 +340,48 @@ function bes = beschleunigung(spiel, farbe)
     end
     
 %%%Search for nearest Tanken and create Path between them
-    function createPathToTanken()
-        tankdistance=createtankdistance();
-        first_tanke = tankdistance(1,1);
-        second_tanke = tankdistance(2,1);
-        third_tanke = tankdistance(3,1);
-        fourth_tanke = tankdistance(4,1);
-        fifth_tanke = tankdistance(5,1);
-        sixth_tanke = tankdistance(6,1);
-        waypointList = findPath(me.pos, spiel.tanke(first_tanke).pos);
-        waypointList = appendToArray(waypointList, findPath(spiel.tanke(first_tanke).pos, spiel.tanke(second_tanke).pos));
-        waypointList = appendToArray(waypointList, findPath(spiel.tanke(second_tanke).pos, spiel.tanke(third_tanke).pos));
-        waypointList = appendToArray(waypointList, findPath(spiel.tanke(third_tanke).pos, spiel.tanke(fourth_tanke).pos));
-        waypointList = appendToArray(waypointList, findPath(spiel.tanke(fourth_tanke).pos, spiel.tanke(fifth_tanke).pos));
-        waypointList = appendToArray(waypointList, findPath(spiel.tanke(fifth_tanke).pos, spiel.tanke(sixth_tanke).pos));
+    function createPathToNextTanke()
+        if numel(waypointList)<=1 && spiel.n_tanke>=1
+            tankdistance=createTankEvaluation(me.pos);
+            next_tanke = tankdistance(1,1);
+            waypointList = appendToArray(waypointList,findPath(me.pos, spiel.tanke(next_tanke).pos));
+            debugDRAW();
+        end
     end
 
 %%%%%%%%%%%%%
 %create Tank Distance Table
-    function tankdistance=createtankdistance()
+    function erg=createTankEvaluation(position)
 
-        tankdistance = zeros(spiel.n_tanke,2);
+        erg = zeros(spiel.n_tanke,4);
         for i=1:spiel.n_tanke
-            tankdistance(i,1) = i;
-            tankdistance(i,2) = norm(spiel.tanke(i).pos-me.pos);
+            erg(i,1) = i;                                   %Spalte 1: Tankstellennummer
+            erg(i,2) = norm(spiel.tanke(i).pos-position);   %Spalte 2: Entfernung zu "position"
+            erg(i,3) = norm(spiel.tanke(i).pos-enemy.pos);  %Spalte 3: Entfernung zum Gegner
+            a=-1;
+            for j=1:spiel.n_tanke
+                if i==j
+                    continue
+                end
+                a=a+1/norm(spiel.tanke(i).pos-spiel.tanke(j).pos);
+            end
+            erg(i,4) = a*0.4+(1/erg(i,2))-0.5*(1/erg(i,3));                                   %Spalte 4: Anzahl Tankstellen in der Nähe und deren Dichte und deren Dichte zum Gegner
         end
-        tankdistance=sortrows(tankdistance,[2 1]);
+        erg=sortrows(erg,[-4 2 -3 1])
+    end
+
+    function checkTankPath()
+       %%Tankstellenliste Aktualisieren
+        endIndex=numel(waypointList);
+         if endIndex >= 1
+           lastWayPoint=waypointList{endIndex};
+           for i=1:spiel.n_tanke
+               if norm(spiel.tanke(i).pos-lastWayPoint) <= spiel.tanke_radius+constGridRadius
+                   return
+               end
+           end
+           waypointList=[];
+        end 
     end
 
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -406,18 +405,7 @@ function bes = beschleunigung(spiel, farbe)
 %%%%%%%%%DEBUGGING%%%%%%%
     function debugDRAW()
         for i = 1 : numel(waypointList)
-
-            rectangle ( ...
-                'Parent', spiel.spielfeld_handle, ...
-                'Position', [...
-                waypointList{i}-0.0025, ...
-                0.005, ...
-                0.005], ...
-                'Curvature', [1 1], ...
-                'FaceColor', spiel.farbe.rot, ...
-                'EdgeColor', 'none' ...
-                );
+            rectangle ('Parent', spiel.spielfeld_handle, 'Position', [waypointList{i}-0.0025, 0.005, 0.005], 'Curvature', [1 1], 'FaceColor', spiel.farbe.rot, 'EdgeColor', 'none');
         end
     end
->>>>>>> master
 end
