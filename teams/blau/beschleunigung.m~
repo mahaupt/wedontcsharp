@@ -1,6 +1,6 @@
 function bes = beschleunigung(spiel, farbe)
     %Konstanten
-    constSafeBorder = 0.005; %collision border around mines
+    constSafeBorder = 0.01; %collision border around mines
     constGridRadius = 0.005; 
     constNavSecurity = 0.001; %simplify path
     constWayPointReachedRadius = 0.01;
@@ -79,9 +79,9 @@ function bes = beschleunigung(spiel, farbe)
                 nodeGrid(x,y).mineCost = 0;
                 
                 %Je dichter an Mine, desto teurer!
-                %for i=1:spiel.n_mine
-                %   nodeGrid(x,y).mineCost = nodeGrid(x,y).mineCost + pow2(1/norm(nodeGrid(x,y).worldPos-spiel.mine(i).pos));
-                %end
+                for i=1:spiel.n_mine
+                   nodeGrid(x,y).mineCost = nodeGrid(x,y).mineCost + pow2(1/norm(nodeGrid(x,y).worldPos-spiel.mine(i).pos));
+                end
                 
             end
         end
@@ -113,8 +113,8 @@ function bes = beschleunigung(spiel, farbe)
     function waypoints = findPath(startp, endp)
         pathSuccess = false; % - Pfad gefunden
         
-        startPos = getValidNodePos(worldPosToGridPos(startp));
-        endPos = getValidNodePos(worldPosToGridPos(endp));
+        startPos = worldPosToGridPos(startp);
+        endPos = worldPosToGridPos(endp);
         
         openSet = {startPos};
         closedSet = {};
@@ -124,9 +124,8 @@ function bes = beschleunigung(spiel, farbe)
         endNode = nodeFromGridCoords(endPos);
         
         %if start and end node is invalid - abort
-        if (~startNode.isWalkable || ~endNode.isWalkable)
+        if (startNode.isWalkable || endNode.isWalkable)
             waypoints = [];
-            disp('findPath: invalid start or end position');
             return;
         end
         
@@ -209,20 +208,18 @@ function bes = beschleunigung(spiel, farbe)
     function erg = getValidNodePos(gridPos)
         node = nodeFromGridCoords(gridPos);
         erg = gridPos;
-        
         %nothing to do
         if (node.isWalkable)
             return;
         end
         
         %check neighbours
-        neighbours = getNeighbourNodes(node);
+        neighbours = getNeighbourNodes(currentNode);
         for i = 1 : numel(neighbours)
             neighbour = neighbours(i);
             
             if (neighbour.isWalkable)
-                erg = neighbour.gridPos;
-                return;
+                erg = neighbour.
             end
         end
     end
