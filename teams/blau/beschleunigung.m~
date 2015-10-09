@@ -5,7 +5,6 @@ function bes = beschleunigung(spiel, farbe)
     constNavSecurity = 0.03; %simplify path
     constWayPointReachedRadius = 0.02; %0.01
     constMineProxPenality = 0.0006;
-    constCornerBreaking = 0.02;
    
     %statische variablen definieren
     persistent nodeGrid;
@@ -79,15 +78,14 @@ function bes = beschleunigung(spiel, farbe)
         globalBreakStartPoint = 100;
         
         nullBreakDistance = calcBreakDistance(norm(me.ges), 0);
-        while(length < nullBreakDistance && waypointIndex <= numel(waypointList))
+        while(length < nullBreakDistance)
             nextDist = norm(waypointList{waypointIndex} - waypointList{waypointIndex-1});
             nextDir = vecNorm(waypointList{waypointIndex} - waypointList{waypointIndex-1});
             angle = acosd(dot(lastDir, nextDir));
             
-            %calculate minimal speed
             minSpeed = 0;
-            if (angle < 90 && waypointIndex < numel(waypointList))
-                minSpeed = constCornerBreaking/sind(angle);
+            if (angle < 90)
+                minSpeed = 0.01/sind(angle);
             end
             
             %get the point where i have to start breaking first
@@ -99,7 +97,6 @@ function bes = beschleunigung(spiel, farbe)
             
             length = length + nextDist;
             lastDir = nextDir;
-            waypointIndex = waypointIndex +1;
         end
         
         erg = globalMinSpeed;
@@ -421,7 +418,7 @@ function bes = beschleunigung(spiel, farbe)
         if endIndex >= 1
             lastWayPoint=waypointList{endIndex};
             for i=1:spiel.n_tanke
-                if norm(spiel.tanke(i).pos-lastWayPoint) <= spiel.tanke_radius+constGridRadius
+                if norm(spiel.tanke(i).pos-lastWayPoint) <= spiel.tanke_radius-constGridRadius
                     return
                 end
             end
