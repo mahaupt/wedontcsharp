@@ -2,7 +2,7 @@ function bes = beschleunigung(spiel, farbe)
     %Konstanten
     constSafeBorder = 0.005; %collision border around mines
     constGridRadius = 0.005; 
-    constNavSecurity = 0.001; %simplify path
+    constNavSecurity = 0.03; %simplify path
     constWayPointReachedRadius = 0.02; %0.01
     constMineProxPenality = 0.0006;
    
@@ -27,9 +27,9 @@ function bes = beschleunigung(spiel, farbe)
         third_tanke = 2;
         fourth_tanke = 8;
         waypointList = findPath(me.pos, spiel.tanke(first_tanke).pos);
-        %waypointList = appendToArray(waypointList, findPath(spiel.tanke(first_tanke).pos, spiel.tanke(second_tanke).pos));
-        %waypointList = appendToArray(waypointList, findPath(spiel.tanke(second_tanke).pos, spiel.tanke(third_tanke).pos));
-        %waypointList = appendToArray(waypointList, findPath(spiel.tanke(third_tanke).pos, spiel.tanke(fourth_tanke).pos));
+        waypointList = appendToArray(waypointList, findPath(spiel.tanke(first_tanke).pos, spiel.tanke(second_tanke).pos));
+        waypointList = appendToArray(waypointList, findPath(spiel.tanke(second_tanke).pos, spiel.tanke(third_tanke).pos));
+        waypointList = appendToArray(waypointList, findPath(spiel.tanke(third_tanke).pos, spiel.tanke(fourth_tanke).pos));
         
         debugDRAW();
     end
@@ -288,20 +288,24 @@ function bes = beschleunigung(spiel, farbe)
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % simplify path
     function erg = simplifyPath(path)
-        %erg=path;
-        %return
-        ergIndex = 1;
-        lastvec=[0,0];
-        for i=2:numel(path)
-            thisvec = path{i}-path{i-1};
-            if (~(abs(thisvec(1)-lastvec(1)) < constNavSecurity && abs(thisvec(2)-lastvec(2)) < constNavSecurity))
-                erg{ergIndex} = path{i-1};
-                ergIndex = ergIndex + 1;
-            end
-            lastvec=thisvec;
+        if (numel(path) == 1)
+            erg = path;
+            return;
         end
         
-        erg{ergIndex} = path{numel(path)};
+        %check collision tube
+        for i=fliplr(1:numel(path))
+            if (~corridorColliding(path{i}, path{1}, constNavSecurity) || ... 
+                    i == 2)
+                %no collision detected start to end
+                erg = {path{1}, path{i}};
+                endIndex = numel(path);
+                erg = appendToArray(erg, simplifyPath(path(i:endIndex)));
+                return;
+            end
+        end
+        
+        
     end
 
 
@@ -338,6 +342,24 @@ function bes = beschleunigung(spiel, farbe)
         for i=1 : numel(array2)
             erg{array1index} = array2{i};
             array1index = array1index + 1;
+        end
+    end
+
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    %corridor colliding
+    function erg = corridorColliding(startp, endp, radius)
+        length = 0;
+        dir = vecNorm(endp-startp);
+        erg = false;
+        
+        while(length < norm(startp - endp))
+            pos = startp + dir*length;
+            for i = 1:spiel.n_mine
+                if (norm(pos-spiel.mine(i).pos)-spiel.mine_radius < radius)
+                    erg = true;
+                end
+            end
+            length = length + radius;
         end
     end
 
