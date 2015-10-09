@@ -82,7 +82,6 @@ function bes = beschleunigung(spiel, farbe)
                 %for i=1:spiel.n_mine
                 %   nodeGrid(x,y).mineCost = nodeGrid(x,y).mineCost + pow2(1/norm(nodeGrid(x,y).worldPos-spiel.mine(i).pos));
                 %end
-                
             end
         end
     end
