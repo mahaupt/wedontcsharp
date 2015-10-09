@@ -5,6 +5,7 @@ function bes = beschleunigung(spiel, farbe)
     constNavSecurity = 0.03; %simplify path
     constWayPointReachedRadius = 0.02; %0.01
     constMineProxPenality = 0.0006;
+    constCornerBreaking = 0.02;
    
     %statische variablen definieren
     persistent nodeGrid;
@@ -24,12 +25,13 @@ function bes = beschleunigung(spiel, farbe)
         setupNodeGrid()
     end
 
+    %Nächste Tankstelle noch vorhanden?
     checkTankPath()
     
-    %%Pfad zur nächstbesten Tankstelle
+    %wenn Wegpunktliste leer => Pfad zur besten Tankstelle setzen
     createPathToNextTanke()
     
-    %%Beschleunigung berechnen:
+    %Beschleunigung berechnen:
     bes=calculateBES();
 
     
@@ -62,30 +64,37 @@ function bes = beschleunigung(spiel, farbe)
     end
 
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    %calculate minimum velocity at next waypoint
     function erg=calcBreakingEndVel()
         erg = 0;
         
+        %if this is the last waypoint - break to full stop
         if (numel(waypointList) <= 1)
             return;
         end
         
+        %calculate vectors to next waypoint
         length = norm(waypointList{1} - me.pos);
         lastDir = vecNorm(waypointList{1} - me.pos);
         waypointIndex = 2;
         
-        %return values
+        %return values - try to get the lowest minspeed
         globalMinSpeed = 100;
         globalBreakStartPoint = 100;
         
+        %iterate waypoints within fullstop breaking range
         nullBreakDistance = calcBreakDistance(norm(me.ges), 0);
-        while(length < nullBreakDistance)
+        while(length < nullBreakDistance && waypointIndex <= numel(waypointList))
             nextDist = norm(waypointList{waypointIndex} - waypointList{waypointIndex-1});
             nextDir = vecNorm(waypointList{waypointIndex} - waypointList{waypointIndex-1});
+            
+            %angle between waypoints 
             angle = acosd(dot(lastDir, nextDir));
             
+            %calculate minimal turningspeed 
             minSpeed = 0;
-            if (angle < 90)
-                minSpeed = 0.01/sind(angle);
+            if (angle < 90 && waypointIndex < numel(waypointList))
+                minSpeed = constCornerBreaking/sind(angle);
             end
             
             %get the point where i have to start breaking first
@@ -97,6 +106,7 @@ function bes = beschleunigung(spiel, farbe)
             
             length = length + nextDist;
             lastDir = nextDir;
+            waypointIndex = waypointIndex +1;
         end
         
         erg = globalMinSpeed;
@@ -104,12 +114,14 @@ function bes = beschleunigung(spiel, farbe)
 
 
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    %calculate distance for breaking from vel to endvel
     function erg = calcBreakDistance(vel, endvel)
         erg = ((vel)^2 - (endvel)^2)/(2*spiel.bes);
     end
         
 
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    %setup node grid for path finding
     function setupNodeGrid()
         gridSizeX = round(1/(constGridRadius*2));
         gridSizeY = round(1/(constGridRadius*2));
@@ -140,7 +152,7 @@ function bes = beschleunigung(spiel, farbe)
     end
 
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    %Kollisionscheck
+    %check if node is a collider (mine, border)
     function erg=isWalkable(pos)
         erg = true;
         secureSpaceballRadius = constSafeBorder + spiel.spaceball_radius;
@@ -281,6 +293,7 @@ function bes = beschleunigung(spiel, farbe)
     end
 
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    %calculate nodegrid position from world position
     function erg = worldPosToGridPos(pos)
         erg = [round(pos(1)/constGridRadius/2), round(pos(2)/constGridRadius/2)];
     end
@@ -325,23 +338,43 @@ function bes = beschleunigung(spiel, farbe)
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % simplify path
     function erg = simplifyPath(path)
+        checkIndex = 1;
+        pathLength = numel(path);
         
-        erg = path;
-        if (numel(path) <= 1)
+        if (pathLength <= 2)
+            erg = path;
             return;
         end
         
-        %check collision tube
-        for i=fliplr(1:numel(path))
-            if (~corridorColliding(path{i}, path{1}, constNavSecurity) || ... 
-                    i == 2)
-                %no collision detected start to end
-                erg = {path{1}, path{i}};
-                endIndex = numel(path);
-                erg = appendToArray(erg, simplifyPath(path(i+1:endIndex)));
-                return;
+        erg = [];
+        ergInsertIndex = 1;
+        
+        %add first waypoint
+        erg{ergInsertIndex} = path{1};
+        ergInsertIndex = ergInsertIndex+1;
+        
+        while(checkIndex < pathLength)
+            isCollided = false;
+            
+            %check collision tube
+            for i=checkIndex+2:pathLength
+                if (corridorColliding(path{checkIndex}, path{i}, constNavSecurity))
+                    erg{ergInsertIndex} = path{i-1};
+                    ergInsertIndex = ergInsertIndex+1;
+                    checkIndex = i;
+                    isCollided = true;
+                    break;
+                end
+            end
+            
+            %no collision on path detected
+            if (~isCollided)
+                break;
             end
         end
+        
+        %add last waypoint
+        erg{ergInsertIndex} = path{pathLength};
     end
 
 
@@ -381,7 +414,8 @@ function bes = beschleunigung(spiel, farbe)
         end
     end
     
-%%%Search for nearest Tanken and create Path between them
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    %%%Search for nearest Tanken and create Path between them
     function createPathToNextTanke()
         if numel(waypointList)<=1 && spiel.n_tanke>=1
             tankdistance=createTankEvaluation(me.pos);
@@ -391,8 +425,8 @@ function bes = beschleunigung(spiel, farbe)
         end
     end
 
-%%%%%%%%%%%%%
-%create Tank Distance Table
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    %create Tank Distance Table
     function erg=createTankEvaluation(position)
 
         erg = zeros(spiel.n_tanke,4);
@@ -412,13 +446,16 @@ function bes = beschleunigung(spiel, farbe)
         erg=sortrows(erg,[-4 2 -3 1])
     end
 
+    
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    %check if target tanke is still there
     function checkTankPath()
         %%Tankstellenliste Aktualisieren
         endIndex=numel(waypointList);
         if endIndex >= 1
             lastWayPoint=waypointList{endIndex};
             for i=1:spiel.n_tanke
-                if norm(spiel.tanke(i).pos-lastWayPoint) <= spiel.tanke_radius-constGridRadius
+                if norm(spiel.tanke(i).pos-lastWayPoint) <= spiel.tanke_radius+constGridRadius
                     return
                 end
             end
@@ -429,26 +466,81 @@ function bes = beschleunigung(spiel, farbe)
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     %corridor colliding
     function erg = corridorColliding(startp, endp, radius)
-        length = 0;
         dir = vecNorm(endp-startp);
+        n = getPerpend(dir);
         erg = false;
         
-        while(length < norm(startp - endp))
-            pos = startp + dir*length;
-            for i = 1:spiel.n_mine
-                if (norm(pos-spiel.mine(i).pos)-spiel.mine_radius < radius)
-                    erg = true;
-                    return;
-                end
-            end
-            length = length + radius/2;
+        if (lineColliding(startp, endp))
+            erg = true;
+            return;
+        end
+        
+        if (lineColliding(startp + n*radius, endp + n*radius))
+            erg = true;
+            return;
+        end
+        
+        if (lineColliding(startp - n*radius, endp - n*radius))
+            erg = true;
+            return;
         end
     end
 
-%%%%%%%%%DEBUGGING%%%%%%%
+
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    function erg=lineColliding(startp, endp)
+        erg = false;
+        
+        for i=1:spiel.n_mine
+            dist = distanceLinePoint(startp, endp, spiel.mine(i).pos);
+            
+            if (dist < spiel.mine_radius)
+                erg = true;
+                return;
+            end
+        end
+        
+    end
+
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    function erg = distanceLinePoint(startp, endp, point)
+        length = norm(startp - endp);
+        dir = vecNorm(endp-startp);
+        n = getPerpend(dir);
+       
+        
+        y = (startp(2)*n(1)-point(2)*n(1)-n(2)*startp(1)+point(1)*n(2))/(dir(1)*n(2)-dir(2)*n(1));
+        
+        linePoint = startp + dir*y;
+        
+        %point is outside of line
+        if (norm(linePoint-startp) > length || norm(linePoint-endp) > length)
+            erg=Inf;
+            return;
+        end
+        
+        erg = norm(point-linePoint);
+    end
+
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    %get perpendicular vector
+    function erg = getPerpend(vec)
+        erg = [-vec(2), vec(1)];
+    end
+
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    %%%%%%%%%DEBUGGING%%%%%%%
     function debugDRAW()
+        persistent drawHandles
+        
+        %delete all draw handles
+        for i = 1 : numel(drawHandles)
+            delete(drawHandles(i))
+            dr
+        end
+        
         for i = 1 : numel(waypointList)
-            rectangle ('Parent', spiel.spielfeld_handle, 'Position', [waypointList{i}-0.0025, 0.005, 0.005], 'Curvature', [1 1], 'FaceColor', spiel.farbe.rot, 'EdgeColor', 'none');
+            drawHandles(i) = rectangle ('Parent', spiel.spielfeld_handle, 'Position', [waypointList{i}-0.0025, 0.005, 0.005], 'Curvature', [1 1], 'FaceColor', spiel.farbe.rot, 'EdgeColor', 'none');
         end
     end
 end
