@@ -42,18 +42,13 @@ function bes = beschleunigung(spiel, farbe)
         dir = vecNorm(waypointList{1}-me.pos);
         erg = dir + corr*5;
         
-        %decelerating to stop
-        decellerateBias = 0;
-        if (numel(waypointList) > 1)
-            decellerateBias = 0.01;
-            if (decellerateBias > norm(me.ges))
-                decellerateBias = norm(me.ges);
-            end
-        end
+        %calculate breaking endvelocity
+        breakingEndVel = calcBreakingEndVel();
         
         %decelleration
-        distancetowaypoint=norm(waypointList{1}-me.pos);
-        if ((norm(me.ges) - decellerateBias) / (spiel.bes) * (norm(me.ges) - decellerateBias)/2) > distancetowaypoint
+        distanceToWaypoint=norm(waypointList{1}-me.pos);
+        breakDistance = calcBreakDistance(norm(me.ges), breakingEndVel);
+        if (breakDistance > distanceToWaypoint)
             erg=-dir + corr*5;
         end
         
@@ -61,6 +56,53 @@ function bes = beschleunigung(spiel, farbe)
         if norm(me.pos-waypointList{1}) < constWayPointReachedRadius
             waypointList(1) = [];
         end
+    end
+
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    function erg=calcBreakingEndVel()
+        erg = 0;
+        
+        if (numel(waypointList) <= 1)
+            return;
+        end
+        
+        length = norm(waypointList{1} - me.pos);
+        lastDir = vecNorm(waypointList{1} - me.pos);
+        waypointIndex = 2;
+        
+        %return values
+        globalMinSpeed = 100;
+        globalBreakStartPoint = 100;
+        
+        nullBreakDistance = calcBreakDistance(norm(me.ges), 0);
+        while(length < nullBreakDistance)
+            nextDist = norm(waypointList{waypointIndex} - waypointList{waypointIndex-1});
+            nextDir = vecNorm(waypointList{waypointIndex} - waypointList{waypointIndex-1});
+            angle = acosd(dot(lastDir, nextDir));
+            
+            minSpeed = 0;
+            if (angle < 90)
+                minSpeed = 0.01/sind(angle);
+            end
+            
+            %get the point where i have to start breaking first
+            breakStartPoint = length-calcBreakDistance(norm(me.ges), minSpeed);
+            if (breakStartPoint < globalBreakStartPoint)
+                globalBreakStartPoint = breakStartPoint;
+                globalMinSpeed = minSpeed;
+            end
+            
+            length = length + nextDist;
+            lastDir = nextDir;
+        end
+        
+        erg = globalMinSpeed;
+    end
+
+
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    function erg = calcBreakDistance(vel, endvel)
+        erg = ((vel)^2 - (endvel)^2)/(2*spiel.bes);
     end
         
 
@@ -280,8 +322,9 @@ function bes = beschleunigung(spiel, farbe)
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % simplify path
     function erg = simplifyPath(path)
+        
+        erg = path;
         if (numel(path) == 1)
-            erg = path;
             return;
         end
         
@@ -292,7 +335,7 @@ function bes = beschleunigung(spiel, farbe)
                 %no collision detected start to end
                 erg = {path{1}, path{i}};
                 endIndex = numel(path);
-                erg = appendToArray(erg, simplifyPath(path(i:endIndex)));
+                erg = appendToArray(erg, simplifyPath(path(i+1:endIndex)));
                 return;
             end
         end
@@ -319,7 +362,7 @@ function bes = beschleunigung(spiel, farbe)
         erg = [vec(1)/n, vec(2)/n];
         
         if (n == 0)
-            erg = 0;
+            erg = [0 , 0];
         end
     end
 
