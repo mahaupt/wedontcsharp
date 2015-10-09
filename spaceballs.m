@@ -5,8 +5,8 @@ close all
 clc
 
 
-%rng shuffle
-rng (10)
+rng shuffle
+%rng (10)
 
 
 %% Konstanten definieren

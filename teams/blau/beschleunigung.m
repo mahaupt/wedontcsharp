@@ -3,7 +3,8 @@ function bes = beschleunigung(spiel, farbe)
     constSafeBorder = 0.005; %collision border around mines
     constGridRadius = 0.005; 
     constNavSecurity = 0.001; %simplify path
-    constWayPointReachedRadius = 0.01;
+    constWayPointReachedRadius = 0.02; %0.01
+    constMineProxPenality = 0.0006;
    
     %statische variablen definieren
     persistent nodeGrid;
@@ -26,9 +27,9 @@ function bes = beschleunigung(spiel, farbe)
         third_tanke = 2;
         fourth_tanke = 8;
         waypointList = findPath(me.pos, spiel.tanke(first_tanke).pos);
-        waypointList = appendToArray(waypointList, findPath(spiel.tanke(first_tanke).pos, spiel.tanke(second_tanke).pos));
-        waypointList = appendToArray(waypointList, findPath(spiel.tanke(second_tanke).pos, spiel.tanke(third_tanke).pos));
-        waypointList = appendToArray(waypointList, findPath(spiel.tanke(third_tanke).pos, spiel.tanke(fourth_tanke).pos));
+        %waypointList = appendToArray(waypointList, findPath(spiel.tanke(first_tanke).pos, spiel.tanke(second_tanke).pos));
+        %waypointList = appendToArray(waypointList, findPath(spiel.tanke(second_tanke).pos, spiel.tanke(third_tanke).pos));
+        %waypointList = appendToArray(waypointList, findPath(spiel.tanke(third_tanke).pos, spiel.tanke(fourth_tanke).pos));
         
         debugDRAW();
     end
@@ -44,13 +45,24 @@ function bes = beschleunigung(spiel, farbe)
             return;
         end
         
+        %acceleration
         corr = vecNorm(waypointList{1}-me.pos)-vecNorm(me.ges);
         dir = vecNorm(waypointList{1}-me.pos);
-        erg = dir + corr;
+        erg = dir + corr*5;
         
+        %decelerating to stop
+        decellerateBias = 0;
+        if (numel(waypointList) > 1)
+            decellerateBias = 0.01;
+            if (decellerateBias > norm(me.ges))
+                decellerateBias = norm(me.ges);
+            end
+        end
+        
+        %decelleration
         distancetowaypoint=norm(waypointList{1}-me.pos);
-        if (norm(me.ges) / (spiel.bes)) * (norm(me.ges) / 2) > distancetowaypoint
-            erg=-me.ges+ corr*0.5;
+        if ((norm(me.ges) - decellerateBias) / (spiel.bes) * (norm(me.ges) - decellerateBias)/2) > distancetowaypoint
+            erg=-dir + corr*5;
         end
         
         %%Überprüfen, ob Wegpunkt erreicht wurde, dann 1. Punkt löschen
@@ -76,12 +88,16 @@ function bes = beschleunigung(spiel, farbe)
                 nodeGrid(x,y).hCost = 0;
                 nodeGrid(x,y).fCost = 0;
                 nodeGrid(x,y).gCost = 0;
-                nodeGrid(x,y).mineCost = 0;
+                mineCost = 0;
                 
                 %Je dichter an Mine, desto teurer!
-                %for i=1:spiel.n_mine
-                %   nodeGrid(x,y).mineCost = nodeGrid(x,y).mineCost + pow2(1/norm(nodeGrid(x,y).worldPos-spiel.mine(i).pos));
-                %end
+                for i=1:spiel.n_mine
+                    if (norm(nodeGrid(x,y).worldPos-spiel.mine(i).pos)-spiel.mine_radius < 0.1)
+                        mineCost = mineCost + constMineProxPenality/(norm(nodeGrid(x,y).worldPos-spiel.mine(i).pos)-spiel.mine_radius);
+                    end
+                end
+                
+                nodeGrid(x,y).mineCost = mineCost;
             end
         end
     end
@@ -167,10 +183,9 @@ function bes = beschleunigung(spiel, farbe)
                 movementCostToNeighbour = currentNode.gCost + norm(currentNode.worldPos - neighbour.worldPos);
                 if (movementCostToNeighbour < neighbour.gCost || ~containsNode(openSet, neighbour.gridPos))
                     
-                    mineCost = nodeGrid(neighbour.gridPos(1), neighbour.gridPos(2)).mineCost;
                     nodeGrid(neighbour.gridPos(1), neighbour.gridPos(2)).gCost = movementCostToNeighbour;
                     nodeGrid(neighbour.gridPos(1), neighbour.gridPos(2)).hCost = norm(endp - neighbour.worldPos);
-                    nodeGrid(neighbour.gridPos(1), neighbour.gridPos(2)).fCost = neighbour.gCost + neighbour.hCost + mineCost;
+                    nodeGrid(neighbour.gridPos(1), neighbour.gridPos(2)).fCost = movementCostToNeighbour + norm(endp - neighbour.worldPos) + neighbour.mineCost;
                     nodeGrid(neighbour.gridPos(1), neighbour.gridPos(2)).parent = currentNode.gridPos;
 
                     %add neighbour to openSet
@@ -224,6 +239,8 @@ function bes = beschleunigung(spiel, farbe)
                 return;
             end
         end
+        
+        
     end
 
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -271,8 +288,8 @@ function bes = beschleunigung(spiel, farbe)
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % simplify path
     function erg = simplifyPath(path)
-        erg=path;
-        return
+        %erg=path;
+        %return
         ergIndex = 1;
         lastvec=[0,0];
         for i=2:numel(path)
@@ -331,9 +348,9 @@ function bes = beschleunigung(spiel, farbe)
             rectangle ( ...
                 'Parent', spiel.spielfeld_handle, ...
                 'Position', [...
-                waypointList{i}, ...
-                0.01, ...
-                0.01], ...
+                waypointList{i}-0.0025, ...
+                0.005, ...
+                0.005], ...
                 'Curvature', [1 1], ...
                 'FaceColor', spiel.farbe.rot, ...
                 'EdgeColor', 'none' ...
