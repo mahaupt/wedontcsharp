@@ -83,7 +83,7 @@ function bes = beschleunigung(spiel, farbe)
                 %Je dichter an Mine, desto teurer!
                 for i=1:spiel.n_mine
                    if norm([x,y]-spiel.mine(i).pos) < 1
-                      nodeGrid(x,y).fCost = 1/(spiel.mine_radius+norm([x,y]-spiel.mine(i).pos));
+                      nodeGrid(x,y).fCost = nodeGrid(x,y).fCost + (1/(spiel.mine_radius+norm([x,y]-spiel.mine(i).pos)));
                    end
                 end
                 
