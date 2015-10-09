@@ -22,19 +22,7 @@ function bes = beschleunigung(spiel, farbe)
     %%wird einmal am Anfang ausgeführt
     if spiel.i_t==1
         setupNodeGrid()
-<<<<<<< HEAD
-        first_tanke = 3;
-        second_tanke = 5;
-        third_tanke = 2;
-        fourth_tanke = 8;
-        waypointList = findPath(me.pos, spiel.tanke(first_tanke).pos);
-        waypointList = appendToArray(waypointList, findPath(spiel.tanke(first_tanke).pos, spiel.tanke(second_tanke).pos));
-        waypointList = appendToArray(waypointList, findPath(spiel.tanke(second_tanke).pos, spiel.tanke(third_tanke).pos));
-        waypointList = appendToArray(waypointList, findPath(spiel.tanke(third_tanke).pos, spiel.tanke(fourth_tanke).pos));
-        
-=======
         createPathToTanken()
->>>>>>> master
         debugDRAW();
     end
 
@@ -308,12 +296,6 @@ function bes = beschleunigung(spiel, farbe)
                 return;
             end
         end
-        
-<<<<<<< HEAD
-        
-=======
-        erg{ergIndex} = path{numel(path)}; %%%%%%%%%%%%%%%%%HIER OFT ERROR
->>>>>>> master
     end
 
 
