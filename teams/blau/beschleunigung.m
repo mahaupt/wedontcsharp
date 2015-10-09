@@ -3,7 +3,7 @@ function bes = beschleunigung(spiel, farbe)
     constSafeBorder = 0.01;
     constGridRadius = 0.005;
     constNavSecurity = 0.001;
-    WayPointReachedBorder = 0.01;
+    WayPointReachedRadius = 0.01;
    
     %statische variablen definieren
     persistent nodeGrid;
@@ -57,7 +57,7 @@ function bes = beschleunigung(spiel, farbe)
         end
         
         %%Überprüfen, ob Wegpunkt erreicht wurde, dann 1. Punkt löschen
-        if norm(me.pos-waypointList{1}) < WayPointReachedBorder
+        if norm(me.pos-waypointList{1}) < WayPointReachedRadius
             waypointList(1) = [];
         end
     end
@@ -79,6 +79,14 @@ function bes = beschleunigung(spiel, farbe)
                 nodeGrid(x,y).hCost = 0;
                 nodeGrid(x,y).fCost = 0;
                 nodeGrid(x,y).gCost = 0;
+                
+                %Je dichter an Mine, desto teurer!
+                for i=1:spiel.n_mine
+                   if norm([x,y]-spiel.mine(i).pos) < 1
+                      nodeGrid(x,y).fCost = 1/(spiel.mine_radius+norm([x,y]-spiel.mine(i).pos));
+                   end
+                end
+                
             end
         end
     end
