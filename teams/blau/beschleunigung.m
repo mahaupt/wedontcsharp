@@ -543,7 +543,7 @@ function bes = beschleunigung(spiel, farbe)
             else
                 waypointList = appendToArray(waypointList, findPath(me.pos,enemy.pos));
             end
-            if corridorColliding(enemy.pos,enemy.pos+0.5*enemy.ges,constNacSecurity)==false
+            if corridorColliding(enemy.pos,enemy.pos+0.5*enemy.ges,constNavSecurity)==false
                 waypointList = appendToArray(waypointList, {enemy.pos+0.5*enemy.ges});
             else
                 waypointList = appendToArray(waypointList, findPath(enemy.pos,0.5*enemy.ges));
