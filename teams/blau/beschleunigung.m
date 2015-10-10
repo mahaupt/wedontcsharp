@@ -536,13 +536,22 @@ function bes = beschleunigung(spiel, farbe)
         if TimeSet==false || numel(waypointList)==0
             TimeSet=true;
             disp('finding Path to Enemy');
-            waypointList = appendToArray(waypointList, findPath(me.pos,enemy.pos));
+            waypointList = [];
+            if corridorColliding(me.pos,enemy.pos,0.01)==false
+                waypointList = appendToArray(waypointList, {enemy.pos});
+            else
+                waypointList = appendToArray(waypointList, findPath(me.pos,enemy.pos));
+            end
+            if corridorColliding(enemy.pos,enemy.pos+0.5*enemy.ges,0.01)==false
+                waypointList = appendToArray(waypointList, {enemy.pos+0.5*enemy.ges});
+            else
+                waypointList = appendToArray(waypointList, findPath(enemy.pos,0.4*enemy.ges));
+            end
             debugDRAW;
         end
         if numel(waypointList)>0
             if norm(enemy.pos-waypointList{numel(waypointList)})>0.2
                 TimeSet=false;
-                waypointList=[];
             end
         end
     end
