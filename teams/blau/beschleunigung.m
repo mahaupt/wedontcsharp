@@ -439,9 +439,7 @@ function bes = beschleunigung(spiel, farbe)
         waypointCount = numel(waypointList);
         
         if waypointCount <= 1 && spiel.n_tanke > 0
-            disp('finding Path to next Tanke');
-            
-            if (waypointCount >= 1)
+            if (waypointCount == 1)
                 %waypointlist not empty => append new waypoints
                 tankdistance=createTankEvaluation(waypointList{waypointCount});
                 next_tanke = tankdistance(1,1);
@@ -462,6 +460,8 @@ function bes = beschleunigung(spiel, farbe)
                 next_tanke = tankdistance(1,1);
                 waypointList = findPath(me.pos, spiel.tanke(next_tanke).pos);
             end
+            
+            disp('finding Path to next Tanke');
             debugDRAW();
         end
     end
