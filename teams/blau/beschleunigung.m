@@ -12,6 +12,7 @@ function bes = beschleunigung(spiel, farbe)
     persistent waypointList;
     persistent drawHandles; %debug drawing
     persistent NumberOfMines %Zur Bestimmung des Minenverschwindens benötigt
+    persistent NumberOfTank %Zur Entscheidung über Angriff und Tanken benötigt
     persistent TimeSet %zur Aktualisierung des Angriffs benötigt
     
     %%Farbe prüfen und zuweisen
@@ -30,6 +31,7 @@ function bes = beschleunigung(spiel, farbe)
         drawHandles = [];
         waypointList = [];
         NumberOfMines = spiel.n_mine;
+        NumberOfTank = spiel.n_tanke;
         TimeSet=false;
         setupNodeGrid();
     end
@@ -52,17 +54,16 @@ function bes = beschleunigung(spiel, farbe)
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     %Tanken oder Angreifen oder Verteidigen?
     function whatToDo()
-        if numel(spiel.tanke)<1 %|| me.getankt>enemy.getankt+1 <<----- HIER MÜSSTEN DIE WEGPUNKTE ERST GELÖSCHT WERDEN
-            if me.getankt>enemy.getankt
-                attackEnemy();
-            else
+        if NumberOfTank*0.5 < me.getankt %Wenn wir mehr als die Hälfte der Tanken haben - Angriff!
+           attackEnemy();
+        else
+            if numel(spiel.tanke) < 1 && me.getankt < enemy.getankt %%Erst wenn alle Tanken weg sind und wir weniger haben, als der Gegner - Fliehen!
                 fleeEnemy();
             end
-        else
-            %Nächste Tankstelle noch vorhanden?
-            checkTankPath()
-            %wenn Wegpunktliste leer => Pfad zur besten Tankstelle setzen
-            createPathToNextTanke()
+        %Nächste Tankstelle noch vorhanden?
+        checkTankPath()
+        %wenn Wegpunktliste leer => Pfad zur besten Tankstelle setzen
+        createPathToNextTanke()
         end
     end
     
@@ -531,31 +532,43 @@ function bes = beschleunigung(spiel, farbe)
     end
 
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    %Einfachster Angriff
+    %Angriff
     function attackEnemy()
         if TimeSet==false || numel(waypointList)==0
             TimeSet=true;
             disp('finding Path to Enemy');
-            waypointList = appendToArray(waypointList, findPath(me.pos,enemy.pos));
+            waypointList = [];
+            if corridorColliding(me.pos,enemy.pos,constNavSecurity)==false
+                waypointList = appendToArray(waypointList, {enemy.pos});
+            else
+                waypointList = appendToArray(waypointList, findPath(me.pos,enemy.pos));
+            end
+            if corridorColliding(enemy.pos,enemy.pos+0.5*enemy.ges,constNacSecurity)==false
+                waypointList = appendToArray(waypointList, {enemy.pos+0.5*enemy.ges});
+            else
+                waypointList = appendToArray(waypointList, findPath(enemy.pos,0.5*enemy.ges));
+            end
             debugDRAW;
         end
         if numel(waypointList)>0
-            if norm(enemy.pos-waypointList{numel(waypointList)})>0.2
+            if norm(enemy.pos-waypointList{numel(waypointList)})>0.15
                 TimeSet=false;
-                waypointList=[];
             end
         end
     end
 
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    %Einfachste Verteidigung
+    %Verteidigung
     function fleeEnemy()
         if numel(spiel.tanke) == 0 && numel(waypointList) == 0
             disp('searching for cover');
-            a = rand;
-            b = rand;
-            RandPoint = [a,b]
-            waypointList = appendToArray(waypointList, findPath(me.pos, RandPoint));
+            waypointList=[];
+            RandPoints = rand(4,2);
+            for i=1:4
+                RandPoints(i,3)=norm([RandPoints(i,1),RandPoints(i,2)]-enemy.pos);
+            end
+            RandPoints=sortrows(RandPoints,[-3,2,1]);
+            waypointList = appendToArray(waypointList, findPath(me.pos, [RandPoints(1,1),RandPoints(1,2)]));
             debugDRAW;
         end
     end
