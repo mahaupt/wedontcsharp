@@ -42,7 +42,7 @@ function bes = beschleunigung(spiel, farbe)
     end
     
     %Nächste Tankstelle noch vorhanden?
-    checkTankPath()
+        checkTankPath()
     
     %wenn Wegpunktliste leer => Pfad zur besten Tankstelle setzen
     createPathToNextTanke()
@@ -505,15 +505,15 @@ function bes = beschleunigung(spiel, farbe)
     %check if target tanke is still there
     function checkTankPath()
         endIndex=numel(waypointList);
-        if endIndex >= 1
+        if endIndex >= 1 && numel(spiel.tanke)>0
             lastWayPoint=waypointList{endIndex};
             for i=1:spiel.n_tanke
                 if norm(spiel.tanke(i).pos-lastWayPoint) <= spiel.tanke_radius+constGridRadius
                     return
                 end
             end
-            %disp('Tanke disappeared, delete all WPs')
-            %waypointList=[];
+            disp('Tanke disappeared, delete all WPs')
+            waypointList=[];
         end 
     end
 
@@ -543,7 +543,7 @@ function bes = beschleunigung(spiel, farbe)
 
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     %Einfachster Angriff
-    if numel(spiel.tanke)==0 && TimeSet==false || numel(spiel.tanke)==0 && numel(waypointList)==0
+    if (numel(spiel.tanke)==0 && TimeSet==false) || (numel(spiel.tanke)==0 && numel(waypointList)==0) && me.getankt>enemy.getankt
         TimeSet=true;
         waypointList = appendToArray(waypointList, findPath(me.pos,enemy.pos));
         disp('finding Path to Enemy');
