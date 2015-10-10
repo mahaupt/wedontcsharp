@@ -4,12 +4,16 @@ function bes = beschleunigung(spiel, farbe)
     constGridRadius = 0.005; 
     constNavSecurity = 0.03; %simplify path
     constWayPointReachedRadius = 0.02; %0.01
-    constMineProxPenality = 0.0006;
-    constCornerBreaking = 0.02;
+    constMineProxPenality = 0.0006; %Strafpunkte für Nodes - je dichter an Mine, desto höher
+    constCornerBreaking = 0.03; %je größer der Winkel zum nächsten Wegpunkt, desto höheres Bremsen. Faktor.
    
     %statische variablen definieren
     persistent nodeGrid;
     persistent waypointList;
+    persistent drawHandles; %debug drawing
+    persistent NumberOfMines %Zur Bestimmung des Minenverschwindens benötigt
+    persistent NumberOfTank %Zur Entscheidung über Angriff und Tanken benötigt
+    persistent TimeSet %zur Aktualisierung des Angriffs benötigt
     
     %%Farbe prüfen und zuweisen
     if strcmp (farbe, 'rot')
@@ -21,20 +25,50 @@ function bes = beschleunigung(spiel, farbe)
     end
     
     %%wird einmal am Anfang ausgeführt
+    %setup node grid and empty persistent vars
     if spiel.i_t==1
-        setupNodeGrid()
+        nodeGrid = [];
+        drawHandles = [];
+        waypointList = [];
+        NumberOfMines = spiel.n_mine;
+        NumberOfTank = spiel.n_tanke;
+        TimeSet=false;
+        setupNodeGrid();
+    end
+    
+    %Nodegrid beim Verschwinden einer Mine aktualisieren:
+    if spiel.n_mine < NumberOfMines
+        disp('Updating NodeGrid');
+        nodeGrid = [];
+        setupNodeGrid();
+        NumberOfMines = spiel.n_mine;
+        waypointList = simplifyPath(waypointList);
     end
 
-    checkTankPath()
+    %Entscheidung über Angriff/Verteidigung/Tanken
+    whatToDo();
     
-    %%Pfad zur nächstbesten Tankstelle
-    createPathToNextTanke()
-    
-    %%Beschleunigung berechnen:
+    %Beschleunigung berechnen:
     bes=calculateBES();
 
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    %Tanken oder Angreifen oder Verteidigen?
+    function whatToDo()
+        if NumberOfTank*0.5 < me.getankt %Wenn wir mehr als die Hälfte der Tanken haben - Angriff!
+           attackEnemy();
+        else
+            if numel(spiel.tanke) < 1 && me.getankt < enemy.getankt %%Erst wenn alle Tanken weg sind und wir weniger haben, als der Gegner - Fliehen!
+                fleeEnemy();
+            end
+        %Nächste Tankstelle noch vorhanden?
+        checkTankPath()
+        %wenn Wegpunktliste leer => Pfad zur besten Tankstelle setzen
+        createPathToNextTanke()
+        end
+    end
     
-    %%%%%%%%%%%%%%%%%%%%%%%%PathToBes%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    %Path To Acceleration (bes)
     function erg=calculateBES()
         if (numel(waypointList) <= 0)
             erg = -me.ges;
@@ -63,28 +97,34 @@ function bes = beschleunigung(spiel, farbe)
     end
 
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    %calculate minimum velocity at next waypoint
     function erg=calcBreakingEndVel()
         erg = 0;
         
+        %if this is the last waypoint - break to full stop
         if (numel(waypointList) <= 1)
             return;
         end
         
+        %calculate vectors to next waypoint
         length = norm(waypointList{1} - me.pos);
         lastDir = vecNorm(waypointList{1} - me.pos);
         waypointIndex = 2;
         
-        %return values
+        %return values - try to get the lowest minspeed
         globalMinSpeed = 100;
         globalBreakStartPoint = 100;
         
+        %iterate waypoints within fullstop breaking range
         nullBreakDistance = calcBreakDistance(norm(me.ges), 0);
         while(length < nullBreakDistance && waypointIndex <= numel(waypointList))
             nextDist = norm(waypointList{waypointIndex} - waypointList{waypointIndex-1});
             nextDir = vecNorm(waypointList{waypointIndex} - waypointList{waypointIndex-1});
+            
+            %angle between waypoints 
             angle = acosd(dot(lastDir, nextDir));
             
-            %calculate minimal speed
+            %calculate minimal turningspeed 
             minSpeed = 0;
             if (angle < 90 && waypointIndex < numel(waypointList))
                 minSpeed = constCornerBreaking/sind(angle);
@@ -107,12 +147,14 @@ function bes = beschleunigung(spiel, farbe)
 
 
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    %calculate distance for breaking from vel to endvel
     function erg = calcBreakDistance(vel, endvel)
         erg = ((vel)^2 - (endvel)^2)/(2*spiel.bes);
     end
         
 
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    %setup node grid for path finding
     function setupNodeGrid()
         gridSizeX = round(1/(constGridRadius*2));
         gridSizeY = round(1/(constGridRadius*2));
@@ -143,7 +185,7 @@ function bes = beschleunigung(spiel, farbe)
     end
 
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    %Kollisionscheck
+    %check if node is a collider (mine, border)
     function erg=isWalkable(pos)
         erg = true;
         secureSpaceballRadius = constSafeBorder + spiel.spaceball_radius;
@@ -170,6 +212,11 @@ function bes = beschleunigung(spiel, farbe)
         
         startPos = getValidNodePos(worldPosToGridPos(startp));
         endPos = getValidNodePos(worldPosToGridPos(endp));
+        
+        %debug purposes
+        if (equalsVec(startPos, endPos))
+            disp('Pathfinder: stard equals end, return zero waypoints');
+        end
         
         openSet = {startPos};
         closedSet = {};
@@ -244,7 +291,7 @@ function bes = beschleunigung(spiel, farbe)
             waypoints = [];
             waypointIndex = 1;
             
-            while (currentNode.gridPos ~= startPos)
+            while (~equalsVec(currentNode.gridPos, startPos))
                waypoints{waypointIndex} = currentNode.worldPos;
                waypointIndex = waypointIndex + 1;
                currentNode = nodeFromGridCoords(currentNode.parent);
@@ -284,6 +331,7 @@ function bes = beschleunigung(spiel, farbe)
     end
 
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    %calculate nodegrid position from world position
     function erg = worldPosToGridPos(pos)
         erg = [round(pos(1)/constGridRadius/2), round(pos(2)/constGridRadius/2)];
     end
@@ -298,6 +346,15 @@ function bes = beschleunigung(spiel, farbe)
     function erg = equalsNode(a, b)
         erg = false;
         if (a.gridPos(1) == b.gridPos(1) && a.gridPos(2) == b.gridPos(2))
+            erg = true;
+        end
+    end
+
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    %check if vectors are equal
+    function erg = equalsVec(a, b)
+        erg = false;
+        if (a(1) == b(1) && a(2) == b(2))
             erg = true;
         end
     end
@@ -328,23 +385,43 @@ function bes = beschleunigung(spiel, farbe)
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % simplify path
     function erg = simplifyPath(path)
+        checkIndex = 1;
+        pathLength = numel(path);
         
-        erg = path;
-        if (numel(path) <= 1)
+        if (pathLength <= 2)
+            erg = path;
             return;
         end
         
-        %check collision tube
-        for i=fliplr(1:numel(path))
-            if (~corridorColliding(path{i}, path{1}, constNavSecurity) || ... 
-                    i == 2)
-                %no collision detected start to end
-                erg = {path{1}, path{i}};
-                endIndex = numel(path);
-                erg = appendToArray(erg, simplifyPath(path(i+1:endIndex)));
-                return;
+        erg = [];
+        ergInsertIndex = 1;
+        
+        %add first waypoint
+        erg{ergInsertIndex} = path{1};
+        ergInsertIndex = ergInsertIndex+1;
+        
+        while(checkIndex < pathLength)
+            isCollided = false;
+            
+            %check collision tube
+            for i=checkIndex+2:pathLength
+                if (corridorColliding(path{checkIndex}, path{i}, constNavSecurity))
+                    erg{ergInsertIndex} = path{i-1};
+                    ergInsertIndex = ergInsertIndex+1;
+                    checkIndex = i;
+                    isCollided = true;
+                    break;
+                end
+            end
+            
+            %no collision on path detected
+            if (~isCollided)
+                break;
             end
         end
+        
+        %add last waypoint
+        erg{ergInsertIndex} = path{pathLength};
     end
 
 
@@ -384,18 +461,41 @@ function bes = beschleunigung(spiel, farbe)
         end
     end
     
-%%%Search for nearest Tanken and create Path between them
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    %%%Search for nearest Tanken and create Path between them
     function createPathToNextTanke()
-        if numel(waypointList)<=1 && spiel.n_tanke>=1
-            tankdistance=createTankEvaluation(me.pos);
-            next_tanke = tankdistance(1,1);
-            waypointList = appendToArray(waypointList,findPath(me.pos, spiel.tanke(next_tanke).pos));
+        waypointCount = numel(waypointList);
+        
+        if waypointCount <= 1 && spiel.n_tanke > 0
+            if (waypointCount == 1)
+                %waypointlist not empty => append new waypoints
+                tankdistance=createTankEvaluation(waypointList{waypointCount});
+                next_tanke = tankdistance(1,1);
+                
+                %possible that current tanke waypoint == next_tanke
+                if (norm(spiel.tanke(next_tanke).pos-waypointList{waypointCount}) < spiel.tanke_radius+constGridRadius)
+                    if (spiel.n_tanke >= 2)
+                        next_tanke = tankdistance(2,1);
+                    else
+                        return;
+                    end
+                end
+                
+                waypointList = appendToArray(waypointList, findPath(waypointList{waypointCount}, spiel.tanke(next_tanke).pos));
+            else
+                %set new waypoints
+                tankdistance=createTankEvaluation(me.pos);
+                next_tanke = tankdistance(1,1);
+                waypointList = findPath(me.pos, spiel.tanke(next_tanke).pos);
+            end
+            
+            disp('finding Path to next Tanke');
             debugDRAW();
         end
     end
 
-%%%%%%%%%%%%%
-%create Tank Distance Table
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    %create Tank Distance Table
     function erg=createTankEvaluation(position)
 
         erg = zeros(spiel.n_tanke,4);
@@ -410,48 +510,147 @@ function bes = beschleunigung(spiel, farbe)
                 end
                 a=a+1/norm(spiel.tanke(i).pos-spiel.tanke(j).pos);
             end
-            erg(i,4) = a*0.4+(1/erg(i,2))-0.5*(1/erg(i,3));                                   %Spalte 4: Anzahl Tankstellen in der Nähe und deren Dichte und deren Dichte zum Gegner
+            erg(i,4) = a*0.4+(1/erg(i,2))-0.5*(1/erg(i,3)); %Spalte 4: Anzahl Tankstellen in der Nähe und deren Dichte und deren Dichte zum Gegner
         end
-        erg=sortrows(erg,[-4 2 -3 1])
+        erg=sortrows(erg,[-4 2 -3 1]);
     end
 
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    %check if target tanke is still there
     function checkTankPath()
-        %%Tankstellenliste Aktualisieren
         endIndex=numel(waypointList);
-        if endIndex >= 1
+        if endIndex >= 1 && numel(spiel.tanke)>0
             lastWayPoint=waypointList{endIndex};
             for i=1:spiel.n_tanke
                 if norm(spiel.tanke(i).pos-lastWayPoint) <= spiel.tanke_radius+constGridRadius
                     return
                 end
             end
+            disp('Tanke disappeared, delete all WPs')
             waypointList=[];
         end 
     end
 
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    %corridor colliding
-    function erg = corridorColliding(startp, endp, radius)
-        length = 0;
-        dir = vecNorm(endp-startp);
-        erg = false;
-        
-        while(length < norm(startp - endp))
-            pos = startp + dir*length;
-            for i = 1:spiel.n_mine
-                if (norm(pos-spiel.mine(i).pos)-spiel.mine_radius < radius)
-                    erg = true;
-                    return;
-                end
+    %Angriff
+    function attackEnemy()
+        if TimeSet==false || numel(waypointList)==0
+            TimeSet=true;
+            disp('finding Path to Enemy');
+            waypointList = [];
+            if corridorColliding(me.pos,enemy.pos,constNavSecurity)==false
+                waypointList = appendToArray(waypointList, {enemy.pos});
+            else
+                waypointList = appendToArray(waypointList, findPath(me.pos,enemy.pos));
             end
-            length = length + radius/2;
+            if corridorColliding(enemy.pos,enemy.pos+0.5*enemy.ges,constNacSecurity)==false
+                waypointList = appendToArray(waypointList, {enemy.pos+0.5*enemy.ges});
+            else
+                waypointList = appendToArray(waypointList, findPath(enemy.pos,0.5*enemy.ges));
+            end
+            debugDRAW;
+        end
+        if numel(waypointList)>0
+            if norm(enemy.pos-waypointList{numel(waypointList)})>0.15
+                TimeSet=false;
+            end
         end
     end
 
-%%%%%%%%%DEBUGGING%%%%%%%
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    %Verteidigung
+    function fleeEnemy()
+        if numel(spiel.tanke) == 0 && numel(waypointList) == 0
+            disp('searching for cover');
+            waypointList=[];
+            RandPoints = rand(4,2);
+            for i=1:4
+                RandPoints(i,3)=norm([RandPoints(i,1),RandPoints(i,2)]-enemy.pos);
+            end
+            RandPoints=sortrows(RandPoints,[-3,2,1]);
+            waypointList = appendToArray(waypointList, findPath(me.pos, [RandPoints(1,1),RandPoints(1,2)]));
+            debugDRAW;
+        end
+    end
+
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    %corridor colliding
+    function erg = corridorColliding(startp, endp, radius)
+        dir = vecNorm(endp-startp);
+        n = getPerpend(dir);
+        erg = false;
+        
+        if (lineColliding(startp, endp))
+            erg = true;
+            return;
+        end
+        
+        if (lineColliding(startp + n*radius, endp + n*radius))
+            erg = true;
+            return;
+        end
+        
+        if (lineColliding(startp - n*radius, endp - n*radius))
+            erg = true;
+            return;
+        end
+    end
+
+
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    function erg=lineColliding(startp, endp)
+        erg = false;
+        
+        for i=1:spiel.n_mine
+            dist = distanceLinePoint(startp, endp, spiel.mine(i).pos);
+            
+            if (dist < spiel.mine_radius)
+                erg = true;
+                return;
+            end
+        end
+        
+    end
+
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    function erg = distanceLinePoint(startp, endp, point)
+        length = norm(startp - endp);
+        dir = vecNorm(endp-startp);
+        n = getPerpend(dir);
+       
+        
+        y = (startp(2)*n(1)-point(2)*n(1)-n(2)*startp(1)+point(1)*n(2))/(dir(1)*n(2)-dir(2)*n(1));
+        
+        linePoint = startp + dir*y;
+        
+        %point is outside of line
+        if (norm(linePoint-startp) > length || norm(linePoint-endp) > length)
+            erg=Inf;
+            return;
+        end
+        
+        erg = norm(point-linePoint);
+    end
+
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    %get perpendicular vector
+    function erg = getPerpend(vec)
+        erg = [-vec(2), vec(1)];
+    end
+
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    %%%%%%%%%DEBUGGING%%%%%%%
     function debugDRAW()
+        %delete all draw handles
+        for i = 1 : numel(drawHandles)
+            if (~isempty(drawHandles(i)))
+                delete(drawHandles(i))
+            end
+        end
+        drawHandles = [];
+        
         for i = 1 : numel(waypointList)
-            rectangle ('Parent', spiel.spielfeld_handle, 'Position', [waypointList{i}-0.0025, 0.005, 0.005], 'Curvature', [1 1], 'FaceColor', spiel.farbe.rot, 'EdgeColor', 'none');
+            drawHandles(i) = rectangle ('Parent', spiel.spielfeld_handle, 'Position', [waypointList{i}-0.0025, 0.005, 0.005], 'Curvature', [1 1], 'FaceColor', spiel.farbe.rot, 'EdgeColor', 'none');
         end
     end
 end
