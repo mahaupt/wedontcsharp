@@ -11,6 +11,7 @@ function bes = beschleunigung(spiel, farbe)
     persistent nodeGrid;
     persistent waypointList;
     persistent drawHandles; %debug drawing
+    persistent NumberOfMines
     
     %%Farbe prüfen und zuweisen
     if strcmp (farbe, 'rot')
@@ -27,8 +28,17 @@ function bes = beschleunigung(spiel, farbe)
         nodeGrid = [];
         drawHandles = [];
         waypointList = [];
+        NumberOfMines = spiel.n_mine;
         setupNodeGrid()
     end
+    
+    %Setup nodegrid beim Verschwinden einer Mine erneut ausführen:
+    if spiel.n_mine < NumberOfMines
+        nodeGrid = [];
+        setupNodeGrid();
+        NumberOfMines = spiel.n_mine;
+    end
+    
     %Nächste Tankstelle noch vorhanden?
     checkTankPath()
     
