@@ -54,7 +54,7 @@ function bes = beschleunigung(spiel, farbe)
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     %Tanken oder Angreifen oder Verteidigen?
     function whatToDo()
-        if NumberOfTank*0.5 < me.getankt %Wenn wir mehr als die Hälfte der Tanken haben - Angriff!
+        if NumberOfTank*0.5 < me.getankt || (norm(me.pos-enemy.pos)<0.2 && me.getankt>enemy.getankt)%Wenn wir mehr als die Hälfte der Tanken haben oder nahe des Gegners sind und mehr getankt haben - Angriff!
            attackEnemy();
         else
             if numel(spiel.tanke) < 1 && me.getankt < enemy.getankt %%Erst wenn alle Tanken weg sind und wir weniger haben, als der Gegner - Fliehen!
@@ -543,10 +543,10 @@ function bes = beschleunigung(spiel, farbe)
             else
                 waypointList = appendToArray(waypointList, findPath(me.pos,enemy.pos));
             end
-            if corridorColliding(enemy.pos,enemy.pos+0.5*enemy.ges,constNavSecurity)==false
-                waypointList = appendToArray(waypointList, {enemy.pos+0.5*enemy.ges});
+            if corridorColliding(enemy.pos,enemy.pos+0.3*enemy.ges,constNavSecurity)==false
+                waypointList = appendToArray(waypointList, {enemy.pos+0.3*enemy.ges});
             else
-                waypointList = appendToArray(waypointList, findPath(enemy.pos,0.5*enemy.ges));
+                waypointList = appendToArray(waypointList, findPath(enemy.pos,0.3*enemy.ges));
             end
             debugDRAW;
         end
@@ -560,7 +560,7 @@ function bes = beschleunigung(spiel, farbe)
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     %Verteidigung
     function fleeEnemy()
-        if numel(spiel.tanke) == 0 && numel(waypointList) == 0
+        if numel(waypointList) == 0
             disp('searching for cover');
             waypointList=[];
             RandPoints = rand(4,2);
