@@ -36,6 +36,7 @@ function bes = beschleunigung(spiel, farbe)
     
     %Setup nodegrid beim Verschwinden einer Mine erneut ausführen:
     if spiel.n_mine < NumberOfMines
+        disp('Updating NodeGrid');
         nodeGrid = [];
         setupNodeGrid();
         NumberOfMines = spiel.n_mine;
@@ -49,6 +50,12 @@ function bes = beschleunigung(spiel, farbe)
     
     %Überprüfen, ob in der Nähe des geplanten Weges eine Tanke liegt
     %checkTankNearPath()
+    
+    if me.getankt>enemy.getankt
+        attackEnemy();
+    else
+        fleeEnemy();
+    end
     
     %Beschleunigung berechnen:
     bes=calculateBES();
@@ -543,16 +550,31 @@ function bes = beschleunigung(spiel, farbe)
 
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     %Einfachster Angriff
-    if (numel(spiel.tanke)==0 && TimeSet==false) || (numel(spiel.tanke)==0 && numel(waypointList)==0) && me.getankt>enemy.getankt
-        TimeSet=true;
-        waypointList = appendToArray(waypointList, findPath(me.pos,enemy.pos));
-        disp('finding Path to Enemy');
-        debugDRAW;
+    function attackEnemy()
+        if (numel(spiel.tanke)==0 && TimeSet==false) || (numel(spiel.tanke)==0 && numel(waypointList)==0)
+            TimeSet=true;
+            disp('finding Path to Enemy');
+            waypointList = appendToArray(waypointList, findPath(me.pos,enemy.pos));
+            debugDRAW;
+        end
+        if numel(waypointList)>0
+            if numel(spiel.tanke)==0 && norm(enemy.pos-waypointList{numel(waypointList)})>0.2
+                TimeSet=false;
+                waypointList=[];
+            end
+        end
     end
-    if numel(waypointList)>0
-        if numel(spiel.tanke)==0 && norm(enemy.pos-waypointList{numel(waypointList)})>0.2
-            TimeSet=false;
-            waypointList=[];
+
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    %Einfachste Verteidigung
+    function fleeEnemy()
+        if numel(spiel.tanke) == 0 && numel(waypointList) == 0
+            disp('searching for cover');
+            a = rand;
+            b = rand;
+            RandPoint = [a,b]
+            waypointList = appendToArray(waypointList, findPath(me.pos, RandPoint));
+            debugDRAW;
         end
     end
 
