@@ -4,8 +4,8 @@ function bes = beschleunigung(spiel, farbe)
     constGridRadius = 0.005; 
     constNavSecurity = 0.03; %simplify path
     constWayPointReachedRadius = 0.02; %0.01
-    constMineProxPenality = 0.0006;
-    constCornerBreaking = 0.03;
+    constMineProxPenality = 0.0006; %Strafpunkte für Nodes - je dichter an Mine, desto höher
+    constCornerBreaking = 0.03; %je größer der Winkel zum nächsten Wegpunkt, desto höheres Bremsen. Faktor.
    
     %statische variablen definieren
     persistent nodeGrid;
@@ -29,12 +29,14 @@ function bes = beschleunigung(spiel, farbe)
         waypointList = [];
         setupNodeGrid()
     end
-
     %Nächste Tankstelle noch vorhanden?
     checkTankPath()
     
     %wenn Wegpunktliste leer => Pfad zur besten Tankstelle setzen
     createPathToNextTanke()
+    
+    %Überprüfen, ob in der Nähe des geplanten Weges eine Tanke liegt
+    checkTankNearPath()
     
     %Beschleunigung berechnen:
     bes=calculateBES();
@@ -482,16 +484,14 @@ function bes = beschleunigung(spiel, farbe)
                 end
                 a=a+1/norm(spiel.tanke(i).pos-spiel.tanke(j).pos);
             end
-            erg(i,4) = a*0.4+(1/erg(i,2))-0.5*(1/erg(i,3));                                   %Spalte 4: Anzahl Tankstellen in der Nähe und deren Dichte und deren Dichte zum Gegner
+            erg(i,4) = a*0.4+(1/erg(i,2))-0.5*(1/erg(i,3)); %Spalte 4: Anzahl Tankstellen in der Nähe und deren Dichte und deren Dichte zum Gegner
         end
         erg=sortrows(erg,[-4 2 -3 1]);
     end
 
-    
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     %check if target tanke is still there
     function checkTankPath()
-        %%Tankstellenliste Aktualisieren
         endIndex=numel(waypointList);
         if endIndex >= 1
             lastWayPoint=waypointList{endIndex};
@@ -503,6 +503,15 @@ function bes = beschleunigung(spiel, farbe)
             disp('Tanke disappeared, delete all WPs')
             waypointList=[];
         end 
+    end
+
+    function checkTankNearPath()
+        endIndex=numel(waypointList);
+        if endIndex >= 1
+            for i=1:numel(spiel.n_tanke)
+                return
+            end
+        end
     end
 
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
