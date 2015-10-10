@@ -36,7 +36,7 @@ function bes = beschleunigung(spiel, farbe)
     createPathToNextTanke()
     
     %Überprüfen, ob in der Nähe des geplanten Weges eine Tanke liegt
-    checkTankNearPath()
+    %checkTankNearPath()
     
     %Beschleunigung berechnen:
     bes=calculateBES();
@@ -505,11 +505,25 @@ function bes = beschleunigung(spiel, farbe)
         end 
     end
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
     function checkTankNearPath()
         endIndex=numel(waypointList);
+        NearTanke=[];
         if endIndex >= 1
-            for i=1:numel(spiel.n_tanke)
-                return
+            waypointListPlusMe=[];
+            waypointListPlusMe{1}=me.pos;
+            waypointListPlusMe=appendToArray(waypointListPlusMe,waypointList);
+            for i=1:(endIndex)
+                vektorOfPath=waypointListPlusMe{i+1}-waypointListPlusMe{i};
+                for j=1:spiel.n_tanke
+                    vektorTanke1=spiel.tanke(j).pos-waypointListPlusMe{i};
+                    vektorTanke2=spiel.tanke(j).pos-waypointListPlusMe{i+1};
+                    if acosd(dot(vektorOfPath, vektorTanke1)) < 50 && acosd(dot(vektorOfPath, vektorTanke2)) < 50
+                        appendToArray(NearTanke,spiel.tanke(j).pos);
+                        disp('LÄUFT')
+                    end
+                end
             end
         end
     end
