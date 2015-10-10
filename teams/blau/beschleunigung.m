@@ -3,13 +3,14 @@ function bes = beschleunigung(spiel, farbe)
     constSafeBorder = 0.005; %collision border around mines
     constGridRadius = 0.005; 
     constNavSecurity = 0.03; %simplify path
-    constWayPointReachedRadius = 0.02; %0.01
+    constWayPointReachedRadius = 0.01; %0.01
     constMineProxPenality = 0.0006;
     constCornerBreaking = 0.02;
    
     %statische variablen definieren
     persistent nodeGrid;
     persistent waypointList;
+    persistent drawHandles; %debug drawing
     
     %%Farbe prüfen und zuweisen
     if strcmp (farbe, 'rot')
@@ -21,7 +22,11 @@ function bes = beschleunigung(spiel, farbe)
     end
     
     %%wird einmal am Anfang ausgeführt
+    %setup node grid and empty persistent vars
     if spiel.i_t==1
+        nodeGrid = [];
+        drawHandles = [];
+        waypointList = [];
         setupNodeGrid()
     end
 
@@ -417,10 +422,12 @@ function bes = beschleunigung(spiel, farbe)
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     %%%Search for nearest Tanken and create Path between them
     function createPathToNextTanke()
-        if numel(waypointList)<=1 && spiel.n_tanke>=1
+        if numel(waypointList) < 1 && spiel.n_tanke > 0
+            disp('finding Path to next Tanke');
+            
             tankdistance=createTankEvaluation(me.pos);
             next_tanke = tankdistance(1,1);
-            waypointList = appendToArray(waypointList,findPath(me.pos, spiel.tanke(next_tanke).pos));
+            waypointList = findPath(me.pos, spiel.tanke(next_tanke).pos);
             debugDRAW();
         end
     end
@@ -443,7 +450,7 @@ function bes = beschleunigung(spiel, farbe)
             end
             erg(i,4) = a*0.4+(1/erg(i,2))-0.5*(1/erg(i,3));                                   %Spalte 4: Anzahl Tankstellen in der Nähe und deren Dichte und deren Dichte zum Gegner
         end
-        erg=sortrows(erg,[-4 2 -3 1])
+        erg=sortrows(erg,[-4 2 -3 1]);
     end
 
     
@@ -459,6 +466,7 @@ function bes = beschleunigung(spiel, farbe)
                     return
                 end
             end
+            disp('Tanke disappeared, delete all WPs')
             waypointList=[];
         end 
     end
@@ -531,11 +539,11 @@ function bes = beschleunigung(spiel, farbe)
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     %%%%%%%%%DEBUGGING%%%%%%%
     function debugDRAW()
-        persistent drawHandles
-        
         %delete all draw handles
         for i = 1 : numel(drawHandles)
-            delete(drawHandles(i))
+            if (~isempty(drawHandles(i)))
+                delete(drawHandles(i))
+            end
         end
         drawHandles = [];
         
