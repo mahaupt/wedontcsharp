@@ -5,11 +5,12 @@ function bes = beschleunigung(spiel, farbe)
     constNavSecurity = 0.03; %simplify path
     constWayPointReachedRadius = 0.02; %0.01
     constMineProxPenality = 0.0006;
-    constCornerBreaking = 0.02;
+    constCornerBreaking = 0.03;
    
     %statische variablen definieren
     persistent nodeGrid;
     persistent waypointList;
+    persistent drawHandles; %debug drawing
     
     %%Farbe prüfen und zuweisen
     if strcmp (farbe, 'rot')
@@ -21,7 +22,11 @@ function bes = beschleunigung(spiel, farbe)
     end
     
     %%wird einmal am Anfang ausgeführt
+    %setup node grid and empty persistent vars
     if spiel.i_t==1
+        nodeGrid = [];
+        drawHandles = [];
+        waypointList = [];
         setupNodeGrid()
     end
 
@@ -180,6 +185,11 @@ function bes = beschleunigung(spiel, farbe)
         startPos = getValidNodePos(worldPosToGridPos(startp));
         endPos = getValidNodePos(worldPosToGridPos(endp));
         
+        %debug purposes
+        if (equalsVec(startPos, endPos))
+            disp('Pathfinder: stard equals end, return zero waypoints');
+        end
+        
         openSet = {startPos};
         closedSet = {};
         closedSetIndex = 1;
@@ -253,7 +263,7 @@ function bes = beschleunigung(spiel, farbe)
             waypoints = [];
             waypointIndex = 1;
             
-            while (currentNode.gridPos ~= startPos)
+            while (~equalsVec(currentNode.gridPos, startPos))
                waypoints{waypointIndex} = currentNode.worldPos;
                waypointIndex = waypointIndex + 1;
                currentNode = nodeFromGridCoords(currentNode.parent);
@@ -308,6 +318,15 @@ function bes = beschleunigung(spiel, farbe)
     function erg = equalsNode(a, b)
         erg = false;
         if (a.gridPos(1) == b.gridPos(1) && a.gridPos(2) == b.gridPos(2))
+            erg = true;
+        end
+    end
+
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    %check if vectors are equal
+    function erg = equalsVec(a, b)
+        erg = false;
+        if (a(1) == b(1) && a(2) == b(2))
             erg = true;
         end
     end
@@ -417,10 +436,32 @@ function bes = beschleunigung(spiel, farbe)
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     %%%Search for nearest Tanken and create Path between them
     function createPathToNextTanke()
-        if numel(waypointList)<=1 && spiel.n_tanke>=1
-            tankdistance=createTankEvaluation(me.pos);
-            next_tanke = tankdistance(1,1);
-            waypointList = appendToArray(waypointList,findPath(me.pos, spiel.tanke(next_tanke).pos));
+        waypointCount = numel(waypointList);
+        
+        if waypointCount <= 1 && spiel.n_tanke > 0
+            disp('finding Path to next Tanke');
+            
+            if (waypointCount >= 1)
+                %waypointlist not empty => append new waypoints
+                tankdistance=createTankEvaluation(waypointList{waypointCount});
+                next_tanke = tankdistance(1,1);
+                
+                %possible that current tanke waypoint == next_tanke
+                if (norm(spiel.tanke(next_tanke).pos-waypointList{waypointCount}) < spiel.tanke_radius+constGridRadius)
+                    if (spiel.n_tanke >= 2)
+                        next_tanke = tankdistance(2,1);
+                    else
+                        return;
+                    end
+                end
+                
+                waypointList = appendToArray(waypointList, findPath(waypointList{waypointCount}, spiel.tanke(next_tanke).pos));
+            else
+                %set new waypoints
+                tankdistance=createTankEvaluation(me.pos);
+                next_tanke = tankdistance(1,1);
+                waypointList = findPath(me.pos, spiel.tanke(next_tanke).pos);
+            end
             debugDRAW();
         end
     end
@@ -443,7 +484,7 @@ function bes = beschleunigung(spiel, farbe)
             end
             erg(i,4) = a*0.4+(1/erg(i,2))-0.5*(1/erg(i,3));                                   %Spalte 4: Anzahl Tankstellen in der Nähe und deren Dichte und deren Dichte zum Gegner
         end
-        erg=sortrows(erg,[-4 2 -3 1])
+        erg=sortrows(erg,[-4 2 -3 1]);
     end
 
     
@@ -459,6 +500,7 @@ function bes = beschleunigung(spiel, farbe)
                     return
                 end
             end
+            disp('Tanke disappeared, delete all WPs')
             waypointList=[];
         end 
     end
@@ -531,11 +573,11 @@ function bes = beschleunigung(spiel, farbe)
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     %%%%%%%%%DEBUGGING%%%%%%%
     function debugDRAW()
-        persistent drawHandles
-        
         %delete all draw handles
         for i = 1 : numel(drawHandles)
-            delete(drawHandles(i))
+            if (~isempty(drawHandles(i)))
+                delete(drawHandles(i))
+            end
         end
         drawHandles = [];
         
