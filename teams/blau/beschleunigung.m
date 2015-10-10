@@ -12,6 +12,7 @@ function bes = beschleunigung(spiel, farbe)
     persistent waypointList;
     persistent drawHandles; %debug drawing
     persistent NumberOfMines
+    persistent TimeSet
     
     %%Farbe prüfen und zuweisen
     if strcmp (farbe, 'rot')
@@ -29,6 +30,7 @@ function bes = beschleunigung(spiel, farbe)
         drawHandles = [];
         waypointList = [];
         NumberOfMines = spiel.n_mine;
+        TimeSet=false;
         setupNodeGrid()
     end
     
@@ -510,13 +512,14 @@ function bes = beschleunigung(spiel, farbe)
                     return
                 end
             end
-            disp('Tanke disappeared, delete all WPs')
-            waypointList=[];
+            %disp('Tanke disappeared, delete all WPs')
+            %waypointList=[];
         end 
     end
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
+    %NEEDS WORK
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    %check if Tankstelle is near our planned path
     function checkTankNearPath()
         endIndex=numel(waypointList);
         NearTanke=[];
@@ -535,6 +538,21 @@ function bes = beschleunigung(spiel, farbe)
                     end
                 end
             end
+        end
+    end
+
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    %Einfachster Angriff
+    if numel(spiel.tanke)==0 && TimeSet==false || numel(spiel.tanke)==0 && numel(waypointList)==0
+        TimeSet=true;
+        waypointList = appendToArray(waypointList, findPath(me.pos,enemy.pos));
+        disp('finding Path to Enemy');
+        debugDRAW;
+    end
+    if numel(waypointList)>0
+        if numel(spiel.tanke)==0 && norm(enemy.pos-waypointList{numel(waypointList)})>0.2
+            TimeSet=false;
+            waypointList=[];
         end
     end
 
