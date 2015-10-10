@@ -31,7 +31,7 @@ function bes = beschleunigung(spiel, farbe)
         waypointList = [];
         NumberOfMines = spiel.n_mine;
         TimeSet=false;
-        setupNodeGrid()
+        setupNodeGrid();
     end
     
     %Nodegrid beim Verschwinden einer Mine aktualisieren:
@@ -40,10 +40,11 @@ function bes = beschleunigung(spiel, farbe)
         nodeGrid = [];
         setupNodeGrid();
         NumberOfMines = spiel.n_mine;
+        waypointList = simplifyPath(waypointList);
     end
 
     %Entscheidung über Angriff/Verteidigung/Tanken
-    whatToDo()
+    whatToDo();
     
     %Beschleunigung berechnen:
     bes=calculateBES();
