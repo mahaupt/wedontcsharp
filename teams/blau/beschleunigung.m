@@ -11,8 +11,8 @@ function bes = beschleunigung(spiel, farbe)
     persistent nodeGrid;
     persistent waypointList;
     persistent drawHandles; %debug drawing
-    persistent NumberOfMines
-    persistent TimeSet
+    persistent NumberOfMines %Zur Bestimmung des Minenverschwindens benötigt
+    persistent TimeSet %zur Aktualisierung des Angriffs benötigt
     
     %%Farbe prüfen und zuweisen
     if strcmp (farbe, 'rot')
@@ -34,34 +34,39 @@ function bes = beschleunigung(spiel, farbe)
         setupNodeGrid()
     end
     
-    %Setup nodegrid beim Verschwinden einer Mine erneut ausführen:
+    %Nodegrid beim Verschwinden einer Mine aktualisieren:
     if spiel.n_mine < NumberOfMines
         disp('Updating NodeGrid');
         nodeGrid = [];
         setupNodeGrid();
         NumberOfMines = spiel.n_mine;
     end
-    
-    %Nächste Tankstelle noch vorhanden?
-        checkTankPath()
-    
-    %wenn Wegpunktliste leer => Pfad zur besten Tankstelle setzen
-    createPathToNextTanke()
-    
-    %Überprüfen, ob in der Nähe des geplanten Weges eine Tanke liegt
-    %checkTankNearPath()
-    
-    if me.getankt>enemy.getankt
-        attackEnemy();
-    else
-        fleeEnemy();
-    end
+
+    %Entscheidung über Angriff/Verteidigung/Tanken
+    whatToDo()
     
     %Beschleunigung berechnen:
     bes=calculateBES();
 
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    %Tanken oder Angreifen oder Verteidigen?
+    function whatToDo()
+        if numel(spiel.tanke)<1 %|| me.getankt>enemy.getankt+1 <<----- HIER MÜSSTEN DIE WEGPUNKTE ERST GELÖSCHT WERDEN
+            if me.getankt>enemy.getankt
+                attackEnemy();
+            else
+                fleeEnemy();
+            end
+        else
+            %Nächste Tankstelle noch vorhanden?
+            checkTankPath()
+            %wenn Wegpunktliste leer => Pfad zur besten Tankstelle setzen
+            createPathToNextTanke()
+        end
+    end
     
-    %%%%%%%%%%%%%%%%%%%%%%%%PathToBes%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    %Path To Acceleration (bes)
     function erg=calculateBES()
         if (numel(waypointList) <= 0)
             erg = -me.ges;
@@ -524,41 +529,17 @@ function bes = beschleunigung(spiel, farbe)
         end 
     end
 
-    %NEEDS WORK
-    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    %check if Tankstelle is near our planned path
-    function checkTankNearPath()
-        endIndex=numel(waypointList);
-        NearTanke=[];
-        if endIndex >= 1
-            waypointListPlusMe=[];
-            waypointListPlusMe{1}=me.pos;
-            waypointListPlusMe=appendToArray(waypointListPlusMe,waypointList);
-            for i=1:(endIndex)
-                vektorOfPath=waypointListPlusMe{i+1}-waypointListPlusMe{i};
-                for j=1:spiel.n_tanke
-                    vektorTanke1=spiel.tanke(j).pos-waypointListPlusMe{i};
-                    vektorTanke2=spiel.tanke(j).pos-waypointListPlusMe{i+1};
-                    if acosd(dot(vektorOfPath, vektorTanke1)) < 50 && acosd(dot(vektorOfPath, vektorTanke2)) < 50
-                        appendToArray(NearTanke,spiel.tanke(j).pos);
-                        disp('LÄUFT')
-                    end
-                end
-            end
-        end
-    end
-
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     %Einfachster Angriff
     function attackEnemy()
-        if (numel(spiel.tanke)==0 && TimeSet==false) || (numel(spiel.tanke)==0 && numel(waypointList)==0)
+        if TimeSet==false || numel(waypointList)==0
             TimeSet=true;
             disp('finding Path to Enemy');
             waypointList = appendToArray(waypointList, findPath(me.pos,enemy.pos));
             debugDRAW;
         end
         if numel(waypointList)>0
-            if numel(spiel.tanke)==0 && norm(enemy.pos-waypointList{numel(waypointList)})>0.2
+            if norm(enemy.pos-waypointList{numel(waypointList)})>0.2
                 TimeSet=false;
                 waypointList=[];
             end
