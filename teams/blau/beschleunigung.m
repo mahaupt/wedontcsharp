@@ -4,13 +4,15 @@ function bes = beschleunigung(spiel, farbe)
     constGridRadius = 0.005; 
     constNavSecurity = 0.03; %simplify path
     constWayPointReachedRadius = 0.02; %0.01
-    constMineProxPenality = 0.0006;
-    constCornerBreaking = 0.03;
+    constMineProxPenality = 0.0006; %Strafpunkte für Nodes - je dichter an Mine, desto höher
+    constCornerBreaking = 0.03; %je größer der Winkel zum nächsten Wegpunkt, desto höheres Bremsen. Faktor.
    
     %statische variablen definieren
     persistent nodeGrid;
     persistent waypointList;
     persistent drawHandles; %debug drawing
+    persistent NumberOfMines
+    persistent TimeSet
     
     %%Farbe prüfen und zuweisen
     if strcmp (farbe, 'rot')
@@ -27,14 +29,26 @@ function bes = beschleunigung(spiel, farbe)
         nodeGrid = [];
         drawHandles = [];
         waypointList = [];
+        NumberOfMines = spiel.n_mine;
+        TimeSet=false;
         setupNodeGrid()
     end
-
+    
+    %Setup nodegrid beim Verschwinden einer Mine erneut ausführen:
+    if spiel.n_mine < NumberOfMines
+        nodeGrid = [];
+        setupNodeGrid();
+        NumberOfMines = spiel.n_mine;
+    end
+    
     %Nächste Tankstelle noch vorhanden?
     checkTankPath()
     
     %wenn Wegpunktliste leer => Pfad zur besten Tankstelle setzen
     createPathToNextTanke()
+    
+    %Überprüfen, ob in der Nähe des geplanten Weges eine Tanke liegt
+    %checkTankNearPath()
     
     %Beschleunigung berechnen:
     bes=calculateBES();
@@ -482,16 +496,14 @@ function bes = beschleunigung(spiel, farbe)
                 end
                 a=a+1/norm(spiel.tanke(i).pos-spiel.tanke(j).pos);
             end
-            erg(i,4) = a*0.4+(1/erg(i,2))-0.5*(1/erg(i,3));                                   %Spalte 4: Anzahl Tankstellen in der Nähe und deren Dichte und deren Dichte zum Gegner
+            erg(i,4) = a*0.4+(1/erg(i,2))-0.5*(1/erg(i,3)); %Spalte 4: Anzahl Tankstellen in der Nähe und deren Dichte und deren Dichte zum Gegner
         end
         erg=sortrows(erg,[-4 2 -3 1]);
     end
 
-    
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     %check if target tanke is still there
     function checkTankPath()
-        %%Tankstellenliste Aktualisieren
         endIndex=numel(waypointList);
         if endIndex >= 1
             lastWayPoint=waypointList{endIndex};
@@ -500,9 +512,48 @@ function bes = beschleunigung(spiel, farbe)
                     return
                 end
             end
-            disp('Tanke disappeared, delete all WPs')
-            waypointList=[];
+            %disp('Tanke disappeared, delete all WPs')
+            %waypointList=[];
         end 
+    end
+
+    %NEEDS WORK
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    %check if Tankstelle is near our planned path
+    function checkTankNearPath()
+        endIndex=numel(waypointList);
+        NearTanke=[];
+        if endIndex >= 1
+            waypointListPlusMe=[];
+            waypointListPlusMe{1}=me.pos;
+            waypointListPlusMe=appendToArray(waypointListPlusMe,waypointList);
+            for i=1:(endIndex)
+                vektorOfPath=waypointListPlusMe{i+1}-waypointListPlusMe{i};
+                for j=1:spiel.n_tanke
+                    vektorTanke1=spiel.tanke(j).pos-waypointListPlusMe{i};
+                    vektorTanke2=spiel.tanke(j).pos-waypointListPlusMe{i+1};
+                    if acosd(dot(vektorOfPath, vektorTanke1)) < 50 && acosd(dot(vektorOfPath, vektorTanke2)) < 50
+                        appendToArray(NearTanke,spiel.tanke(j).pos);
+                        disp('LÄUFT')
+                    end
+                end
+            end
+        end
+    end
+
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    %Einfachster Angriff
+    if numel(spiel.tanke)==0 && TimeSet==false || numel(spiel.tanke)==0 && numel(waypointList)==0
+        TimeSet=true;
+        waypointList = appendToArray(waypointList, findPath(me.pos,enemy.pos));
+        disp('finding Path to Enemy');
+        debugDRAW;
+    end
+    if numel(waypointList)>0
+        if numel(spiel.tanke)==0 && norm(enemy.pos-waypointList{numel(waypointList)})>0.2
+            TimeSet=false;
+            waypointList=[];
+        end
     end
 
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
