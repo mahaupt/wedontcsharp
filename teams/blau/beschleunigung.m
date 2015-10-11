@@ -58,7 +58,7 @@ function bes = beschleunigung(spiel, farbe)
             
             %Wenn wir mehr als die Hälfte der Tanken haben oder nahe des Gegners sind und mehr getankt haben - Angriff!
             attackEnemy();
-        elseif (numel(spiel.tanke) < 1 && me.getankt < enemy.getankt)
+        elseif (numel(spiel.tanke) <= 0 && me.getankt < enemy.getankt)
             
             %%Erst wenn alle Tanken weg sind und wir weniger haben, als der Gegner - Fliehen!
             fleeEnemy();
@@ -113,7 +113,7 @@ function bes = beschleunigung(spiel, farbe)
         erg = false;
         
         %nothing to do
-        if (numel(waypointList))
+        if (numel(waypointList) <= 0)
             return;
         end
         
@@ -123,18 +123,14 @@ function bes = beschleunigung(spiel, farbe)
         %distance to overshoot
         minTurnDist = projectVectorNorm(towp, vdir);
         %time to overshoot
-        turnTime = minTurnDist/norm(vdir);
+        turnTime = minTurnDist/norm(me.ges);
         %position to overshoot
         turnPos = me.pos + vecNorm(vdir)*minTurnDist;
         %distace of overshooting
         correctDist = norm(turnPos - waypointList{1});
         
-        %nothing to do
-        if (turnTime <= 0)
-            return;
-        end
-        
-        if (0.5*spiel.bes * turnTime^2 < correctDist)
+        accCorrection = 0.5*spiel.bes * turnTime^2 * 0.9;
+        if (accCorrection < correctDist)
             erg = true;
             disp('overshooting, breaking')
         end
@@ -572,7 +568,7 @@ function bes = beschleunigung(spiel, farbe)
                 end
                 a=a+1/norm(spiel.tanke(i).pos-spiel.tanke(j).pos);
             end
-            erg(i,4) = a*0.4+(1/erg(i,2))-0.5*(1/erg(i,3)); %Spalte 4: Anzahl Tankstellen in der Nähe und deren Dichte und deren Dichte zum Gegner
+            erg(i,4) = a*0.3+(1/erg(i,2))-0.3*(1/erg(i,3)); %Spalte 4: Anzahl Tankstellen in der Nähe und deren Dichte und deren Dichte zum Gegner
             
             %set evaluation bad if this is the ignore tanken
             if (ignoreTanke == i)
@@ -588,7 +584,7 @@ function bes = beschleunigung(spiel, farbe)
         tankenList = [];
         
         %avoid loop when only 1 tanke exists
-        if numel(spiel.n_tanke == 1 && ignoreTanke == 1)
+        if numel(spiel.n_tanke) == 1 && ignoreTanke == 1
             return;
         end
         
@@ -622,7 +618,7 @@ function bes = beschleunigung(spiel, farbe)
             tvown = getTimeToAlignVelocity(me.ges, ownPath);
             
             %only if tanke is about to get taken
-            if (tenemy > 0 && tenemy < 0.2)
+            if (tenemy > 0 && tenemy < 0.3)
                 if (tenemy+tvenemy < town+tvown)
                     disp('enemy reaches tanke before us .. get new target tanke');
                     recalculateTankenWPs = true;
