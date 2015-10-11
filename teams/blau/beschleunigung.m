@@ -3,7 +3,7 @@ function bes = beschleunigung(spiel, farbe)
     constSafeBorder = 0.005; %collision border around mines
     constGridRadius = 0.005; 
     constNavSecurity = 0.03; %simplify path
-    constWayPointReachedRadius = 0.01; %0.01
+    constWayPointReachedRadius = 0.02; %0.01
     constMineProxPenality = 0.0006; %Strafpunkte für Nodes - je dichter an Mine, desto höher
     constCornerBreaking = 0.03; %je größer der Winkel zum nächsten Wegpunkt, desto höheres Bremsen. Faktor.
    
