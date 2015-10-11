@@ -587,10 +587,10 @@ function bes = beschleunigung(spiel, farbe)
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     function erg = calcEnemyHitPosition()
         thit = norm(me.pos - enemy.pos)/norm(me.ges);
-        if (thit > 0.5)
+        if (thit > 1)
             erg = enemy.pos;
         else
-            erg = enemy.pos + enemy.ges*thit;
+            erg = enemy.pos + enemy.ges*thit + 0.1*enemy.bes*thit^2;
         end
     end
 
