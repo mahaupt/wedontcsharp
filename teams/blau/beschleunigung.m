@@ -54,16 +54,19 @@ function bes = beschleunigung(spiel, farbe)
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     %Tanken oder Angreifen oder Verteidigen?
     function whatToDo()
-        if NumberOfTank*0.5 < me.getankt || (norm(me.pos-enemy.pos)<0.2 && me.getankt>enemy.getankt)%Wenn wir mehr als die Hälfte der Tanken haben oder nahe des Gegners sind und mehr getankt haben - Angriff!
-           attackEnemy();
+        if NumberOfTank*0.5 < me.getankt || (norm(me.pos-enemy.pos)<0.2 && me.getankt>enemy.getankt)
+            
+            %Wenn wir mehr als die Hälfte der Tanken haben oder nahe des Gegners sind und mehr getankt haben - Angriff!
+            attackEnemy();
+        elseif (numel(spiel.tanke) < 1 && me.getankt < enemy.getankt)
+            
+            %%Erst wenn alle Tanken weg sind und wir weniger haben, als der Gegner - Fliehen!
+            fleeEnemy();
         else
-            if numel(spiel.tanke) < 1 && me.getankt < enemy.getankt %%Erst wenn alle Tanken weg sind und wir weniger haben, als der Gegner - Fliehen!
-                fleeEnemy();
-            end
-        %Nächste Tankstelle noch vorhanden?
-        checkTankPath()
-        %wenn Wegpunktliste leer => Pfad zur besten Tankstelle setzen
-        createPathToNextTanke()
+            %Nächste Tankstelle noch vorhanden?
+            checkTankPath()
+            %wenn Wegpunktliste leer => Pfad zur besten Tankstelle setzen
+            createPathToNextTanke()
         end
     end
     
@@ -83,6 +86,8 @@ function bes = beschleunigung(spiel, farbe)
         %calculate safe breaking endvelocity
         breakingEndVel = calcBreakingEndVel();
         
+        tooFast = checkIfTooFast();
+        
         %decelleration
         distanceToWaypoint=norm(waypointList{1}-me.pos);
         breakDistance = calcBreakDistance(norm(me.ges), breakingEndVel);
@@ -90,10 +95,48 @@ function bes = beschleunigung(spiel, farbe)
             erg=-dir + corr*5;
         end
         
+        %emergencyBreaking
+        if (tooFast)
+            erg = -me.ges;
+        end
+        
         %%Überprüfen, ob Wegpunkt erreicht wurde, dann 1. Punkt löschen
         if norm(me.pos-waypointList{1}) < constWayPointReachedRadius
             waypointList(1) = [];
             debugDRAW();
+        end
+    end
+
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    %check if overshooting next waypoint
+    function erg = checkIfTooFast()
+        erg = false;
+        
+        %nothing to do
+        if (numel(waypointList))
+            return;
+        end
+        
+        vdir = vecNorm(me.ges);
+        towp = waypointList{1} - me.pos;
+
+        %distance to overshoot
+        minTurnDist = projectVectorNorm(towp, vdir);
+        %time to overshoot
+        turnTime = minTurnDist/norm(vdir);
+        %position to overshoot
+        turnPos = me.pos + vecNorm(vdir)*minTurnDist;
+        %distace of overshooting
+        correctDist = norm(turnPos - waypointList{1});
+        
+        %nothing to do
+        if (turnTime <= 0)
+            return;
+        end
+        
+        if (0.5*spiel.bes * turnTime^2 < correctDist)
+            erg = true;
+            disp('overshooting, breaking')
         end
     end
 
@@ -167,7 +210,7 @@ function bes = beschleunigung(spiel, farbe)
                 gridPos = [x, y];
                 nodeGrid(x,y).worldPos = worldPos;
                 nodeGrid(x,y).gridPos = gridPos;
-                nodeGrid(x,y).isWalkable = isWalkable(worldPos);
+                nodeGrid(x,y).isWalkable = isWalkable(worldPos, constSafeBorder + spiel.spaceball_radius);
                 nodeGrid(x,y).hCost = 0;
                 nodeGrid(x,y).fCost = 0;
                 nodeGrid(x,y).gCost = 0;
@@ -187,9 +230,9 @@ function bes = beschleunigung(spiel, farbe)
 
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     %check if node is a collider (mine, border)
-    function erg=isWalkable(pos)
+    function erg=isWalkable(pos, radius)
         erg = true;
-        secureSpaceballRadius = constSafeBorder + spiel.spaceball_radius;
+        secureSpaceballRadius = radius;
         
         %border check
         if (pos(1) > 1-secureSpaceballRadius || pos(1) < secureSpaceballRadius || pos(2) > 1-secureSpaceballRadius || pos(2) < secureSpaceballRadius)
@@ -544,6 +587,11 @@ function bes = beschleunigung(spiel, farbe)
     function checkTankPath()
         tankenList = [];
         
+        %avoid loop when only 1 tanke exists
+        if numel(spiel.n_tanke == 1 && ignoreTanke == 1)
+            return;
+        end
+        
         %get targeted tanken
         for i=1:numel(waypointList)
             for j=1:spiel.n_tanke
@@ -569,6 +617,7 @@ function bes = beschleunigung(spiel, farbe)
             tenemy  = norm(enemyPath)/projectVectorNorm(enemy.ges, enemyPath);
             tvenemy = getTimeToAlignVelocity(enemy.ges, enemyPath);
             
+            %time to correct velocity to tanke
             town = norm(ownPath) / projectVectorNorm(me.ges, ownPath);
             tvown = getTimeToAlignVelocity(me.ges, ownPath);
             
@@ -700,6 +749,16 @@ function bes = beschleunigung(spiel, farbe)
             erg = true;
             return;
         end
+        
+        %start and endpoint
+        if (~isWalkable(startp, radius))
+            erg = true;
+            return;
+        end
+        if (~isWalkable(endp, radius))
+            erg = true;
+            return;
+        end
     end
 
 
@@ -715,7 +774,6 @@ function bes = beschleunigung(spiel, farbe)
                 return;
             end
         end
-        
     end
 
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -767,6 +825,7 @@ function bes = beschleunigung(spiel, farbe)
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     function endPosition = safeDeleteWaypoints()
         %nothing to do
+        endPosition = me.pos;
         if (numel(waypointList) <= 0)
             return;
         end
@@ -803,7 +862,6 @@ function bes = beschleunigung(spiel, farbe)
         
         %get new end point
         endIndex = numel(waypointList);
-        endPosition = me.pos;
         if (endIndex > 0)
             endPosition = waypointList{endIndex};
         end
