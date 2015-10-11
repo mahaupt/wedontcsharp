@@ -63,20 +63,10 @@ function bes = beschleunigung(spiel, farbe)
             %%Erst wenn alle Tanken weg sind und wir weniger haben, als der Gegner - Fliehen!
             fleeEnemy();
         else
-<<<<<<< HEAD
-            if numel(spiel.tanke) < 1 && me.getankt < enemy.getankt || (norm(me.pos-enemy.pos)<0.2 && me.getankt<enemy.getankt) %%Erst wenn alle Tanken weg sind und wir weniger haben, als der Gegner - Fliehen!
-                fleeEnemy();
-            end
-        %Nächste Tankstelle noch vorhanden?
-        checkTankPath()
-        %wenn Wegpunktliste leer => Pfad zur besten Tankstelle setzen
-        createPathToNextTanke()
-=======
             %Nächste Tankstelle noch vorhanden?
             checkTankPath()
             %wenn Wegpunktliste leer => Pfad zur besten Tankstelle setzen
             createPathToNextTanke()
->>>>>>> master
         end
     end
     
