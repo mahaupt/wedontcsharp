@@ -3,7 +3,7 @@ function bes = beschleunigung(spiel, farbe)
     constSafeBorder = 0.005; %collision border around mines
     constGridRadius = 0.005; 
     constNavSecurity = 0.03; %simplify path
-    constWayPointReachedRadius = 0.02; %0.01
+    constWayPointReachedRadius = 0.01; %0.01
     constMineProxPenality = 0.0006; %Strafpunkte für Nodes - je dichter an Mine, desto höher
     constCornerBreaking = 0.03; %je größer der Winkel zum nächsten Wegpunkt, desto höheres Bremsen. Faktor.
    
@@ -119,20 +119,35 @@ function bes = beschleunigung(spiel, farbe)
         
         vdir = vecNorm(me.ges);
         towp = waypointList{1} - me.pos;
+        velocity = norm(me.ges);
 
         %distance to overshoot
         minTurnDist = projectVectorNorm(towp, vdir);
         %time to overshoot
-        turnTime = minTurnDist/norm(me.ges);
+        turnTime = minTurnDist/velocity;
         %position to overshoot
         turnPos = me.pos + vecNorm(vdir)*minTurnDist;
         %distace of overshooting
         correctDist = norm(turnPos - waypointList{1});
         
         accCorrection = 0.5*spiel.bes * turnTime^2 * 0.9;
-        if (accCorrection < correctDist)
+        if (accCorrection < correctDist && norm(towp) > constWayPointReachedRadius*2 && velocity >= 0.01)
             erg = true;
             disp('overshooting, breaking')
+            return;
+        end
+        
+        
+        %collision check only on direct-mode
+        if (numel(waypointList) == 1)
+            %%check if about to collide
+            safeSpaceballRadius = constSafeBorder + spiel.spaceball_radius;
+            breakDist = calcBreakDistance(norm(velocity), 0)*1.1;
+            checkPoint = me.pos + vecNorm(me.ges)*breakDist;
+            if (~isWalkable(checkPoint, safeSpaceballRadius) && velocity >= 0.01)
+                erg = true;
+                return
+            end
         end
     end
 
@@ -673,7 +688,7 @@ function bes = beschleunigung(spiel, farbe)
                 endIndex = 1;
             end
             
-            waypointList{endIndex} = enemypos;
+            waypointList{endIndex} = getEnemyAccPos(enemypos);
             debugDRAW();
             
         else
@@ -704,6 +719,22 @@ function bes = beschleunigung(spiel, farbe)
             erg = enemy.pos;
         else
             erg = enemy.pos + enemy.ges*thit + 0.5*enemy.bes*thit^2;
+        end
+    end
+
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    %get point behind enemy so it don't has to decellerate before this wp
+    function erg = getEnemyAccPos(enemypos)
+        stepsize = 0.02;
+        maxsize = 0.2;
+        
+        dir = vecNorm(enemypos - me.pos);
+        erg = enemypos -dir*stepsize;
+        
+        length = 0;
+        while(isWalkable(erg+dir*stepsize, constNavSecurity) && length < maxsize)
+            erg = erg+dir*stepsize;
+            length = length + stepsize;
         end
     end
 
@@ -747,14 +778,14 @@ function bes = beschleunigung(spiel, farbe)
         end
         
         %start and endpoint
-        if (~isWalkable(startp, radius))
-            erg = true;
-            return;
-        end
-        if (~isWalkable(endp, radius))
-            erg = true;
-            return;
-        end
+        %if (~isWalkable(startp, radius))
+        %    erg = true;
+        %    return;
+        %end
+        %if (~isWalkable(endp, radius))
+        %    erg = true;
+        %    return;
+        %end
     end
 
 
