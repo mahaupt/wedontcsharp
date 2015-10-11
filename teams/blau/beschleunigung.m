@@ -723,7 +723,7 @@ function bes = beschleunigung(spiel, farbe)
     end
 
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    %get point behind enemy so it don't has to decellerate before this wp
+    %get point behind enemy so it doesn't have to decellerate before this wp
     function erg = getEnemyAccPos(enemypos)
         stepsize = 0.02;
         maxsize = 0.2;
