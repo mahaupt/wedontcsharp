@@ -57,7 +57,7 @@ function bes = beschleunigung(spiel, farbe)
         if NumberOfTank*0.5 < me.getankt || (norm(me.pos-enemy.pos)<0.2 && me.getankt>enemy.getankt)%Wenn wir mehr als die Hälfte der Tanken haben oder nahe des Gegners sind und mehr getankt haben - Angriff!
            attackEnemy();
         else
-            if numel(spiel.tanke) < 1 && me.getankt < enemy.getankt %%Erst wenn alle Tanken weg sind und wir weniger haben, als der Gegner - Fliehen!
+            if numel(spiel.tanke) < 1 && me.getankt < enemy.getankt || (norm(me.pos-enemy.pos)<0.2 && me.getankt<enemy.getankt) %%Erst wenn alle Tanken weg sind und wir weniger haben, als der Gegner - Fliehen!
                 fleeEnemy();
             end
         %Nächste Tankstelle noch vorhanden?
