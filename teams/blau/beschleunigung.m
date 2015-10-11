@@ -13,7 +13,6 @@ function bes = beschleunigung(spiel, farbe)
     persistent drawHandles; %debug drawing
     persistent NumberOfMines %Zur Bestimmung des Minenverschwindens benötigt
     persistent NumberOfTank %Zur Entscheidung über Angriff und Tanken benötigt
-    persistent TimeSet %zur Aktualisierung des Angriffs benötigt
     
     %%Farbe prüfen und zuweisen
     if strcmp (farbe, 'rot')
@@ -32,7 +31,6 @@ function bes = beschleunigung(spiel, farbe)
         waypointList = [];
         NumberOfMines = spiel.n_mine;
         NumberOfTank = spiel.n_tanke;
-        TimeSet=false;
         setupNodeGrid();
     end
     
@@ -334,7 +332,25 @@ function bes = beschleunigung(spiel, farbe)
     %calculate nodegrid position from world position
     function erg = worldPosToGridPos(pos)
         erg = [round(pos(1)/constGridRadius/2), round(pos(2)/constGridRadius/2)];
+        erg = clamp(erg, 1, round(1/(constGridRadius*2)));
     end
+
+
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    %clamps value between min and max
+    function erg = clamp(value, min, max)
+       for i=1:numel(value)
+           if (value(i) > max)
+               value(i) = max;
+           end
+           if (value(i) < min)
+               value(i) = min;
+           end
+       end
+       erg = value;
+    end
+    
+        
 
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     function erg = nodeFromGridCoords(pos)
@@ -534,26 +550,47 @@ function bes = beschleunigung(spiel, farbe)
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     %Angriff
     function attackEnemy()
-        if TimeSet==false || numel(waypointList)==0
-            TimeSet=true;
-            disp('finding Path to Enemy');
-            waypointList = [];
-            if corridorColliding(me.pos,enemy.pos,constNavSecurity)==false
-                waypointList = appendToArray(waypointList, {enemy.pos});
-            else
-                waypointList = appendToArray(waypointList, findPath(me.pos,enemy.pos));
+        
+        %check if path to enemy is free
+        enemypos = calcEnemyHitPosition();
+        if (~corridorColliding(me.pos, enemypos, constNavSecurity))
+            %delete all other waypoints
+            if (numel(waypointList) > 1)
+                waypointList = [];
             end
-            if corridorColliding(enemy.pos,enemy.pos+0.3*enemy.ges,constNavSecurity)==false
-                waypointList = appendToArray(waypointList, {enemy.pos+0.3*enemy.ges});
+            
+            %set wp directly to enemy - more precise
+            waypointList{1} = enemypos;
+            debugDRAW();
+            
+        else
+            %calculate indirect path to enemy
+            recalcPath = false;
+            if numel(waypointList) >= 1
+                if norm(enemypos-waypointList{numel(waypointList)})>0.15
+                    recalcPath = true;
+                end
             else
-                waypointList = appendToArray(waypointList, findPath(enemy.pos,0.3*enemy.ges));
+                recalcPath = true;
             end
-            debugDRAW;
+            
+            if recalcPath
+                disp('finding Path to Enemy');
+
+                waypointList = findPath(me.pos,enemypos);
+
+                debugDRAW();
+            end
         end
-        if numel(waypointList)>0
-            if norm(enemy.pos-waypointList{numel(waypointList)})>0.15
-                TimeSet=false;
-            end
+    end
+
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    function erg = calcEnemyHitPosition()
+        thit = norm(me.pos - enemy.pos)/norm(me.ges);
+        if (thit > 0.5)
+            erg = enemy.pos;
+        else
+            erg = enemy.pos + enemy.ges*thit;
         end
     end
 
