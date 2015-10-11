@@ -58,7 +58,7 @@ function bes = beschleunigung(spiel, farbe)
             
             %Wenn wir mehr als die Hälfte der Tanken haben oder nahe des Gegners sind und mehr getankt haben - Angriff!
             attackEnemy();
-        elseif (numel(spiel.tanke) <= 0 && me.getankt < enemy.getankt)
+        elseif (numel(spiel.tanke) <= 0 && me.getankt < enemy.getankt) || (norm(me.pos-enemy.pos)<0.2 && me.getankt<enemy.getankt)
             
             %%Erst wenn alle Tanken weg sind und wir weniger haben, als der Gegner - Fliehen!
             fleeEnemy();
@@ -723,7 +723,7 @@ function bes = beschleunigung(spiel, farbe)
     end
 
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    %get point behind enemy so it don't has to decellerate before this wp
+    %get point behind enemy so it doesn't have to decellerate before this wp
     function erg = getEnemyAccPos(enemypos)
         stepsize = 0.02;
         maxsize = 0.2;
