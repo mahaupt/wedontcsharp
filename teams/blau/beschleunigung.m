@@ -11,8 +11,9 @@ function bes = beschleunigung(spiel, farbe)
     persistent nodeGrid;
     persistent waypointList;
     persistent drawHandles; %debug drawing
-    persistent NumberOfMines %Zur Bestimmung des Minenverschwindens benötigt
-    persistent NumberOfTank %Zur Entscheidung über Angriff und Tanken benötigt
+    persistent NumberOfMines; %Zur Bestimmung des Minenverschwindens benötigt
+    persistent NumberOfTank; %Zur Entscheidung über Angriff und Tanken benötigt
+    persistent ignoreTanke; %number of tanke to be ignored by targetNextTanke
     
     %%Farbe prüfen und zuweisen
     if strcmp (farbe, 'rot')
@@ -29,6 +30,7 @@ function bes = beschleunigung(spiel, farbe)
         nodeGrid = [];
         drawHandles = [];
         waypointList = [];
+        ignoreTanke = 0;
         NumberOfMines = spiel.n_mine;
         NumberOfTank = spiel.n_tanke;
         setupNodeGrid();
@@ -78,7 +80,7 @@ function bes = beschleunigung(spiel, farbe)
         dir = vecNorm(waypointList{1}-me.pos);
         erg = dir + corr*5;
         
-        %calculate breaking endvelocity
+        %calculate safe breaking endvelocity
         breakingEndVel = calcBreakingEndVel();
         
         %decelleration
@@ -91,6 +93,7 @@ function bes = beschleunigung(spiel, farbe)
         %%Überprüfen, ob Wegpunkt erreicht wurde, dann 1. Punkt löschen
         if norm(me.pos-waypointList{1}) < constWayPointReachedRadius
             waypointList(1) = [];
+            debugDRAW();
         end
     end
 
@@ -527,6 +530,11 @@ function bes = beschleunigung(spiel, farbe)
                 a=a+1/norm(spiel.tanke(i).pos-spiel.tanke(j).pos);
             end
             erg(i,4) = a*0.4+(1/erg(i,2))-0.5*(1/erg(i,3)); %Spalte 4: Anzahl Tankstellen in der Nähe und deren Dichte und deren Dichte zum Gegner
+            
+            %set evaluation bad if this is the ignore tanken
+            if (ignoreTanke == i)
+                erg(i,4) = -100;
+            end
         end
         erg=sortrows(erg,[-4 2 -3 1]);
     end
@@ -534,17 +542,72 @@ function bes = beschleunigung(spiel, farbe)
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     %check if target tanke is still there
     function checkTankPath()
-        endIndex=numel(waypointList);
-        if endIndex >= 1 && numel(spiel.tanke)>0
-            lastWayPoint=waypointList{endIndex};
-            for i=1:spiel.n_tanke
-                if norm(spiel.tanke(i).pos-lastWayPoint) <= spiel.tanke_radius+constGridRadius
-                    return
+        tankenList = [];
+        
+        %get targeted tanken
+        for i=1:numel(waypointList)
+            for j=1:spiel.n_tanke
+                if norm(spiel.tanke(j).pos-waypointList{i}) <= spiel.tanke_radius+constGridRadius
+                    insertIndex = numel(tankenList) + 1;
+                    tankenList(insertIndex) = j;
+                    break;
                 end
             end
-            disp('Tanke disappeared, delete all WPs')
-            waypointList=[];
-        end 
+        end
+        
+        %waypoints needs to be recalculated
+        recalculateTankenWPs = false;
+        reTargetedTanken = [];
+        
+        %check if enemy reaches targeted tanken before us
+        for i = 1:numel(tankenList)
+            tankeIndex = tankenList(i);
+            enemyPath = spiel.tanke(tankeIndex).pos - enemy.pos;
+            ownPath = spiel.tanke(tankeIndex).pos - me.pos;
+            
+            %estimated time of tanken arrival
+            tenemy  = norm(enemyPath)/projectVectorNorm(enemy.ges, enemyPath);
+            tvenemy = getTimeToAlignVelocity(enemy.ges, enemyPath);
+            
+            town = norm(ownPath) / projectVectorNorm(me.ges, ownPath);
+            tvown = getTimeToAlignVelocity(me.ges, ownPath);
+            
+            %only if tanke is about to get taken
+            if (tenemy > 0 && tenemy < 0.2)
+                if (tenemy+tvenemy < town+tvown)
+                    disp('enemy reaches tanke before us .. get new target tanke');
+                    recalculateTankenWPs = true;
+                    ignoreTanke = tankeIndex;
+                    break;
+                end
+            end
+            
+            %if tanke can still be reached
+            insertIndex = numel(reTargetedTanken) + 1;
+            reTargetedTanken(insertIndex) = tankeIndex;
+        end
+        
+        
+        %recalculate tanken
+        if (recalculateTankenWPs)
+            startP = safeDeleteWaypoints();
+            
+            for i=1:numel(reTargetedTanken)
+                if (reTargetedTanken(i) == ignoreTanke)
+                    continue;
+                end
+                
+                if (i == 1)
+                    startPos = startP;
+                else
+                    startPos = spiel.tanke(reTargetedTanken(i-1)).pos;
+                end
+                endPos = spiel.tanke(reTargetedTanken(i)).pos
+                waypointList = appendToArray(waypointList, findPath(startPos, endPos));
+            end
+            
+            debugDRAW();
+        end
     end
 
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -556,11 +619,16 @@ function bes = beschleunigung(spiel, farbe)
         if (~corridorColliding(me.pos, enemypos, constNavSecurity))
             %delete all other waypoints
             if (numel(waypointList) > 1)
-                waypointList = [];
+                safeDeleteWaypoints();
             end
             
             %set wp directly to enemy - more precise
-            waypointList{1} = enemypos;
+            endIndex = numel(waypointList);
+            if (endIndex == 0)
+                endIndex = 1;
+            end
+            
+            waypointList{endIndex} = enemypos;
             debugDRAW();
             
         else
@@ -576,8 +644,8 @@ function bes = beschleunigung(spiel, farbe)
             
             if recalcPath
                 disp('finding Path to Enemy');
-
-                waypointList = findPath(me.pos,enemypos);
+                startPos = safeDeleteWaypoints();
+                waypointList = appendToArray(waypointList, findPath(startPos,enemypos));
 
                 debugDRAW();
             end
@@ -590,7 +658,7 @@ function bes = beschleunigung(spiel, farbe)
         if (thit > 1)
             erg = enemy.pos;
         else
-            erg = enemy.pos + enemy.ges*thit + 0.1*enemy.bes*thit^2;
+            erg = enemy.pos + enemy.ges*thit + 0.5*enemy.bes*thit^2;
         end
     end
 
@@ -599,13 +667,13 @@ function bes = beschleunigung(spiel, farbe)
     function fleeEnemy()
         if numel(waypointList) == 0
             disp('searching for cover');
-            waypointList=[];
+            startPos = safeDeleteWaypoints();
             RandPoints = rand(4,2);
             for i=1:4
                 RandPoints(i,3)=norm([RandPoints(i,1),RandPoints(i,2)]-enemy.pos);
             end
             RandPoints=sortrows(RandPoints,[-3,2,1]);
-            waypointList = appendToArray(waypointList, findPath(me.pos, [RandPoints(1,1),RandPoints(1,2)]));
+            waypointList = appendToArray(waypointList, findPath(startPos, [RandPoints(1,1),RandPoints(1,2)]));
             debugDRAW;
         end
     end
@@ -617,7 +685,8 @@ function bes = beschleunigung(spiel, farbe)
         n = getPerpend(dir);
         erg = false;
         
-        if (lineColliding(startp, endp))
+        %middle line
+        if (lineColliding(startp - dir*radius, endp + dir*radius))
             erg = true;
             return;
         end
@@ -674,6 +743,72 @@ function bes = beschleunigung(spiel, farbe)
     function erg = getPerpend(vec)
         erg = [-vec(2), vec(1)];
     end
+
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    %return projected norm of vector 1 projected on vector2
+    function erg = projectVectorNorm(vec1, vec2)
+        vec1 = vecNorm(vec1);
+        vec2 = vecNorm(vec2);
+        
+        erg = norm(vec1)*dot(vec1, vec2);
+    end
+
+
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    function erg = getTimeToAlignVelocity(vel1, vec)
+        length = norm(vel1);
+        vec = vecNorm(vec) * length;
+        
+        deltaV = vec - vel1;
+        erg = norm(deltaV)/spiel.bes;
+    end
+
+
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    function endPosition = safeDeleteWaypoints()
+        %nothing to do
+        if (numel(waypointList) <= 0)
+            return;
+        end
+        
+        fullStopDist = calcBreakDistance(norm(me.ges), 0);
+        lastDir = waypointList{1} - me.pos;
+        length = norm(lastDir);
+        newWPList = [];
+        
+        for i=1:numel(waypointList)
+            if length > fullStopDist || i == numel(waypointList)
+                deltaLength = fullStopDist - length;
+                dir = vecNorm(lastDir);
+                lastWayPoint = waypointList{i} + dir * deltaLength;
+                
+                if (i == numel(waypointList))
+                    lastWayPoint = waypointList{i};
+                end
+                
+                insertIndex = numel(newWPList) + 1;
+                newWPList{insertIndex} = lastWayPoint;
+                break;
+            end
+            
+            insertIndex = numel(newWPList) + 1;
+            newWPList{insertIndex} = waypointList{i};
+            lastDir = waypointList{i} - waypointList{i+1};
+            length = length + norm(lastDir);
+        end
+        
+        %save data
+        waypointList = newWPList;
+        debugDRAW();
+        
+        %get new end point
+        endIndex = numel(waypointList);
+        endPosition = me.pos;
+        if (endIndex > 0)
+            endPosition = waypointList{endIndex};
+        end
+    end
+    
 
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     %%%%%%%%%DEBUGGING%%%%%%%
