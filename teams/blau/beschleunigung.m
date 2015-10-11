@@ -747,8 +747,15 @@ function bes = beschleunigung(spiel, farbe)
             RandPoints = rand(4,2);
             for i=1:4
                 RandPoints(i,3)=norm([RandPoints(i,1),RandPoints(i,2)]-enemy.pos);
+                RandPoints(i,4)=0;
+                if spiel.n_mine > 1
+                    for j=1:spiel.n_mine
+                        RandPoints(i,4)=RandPoints(i,4)+norm(spiel.mine(j).pos-[RandPoints(i,1),RandPoints(i,2)]);
+                    end
+                end
+                RandPoints(i,5)=RandPoints(i,3)*10-RandPoints(i,4)*0.8;
             end
-            RandPoints=sortrows(RandPoints,[-3,2,1]);
+            RandPoints=sortrows(RandPoints,[-5 -3 4 -1 -2])
             waypointList = appendToArray(waypointList, findPath(startPos, [RandPoints(1,1),RandPoints(1,2)]));
             debugDRAW;
         end
