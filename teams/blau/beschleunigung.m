@@ -79,8 +79,8 @@ function bes = beschleunigung(spiel, farbe)
         end
         
         %acceleration
-        corr = vecNorm(waypointList{1}-me.pos)-vecNorm(me.ges);
         dir = vecNorm(waypointList{1}-me.pos);
+        corr = dir-vecNorm(me.ges);
         erg = dir + corr*5;
         
         %calculate safe breaking endvelocity
@@ -688,10 +688,10 @@ function bes = beschleunigung(spiel, farbe)
                 next_tanke = tankdistance(1,1);
                 waypointList = findPath(me.pos, spiel.tanke(next_tanke).pos);
             end
-            Tanknumber=isThereATankeOnPath()
-                if Tanknumber ~= 0
-                    waypointList = appendToArray(findPath(me.pos, spiel.tanke(Tanknumber).pos), waypointList);
-                end
+            %Tanknumber=isThereATankeOnPath(0.1)
+            %    if Tanknumber ~= 0
+            %        waypointList = appendToArray(findPath(me.pos, spiel.tanke(Tanknumber).pos), waypointList);
+            %    end
             debugDRAW();
         end
     end
@@ -801,11 +801,11 @@ function bes = beschleunigung(spiel, farbe)
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     %Überprüfen, ob Tankstelle auf aktuellem Pfad liegt
-    function erg=isThereATankeOnPath()
+    function erg=isThereATankeOnPath(radius)
         erg=0;
         if numel(waypointList)>= 1
             for i=1:spiel.n_tanke
-                if corridorTankColliding(me.pos,waypointList{1},0.1,spiel.tanke(i).pos)
+                if corridorTankColliding(me.pos,waypointList{1},radius,spiel.tanke(i).pos)
                     erg=i;
                 end
             end
@@ -835,7 +835,7 @@ function bes = beschleunigung(spiel, farbe)
     end
 
     function erg=lineTankColliding(startp, endp, tanknumber)
-        erg=0;
+        erg=false;
         dist = distanceLinePoint(startp, endp, tanknumber);
         if (dist < spiel.tanke_radius)
             erg = true;
