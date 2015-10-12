@@ -225,6 +225,7 @@ function bes = beschleunigung(spiel, farbe)
                 nodeGrid(x,y).hCost = 0;
                 nodeGrid(x,y).fCost = 0;
                 nodeGrid(x,y).gCost = 0;
+                nodeGrid(x,y).heapIndex = 0;
                 mineCost = 0;
                 
                 %Je dichter an Mine, desto teurer!
@@ -273,7 +274,8 @@ function bes = beschleunigung(spiel, farbe)
             disp('Pathfinder: stard equals end, return zero waypoints');
         end
         
-        openSet = {startPos};
+        openSet = {};
+        openSet = insertHeapNode(openSet, startPos);
         closedSet = {};
         closedSetIndex = 1;
         
@@ -289,22 +291,13 @@ function bes = beschleunigung(spiel, farbe)
         
         %find path...
         while(numel(openSet) > 0)
+            %get first heap node and resort heap
             currentNode = nodeFromGridCoords(openSet{1});
-            openSetIndex = 1;
+            openSet = removeHeapNode(openSet, 1);
+            openSet = sortHeapNodeDown(openSet, 1);
             
-            %get node woth lowest fcost (or hcost) and remove it from openlist
-            for i=1:numel(openSet)
-                cn = nodeFromGridCoords(openSet{i});
-                if (cn.fCost < currentNode.fCost || cn.fCost == currentNode.fCost && cn.hCost < currentNode.hCost)
-                    currentNode = nodeFromGridCoords(openSet{i});    
-                    openSetIndex = i;
-                end
-            end
-            
-            %remove node from open set
-            openSet(openSetIndex) = [];
             %add node to closed set
-            closedSet{closedSetIndex} = currentNode.gridPos;
+            closedSet = insertHeapNode(closedSet, currentNode.gridPos);
             closedSetIndex = closedSetIndex + 1;
             
             %if it is target - close - path found!
@@ -317,23 +310,28 @@ function bes = beschleunigung(spiel, farbe)
             neighbours = getNeighbourNodes(currentNode);
             for i = 1 : numel(neighbours)
                 neighbour = neighbours(i);
-                if (~neighbour.isWalkable || containsNode(closedSet, neighbour.gridPos))
+                if (~neighbour.isWalkable || containsHeapNode(closedSet, neighbour.gridPos))
                     continue;
                 end
                 
                 %update costs for neighbours
                 movementCostToNeighbour = currentNode.gCost + norm(currentNode.worldPos - neighbour.worldPos);
-                if (movementCostToNeighbour < neighbour.gCost || ~containsNode(openSet, neighbour.gridPos))
+                if (movementCostToNeighbour < neighbour.gCost || ~containsHeapNode(openSet, neighbour.gridPos))
                     
                     nodeGrid(neighbour.gridPos(1), neighbour.gridPos(2)).gCost = movementCostToNeighbour;
                     nodeGrid(neighbour.gridPos(1), neighbour.gridPos(2)).hCost = norm(endp - neighbour.worldPos);
                     nodeGrid(neighbour.gridPos(1), neighbour.gridPos(2)).fCost = movementCostToNeighbour + norm(endp - neighbour.worldPos) + neighbour.mineCost;
                     nodeGrid(neighbour.gridPos(1), neighbour.gridPos(2)).parent = currentNode.gridPos;
-
+                    heapIndex = neighbour.heapIndex;
+                    
                     %add neighbour to openSet
-                    if (~containsNode(openSet, neighbour.gridPos))
-                        insertIndex = numel(openSet)+1;
-                        openSet{insertIndex} = neighbour.gridPos;
+                    if (~containsHeapNode(openSet, neighbour.gridPos))
+                        %insert node into heap and resort heap
+                        openSet = insertHeapNode(openSet, neighbour.gridPos);
+                        heapIndex = numel(openSet);
+                        openSet = sortHeapNodeUp(openSet, heapIndex);
+                    else
+                        openSet = sortHeapNodeUp(openSet, heapIndex);
                     end
                 end
             end
@@ -499,16 +497,151 @@ function bes = beschleunigung(spiel, farbe)
 
 
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    %check if array contains node
-    function erg = containsNode(nodes, pos)
+    %check if heap contains node
+    function erg = containsHeapNode(nodes, pos)
         erg = false;
+        index = nodeGrid(pos(1), pos(2)).heapIndex;
+        if (index < 1 || index > numel(nodes))
+            return;
+        end
         
-        for i=1:numel(nodes)
-            if (nodes{i}(1) == pos(1) && nodes{i}(2) == pos(2))
-                erg = true;
-                return;
+        node = nodes{index};
+        
+        if (node(1) == pos(1) && node(2) == pos(2))
+            erg = true;
+            return;
+        end
+
+    end
+
+
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    %insert node into heap
+    function erg = insertHeapNode(heap, nodePos)
+        insertIndex = numel(heap) + 1;
+        heap{insertIndex} = nodePos;
+        nodeGrid(nodePos(1), nodePos(2)).heapIndex = insertIndex;
+        
+        erg = heap;
+    end
+
+
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    %remove node from heap
+    %replace last node in heap with given node
+    function erg = removeHeapNode(heap, index)
+        
+        nodePos = heap{index};
+        nodeGrid(nodePos(1), nodePos(2)).heapIndex = 0;
+        
+        lastIndex = numel(heap);
+        lastNode = heap{lastIndex};
+        if (lastIndex ~= index)
+            nodeGrid(lastNode(1), lastNode(2)).heapIndex = index;
+        end
+        
+        heap{index} = lastNode;
+        heap(lastIndex) = [];
+        
+        erg = heap;
+    end
+
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    function erg = sortHeapNodeDown(heap, index)
+        erg = heap;
+        %nothing to do
+        if (index > numel(heap))
+            return;
+        end
+        
+        parentPos = heap{index};
+        parentNode = nodeFromGridCoords(parentPos);
+        
+        child1 = round(index*2);
+        child2 = round(index*2+1);
+        
+        %node has no child nodes
+        if (child1 > numel(heap))
+            return;
+        end
+        
+        childPos1 = heap{child1};
+        childNode1 = nodeFromGridCoords(childPos1);
+        
+        swapIndex = 0;
+        
+        %node has two child nodes
+        if (child2 <= numel(heap))
+            childPos2 = heap{child2};
+            childNode2 = nodeFromGridCoords(childPos2);
+
+
+            if (childNode1.fCost > childNode2.fCost)
+                if (childNode2.fCost < parentNode.fCost)
+                    swapIndex = child2;
+                end
+            else
+                if (childNode1.fCost < parentNode.fCost)
+                    swapIndex = child1;
+                end
+            end
+        else
+            %node has one child node
+            if (childNode1.fCost < parentNode.fCost)
+                    swapIndex = child1;
             end
         end
+        
+        
+        if (swapIndex > 0)
+            %swap nodes
+            erg = swapHeapNodes(erg, swapIndex, index);
+            
+            %get new index and continue downsorting
+            newNode = nodeFromGridCoords(parentPos);
+            erg = sortHeapNodeDown(erg, newNode.heapIndex);
+        end
+    end
+
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    function erg = sortHeapNodeUp(heap, index)
+        erg = heap;
+        parentIndex = round(index/2-0.25);
+        
+        if (parentIndex <= 0)
+            return;
+        end
+        
+        parentPos = heap{parentIndex};
+        childPos = heap{index};
+        
+        
+        parentNode = nodeFromGridCoords(parentPos);
+        childNode = nodeFromGridCoords(childPos);
+        
+        if (parentNode.fCost > childNode.fCost)
+            %swap position
+            erg = swapHeapNodes(erg, index, parentIndex);
+            
+            %get new node index
+            newNode = nodeFromGridCoords(childPos);
+            newIndex = newNode.heapIndex;
+            erg = sortHeapNodeUp(erg, newIndex);
+        end
+    end
+
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    %swap two nodes saved in heap;
+    function erg = swapHeapNodes(heap, index1, index2)
+        nodePos1 = heap{index1};
+        nodeGrid(nodePos1(1), nodePos1(2)).heapIndex = index2;
+        
+        nodePos2 = heap{index2};
+        nodeGrid(nodePos2(1), nodePos2(2)).heapIndex = index1;
+        
+        heap{index1} = nodePos2;
+        heap{index2} = nodePos1;
+        erg = heap;
     end
 
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -648,7 +781,8 @@ function bes = beschleunigung(spiel, farbe)
         end
         
         
-        %recalculate tanken
+        %recalculate tanken - Wegpunkte neu berechnen, da Tanke nicht mehr
+        %angefahren werden soll
         if (recalculateTankenWPs)
             startP = safeDeleteWaypoints();
             
@@ -757,7 +891,7 @@ function bes = beschleunigung(spiel, farbe)
             end
             RandPoints=sortrows(RandPoints,[-5 -3 4 -1 -2])
             waypointList = appendToArray(waypointList, findPath(startPos, [RandPoints(1,1),RandPoints(1,2)]));
-            debugDRAW;
+            debugDRAW();
         end
     end
 
