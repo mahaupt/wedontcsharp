@@ -1,4 +1,5 @@
 function bes = beschleunigung(spiel, farbe)
+
     %Konstanten
     constSafeBorder = 0.005; %collision border around mines
     constGridRadius = 0.005; 
@@ -7,6 +8,7 @@ function bes = beschleunigung(spiel, farbe)
     constMineProxPenality = 0.0006; %Strafpunkte für Nodes - je dichter an Mine, desto höher
     constCornerBreaking = 0.03; %je größer der Winkel zum nächsten Wegpunkt, desto höheres Bremsen. Faktor.
    
+    
     %statische variablen definieren
     persistent nodeGrid;
     persistent waypointList;
@@ -14,6 +16,7 @@ function bes = beschleunigung(spiel, farbe)
     persistent NumberOfMines; %Zur Bestimmung des Minenverschwindens benötigt
     persistent NumberOfTank; %Zur Entscheidung über Angriff und Tanken benötigt
     persistent ignoreTanke; %number of tanke to be ignored by targetNextTanke
+    
     
     %%Farbe prüfen und zuweisen
     if strcmp (farbe, 'rot')
@@ -23,6 +26,7 @@ function bes = beschleunigung(spiel, farbe)
         me = spiel.blau;
         enemy = spiel.rot;
     end
+    
     
     %%wird einmal am Anfang ausgeführt
     %setup node grid and empty persistent vars
@@ -36,6 +40,7 @@ function bes = beschleunigung(spiel, farbe)
         setupNodeGrid();
     end
     
+    
     %Nodegrid beim Verschwinden einer Mine aktualisieren:
     if spiel.n_mine < NumberOfMines
         disp('Updating NodeGrid');
@@ -45,11 +50,15 @@ function bes = beschleunigung(spiel, farbe)
         waypointList = simplifyPath(waypointList);
     end
 
+    
     %Entscheidung über Angriff/Verteidigung/Tanken
     whatToDo();
     
+    
     %Beschleunigung berechnen:
     bes=calculateBES();
+
+    
     
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     %Tanken oder Angreifen oder Verteidigen?
@@ -70,6 +79,8 @@ function bes = beschleunigung(spiel, farbe)
         end
     end
     
+
+
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     %Path To Acceleration (bes)
     function erg=calculateBES()
@@ -106,6 +117,8 @@ function bes = beschleunigung(spiel, farbe)
             debugDRAW();
         end
     end
+
+
 
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     %check if overshooting next waypoint
@@ -259,6 +272,8 @@ function bes = beschleunigung(spiel, farbe)
         end
     end
 
+
+
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     %Pathfinder
     function waypoints = findPath(startp, endp)
@@ -355,7 +370,6 @@ function bes = beschleunigung(spiel, farbe)
         end
     end
 
-    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % if node is not walkable, check for valid node in neighbours
     function erg = getValidNodePos(gridPos)
         node = nodeFromGridCoords(gridPos);
@@ -377,6 +391,8 @@ function bes = beschleunigung(spiel, farbe)
             end
         end   
     end
+
+
 
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     %calculate nodegrid position from world position
@@ -488,6 +504,7 @@ function bes = beschleunigung(spiel, farbe)
     end
 
 
+
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     %check if heap contains node
     function erg = containsHeapNode(nodes, pos)
@@ -506,8 +523,6 @@ function bes = beschleunigung(spiel, farbe)
 
     end
 
-
-    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     %insert node into heap
     function erg = insertHeapNode(heap, nodePos)
         insertIndex = numel(heap) + 1;
@@ -517,8 +532,6 @@ function bes = beschleunigung(spiel, farbe)
         erg = heap;
     end
 
-
-    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     %remove node from heap
     %replace last node in heap with given node
     function erg = removeHeapNode(heap, index)
@@ -538,7 +551,6 @@ function bes = beschleunigung(spiel, farbe)
         erg = heap;
     end
 
-    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     function erg = sortHeapNodeDown(heap, index)
         erg = heap;
         %nothing to do
@@ -595,7 +607,6 @@ function bes = beschleunigung(spiel, farbe)
         end
     end
 
-    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     function erg = sortHeapNodeUp(heap, index)
         erg = heap;
         parentIndex = round(index/2-0.25);
@@ -622,8 +633,7 @@ function bes = beschleunigung(spiel, farbe)
         end
     end
 
-    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    %swap two nodes saved in heap;
+    %Swap two nodes saved in heap;
     function erg = swapHeapNodes(heap, index1, index2)
         nodePos1 = heap{index1};
         nodeGrid(nodePos1(1), nodePos1(2)).heapIndex = index2;
@@ -636,8 +646,10 @@ function bes = beschleunigung(spiel, farbe)
         erg = heap;
     end
 
+
+
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    %normalize 2D vector
+    %Normalize 2D vector
     function erg = vecNorm(vec)
         n = norm(vec);
         erg = [vec(1)/n, vec(2)/n];
@@ -647,8 +659,10 @@ function bes = beschleunigung(spiel, farbe)
         end
     end
 
+
+
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    %append to existing cell arrray
+    %Append to existing cell arrray
     function erg = appendToArray(array1, array2)
         array1index = numel(array1)+1;
         erg = array1;
@@ -659,8 +673,10 @@ function bes = beschleunigung(spiel, farbe)
         end
     end
     
+
+
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    %%%Search for nearest Tanken and create Path between them
+    %Search for nearest Tanken and create Path between them
     function createPathToNextTanke()
         waypointCount = numel(waypointList);
         
@@ -696,8 +712,7 @@ function bes = beschleunigung(spiel, farbe)
         end
     end
 
-    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    %create Tank Distance Table
+    %Create Tank Distance Table
     function erg=createTankEvaluation(position)
         erg = zeros(spiel.n_tanke,4);
         for i=1:spiel.n_tanke
@@ -721,8 +736,7 @@ function bes = beschleunigung(spiel, farbe)
         erg=sortrows(erg,[-4 2 -3 1]);
     end
 
-    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    %check if target tanke is still there
+    %Check if target tanke is still there
     function checkTankPath()
         tankenList = [];
         
@@ -799,7 +813,9 @@ function bes = beschleunigung(spiel, farbe)
         end
     end
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     %Überprüfen, ob Tankstelle auf aktuellem Pfad liegt
     function erg=isThereATankeOnPath(radius)
         erg=0;
@@ -842,7 +858,9 @@ function bes = beschleunigung(spiel, farbe)
             return;
         end
     end
-        
+
+
+
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     %Angriff
     function attackEnemy()
@@ -885,7 +903,6 @@ function bes = beschleunigung(spiel, farbe)
         end
     end
 
-    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     function erg = calcEnemyHitPosition()
         thit = norm(me.pos - enemy.pos)/norm(me.ges);
         if (thit > 1)
@@ -895,7 +912,6 @@ function bes = beschleunigung(spiel, farbe)
         end
     end
 
-    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     %get point behind enemy so it doesn't have to decellerate before this wp
     function erg = getEnemyAccPos(enemypos)
         stepsize = 0.02;
@@ -910,6 +926,8 @@ function bes = beschleunigung(spiel, farbe)
             length = length + stepsize;
         end
     end
+
+
 
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     %Verteidigung
@@ -934,6 +952,8 @@ function bes = beschleunigung(spiel, farbe)
         end
     end
 
+
+
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     %corridor colliding
     function erg = corridorColliding(startp, endp, radius)
@@ -957,7 +977,7 @@ function bes = beschleunigung(spiel, farbe)
                 return;
             end
     end
-    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
     function erg=lineColliding(startp, endp)
         erg = false;
 
@@ -970,6 +990,8 @@ function bes = beschleunigung(spiel, farbe)
                 end
             end 
     end
+
+
 
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     function erg = distanceLinePoint(startp, endp, point)
@@ -1006,7 +1028,6 @@ function bes = beschleunigung(spiel, farbe)
         erg = norm(vec1)*dot(vec1, vec2);
     end
 
-
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     function erg = getTimeToAlignVelocity(vel1, vec)
         length = norm(vel1);
@@ -1015,7 +1036,6 @@ function bes = beschleunigung(spiel, farbe)
         deltaV = vec - vel1;
         erg = norm(deltaV)/spiel.bes;
     end
-
 
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     function endPosition = safeDeleteWaypoints()
@@ -1063,8 +1083,9 @@ function bes = beschleunigung(spiel, farbe)
     end
     
 
+
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    %%%%%%%%%DEBUGGING%%%%%%%
+    %Debugging
     function debugDRAW()
         %delete all draw handles
         for i = 1 : numel(drawHandles)
