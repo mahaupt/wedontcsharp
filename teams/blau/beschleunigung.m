@@ -50,7 +50,7 @@ function bes = beschleunigung(spiel, farbe)
     
     %Beschleunigung berechnen:
     bes=calculateBES();
-
+    
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     %Tanken oder Angreifen oder Verteidigen?
     function whatToDo()
@@ -665,10 +665,12 @@ function bes = beschleunigung(spiel, farbe)
         waypointCount = numel(waypointList);
         
         if waypointCount <= 1 && spiel.n_tanke > 0
+            disp('finding Path to next Tanke');
             if (waypointCount == 1)
                 %waypointlist not empty => append new waypoints
                 tankdistance=createTankEvaluation(waypointList{waypointCount});
                 next_tanke = tankdistance(1,1);
+                
                 
                 %possible that current tanke waypoint == next_tanke
                 if (norm(spiel.tanke(next_tanke).pos-waypointList{waypointCount}) < spiel.tanke_radius+constGridRadius)
@@ -686,8 +688,10 @@ function bes = beschleunigung(spiel, farbe)
                 next_tanke = tankdistance(1,1);
                 waypointList = findPath(me.pos, spiel.tanke(next_tanke).pos);
             end
-            
-            disp('finding Path to next Tanke');
+            Tanknumber=isThereATankeOnPath()
+                if Tanknumber ~= 0
+                    waypointList = appendToArray(findPath(me.pos, spiel.tanke(Tanknumber).pos), waypointList);
+                end
             debugDRAW();
         end
     end
@@ -695,7 +699,6 @@ function bes = beschleunigung(spiel, farbe)
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     %create Tank Distance Table
     function erg=createTankEvaluation(position)
-
         erg = zeros(spiel.n_tanke,4);
         for i=1:spiel.n_tanke
             erg(i,1) = i;                                   %Spalte 1: Tankstellennummer
@@ -795,12 +798,6 @@ function bes = beschleunigung(spiel, farbe)
             debugDRAW();
         end
     end
-
-
-Tanknumber=isThereATankeOnPath()
-if Tanknumber ~= 0
-    waypointList=appendToArray(findPath(me.pos,spiel.tanke(Tanknumber).pos),waypointList);
-end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     %Überprüfen, ob Tankstelle auf aktuellem Pfad liegt
