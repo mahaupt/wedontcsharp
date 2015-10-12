@@ -225,6 +225,7 @@ function bes = beschleunigung(spiel, farbe)
                 nodeGrid(x,y).hCost = 0;
                 nodeGrid(x,y).fCost = 0;
                 nodeGrid(x,y).gCost = 0;
+                nodeGrid(x,y).heapIndex = 0;
                 mineCost = 0;
                 
                 %Je dichter an Mine, desto teurer!
@@ -273,7 +274,8 @@ function bes = beschleunigung(spiel, farbe)
             disp('Pathfinder: stard equals end, return zero waypoints');
         end
         
-        openSet = {startPos};
+        openSet = {};
+        openSet = insertHeapNode(openSet, startPos);
         closedSet = {};
         closedSetIndex = 1;
         
@@ -302,9 +304,10 @@ function bes = beschleunigung(spiel, farbe)
             end
             
             %remove node from open set
-            openSet(openSetIndex) = [];
+            openSet = removeHeapNode(openSet, openSetIndex);
             %add node to closed set
-            closedSet{closedSetIndex} = currentNode.gridPos;
+            closedSet = insertHeapNode(closedSet, currentNode.gridPos);
+            nodeGrid(currentNode.gridPos(1), currentNode.gridPos(2)).heapIndex = closedSetIndex;
             closedSetIndex = closedSetIndex + 1;
             
             %if it is target - close - path found!
@@ -317,13 +320,13 @@ function bes = beschleunigung(spiel, farbe)
             neighbours = getNeighbourNodes(currentNode);
             for i = 1 : numel(neighbours)
                 neighbour = neighbours(i);
-                if (~neighbour.isWalkable || containsNode(closedSet, neighbour.gridPos))
+                if (~neighbour.isWalkable || containsHeapNode(closedSet, neighbour.gridPos))
                     continue;
                 end
                 
                 %update costs for neighbours
                 movementCostToNeighbour = currentNode.gCost + norm(currentNode.worldPos - neighbour.worldPos);
-                if (movementCostToNeighbour < neighbour.gCost || ~containsNode(openSet, neighbour.gridPos))
+                if (movementCostToNeighbour < neighbour.gCost || ~containsHeapNode(openSet, neighbour.gridPos))
                     
                     nodeGrid(neighbour.gridPos(1), neighbour.gridPos(2)).gCost = movementCostToNeighbour;
                     nodeGrid(neighbour.gridPos(1), neighbour.gridPos(2)).hCost = norm(endp - neighbour.worldPos);
@@ -331,9 +334,8 @@ function bes = beschleunigung(spiel, farbe)
                     nodeGrid(neighbour.gridPos(1), neighbour.gridPos(2)).parent = currentNode.gridPos;
 
                     %add neighbour to openSet
-                    if (~containsNode(openSet, neighbour.gridPos))
-                        insertIndex = numel(openSet)+1;
-                        openSet{insertIndex} = neighbour.gridPos;
+                    if (~containsHeapNode(openSet, neighbour.gridPos))
+                        openSet = insertHeapNode(openSet, neighbour.gridPos);
                     end
                 end
             end
@@ -499,16 +501,53 @@ function bes = beschleunigung(spiel, farbe)
 
 
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    %check if array contains node
-    function erg = containsNode(nodes, pos)
+    %check if heap contains node
+    function erg = containsHeapNode(nodes, pos)
         erg = false;
-        
-        for i=1:numel(nodes)
-            if (nodes{i}(1) == pos(1) && nodes{i}(2) == pos(2))
-                erg = true;
-                return;
-            end
+        index = nodeGrid(pos(1), pos(2)).heapIndex;
+        if (index < 1 || index > numel(nodes))
+            return;
         end
+        
+        node = nodes{index};
+        
+        if (node(1) == pos(1) && node(2) == pos(2))
+            erg = true;
+            return;
+        end
+
+    end
+
+
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    %insert node into heap
+    function erg = insertHeapNode(heap, nodePos)
+        insertIndex = numel(heap) + 1;
+        heap{insertIndex} = nodePos;
+        nodeGrid(nodePos(1), nodePos(2)).heapIndex = insertIndex;
+        
+        erg = heap;
+    end
+
+
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    %remove node from heap
+    %replace last node in heap with given node
+    function erg = removeHeapNode(heap, index)
+        
+        nodePos = heap{index};
+        nodeGrid(nodePos(1), nodePos(2)).heapIndex = 0;
+        
+        lastIndex = numel(heap);
+        lastNode = heap{lastIndex};
+        if (lastIndex ~= index)
+            nodeGrid(lastNode(1), lastNode(2)).heapIndex = index;
+        end
+        
+        heap{index} = lastNode;
+        heap(lastIndex) = [];
+        
+        erg = heap;
     end
 
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
