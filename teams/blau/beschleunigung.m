@@ -799,7 +799,7 @@ function bes = beschleunigung(spiel, farbe)
 
 Tanknumber=isThereATankeOnPath()
 if Tanknumber ~= 0
-    waypointList=appendToArray(findPath(spiel.tanke(Tanknumber)),waypointList);
+    waypointList=appendToArray(findPath(me.pos,spiel.tanke(Tanknumber).pos),waypointList);
 end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
