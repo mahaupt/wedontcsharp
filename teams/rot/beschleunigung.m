@@ -810,21 +810,21 @@ end
         n = getPerpend(dir);
         erg = false;
         
-            %middle line
-            if (lineColliding(startp - dir*radius, endp + dir*radius))
-                erg = true;
-                return;
-            end
+        %middle line
+        if (lineColliding(startp - dir*radius, endp + dir*radius))
+            erg = true;
+            return;
+        end
 
-            if (lineColliding(startp + n*radius, endp + n*radius))
-                erg = true;
-                return;
-            end
+        if (lineColliding(startp + n*radius, endp + n*radius))
+            erg = true;
+            return;
+        end
 
-            if (lineColliding(startp - n*radius, endp - n*radius))
-                erg = true;
-                return;
-            end
+        if (lineColliding(startp - n*radius, endp - n*radius))
+            erg = true;
+            return;
+        end
     end
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     function erg=lineColliding(startp, endp)
