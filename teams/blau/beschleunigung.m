@@ -680,30 +680,25 @@ function bes = beschleunigung(spiel, farbe)
     function createPathToNextTanke()
         waypointCount = numel(waypointList);
         
-        if waypointCount <= 1 && spiel.n_tanke > 0
-            disp('finding Path to next Tanke');
-            if (waypointCount == 1)
-                %waypointlist not empty => append new waypoints
-                tankdistance=createTankEvaluation(waypointList{waypointCount});
-                next_tanke = tankdistance(1,1);
-                
-                
-                %possible that current tanke waypoint == next_tanke
-                if (norm(spiel.tanke(next_tanke).pos-waypointList{waypointCount}) < spiel.tanke_radius+constGridRadius)
-                    if (spiel.n_tanke >= 2)
-                        next_tanke = tankdistance(2,1);
-                    else
-                        return;
-                    end
-                end
-                
-                waypointList = appendToArray(waypointList, findPath(waypointList{waypointCount}, spiel.tanke(next_tanke).pos));
-            else
-                %set new waypoints
-                tankdistance=createTankEvaluation(me.pos);
-                next_tanke = tankdistance(1,1);
-                waypointList = findPath(me.pos, spiel.tanke(next_tanke).pos);
+        if waypointCount <= 1 && spiel.n_tanke > 1 || ...
+                waypointCount == 0 && spiel.n_tanke == 1 %prevent loop on last tanke
+            
+            lastWaypoint = me.pos;
+            if (waypointCount >= 1)
+                lastWaypoint = waypointList{waypointCount};
             end
+            
+            %set new waypoints
+            tankdistance=createTankEvaluation(me.pos);
+            if (numel(tankdistance) <= 0)
+                return;
+            end
+            
+            disp('finding Path to next Tanke');
+            
+            next_tanke = tankdistance(1,1);
+            waypointList = appendToArray(waypointList, findPath(lastWaypoint, spiel.tanke(next_tanke).pos));
+            
             %Tanknumber=isThereATankeOnPath(0.1)
             %    if Tanknumber ~= 0
             %        waypointList = appendToArray(findPath(me.pos, spiel.tanke(Tanknumber).pos), waypointList);
@@ -715,7 +710,27 @@ function bes = beschleunigung(spiel, farbe)
     %Create Tank Distance Table
     function erg=createTankEvaluation(position)
         erg = zeros(spiel.n_tanke,4);
+        headedTankenList = getHeadedTanken();
         for i=1:spiel.n_tanke
+            
+            %avoid setting WP to a tanke twice
+            ignoreThisTanke = false;
+            for j=1:numel(headedTankenList)
+                if (headedTankenList(j) == i)
+                    ignoreThisTanke = true;
+                    break;
+                end
+            end
+            
+            %avoid setting tanke as new wp before collecting it
+            if (norm(me.pos - spiel.tanke(i).pos) < 2*constWayPointReachedRadius)
+                ignoreThisTanke = true;
+            end
+            
+            if (ignoreThisTanke)
+                continue;
+            end
+            
             erg(i,1) = i;                                   %Spalte 1: Tankstellennummer
             erg(i,2) = norm(spiel.tanke(i).pos-position);   %Spalte 2: Entfernung zu "position"
             erg(i,3) = norm(spiel.tanke(i).pos-enemy.pos);  %Spalte 3: Entfernung zum Gegner
@@ -733,17 +748,16 @@ function bes = beschleunigung(spiel, farbe)
                 erg(i,4) = -100;
             end
         end
+        
+        %remove empty rows
+        erg( ~any(erg,2), : ) = [];
+        %sort rows
         erg=sortrows(erg,[-4 2 -3 1]);
     end
 
-    %Check if target tanke is still there
-    function checkTankPath()
+    %get tanken list from current waypoints
+    function tankenList = getHeadedTanken()
         tankenList = [];
-        
-        %avoid loop when only 1 tanke exists
-        if numel(spiel.n_tanke) == 1 && ignoreTanke == 1
-            return;
-        end
         
         %get targeted tanken
         for i=1:numel(waypointList)
@@ -755,6 +769,16 @@ function bes = beschleunigung(spiel, farbe)
                 end
             end
         end
+    end
+
+    %Check if target tanke is still there
+    function checkTankPath()
+        %avoid loop when only 1 tanke exists
+        if numel(spiel.n_tanke) == 1 && ignoreTanke == 1
+            return;
+        end
+        
+        tankenList = getHeadedTanken();
         
         %waypoints needs to be recalculated
         recalculateTankenWPs = false;
