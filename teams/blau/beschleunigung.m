@@ -80,7 +80,7 @@ function bes = beschleunigung(spiel, farbe)
             %%Erst wenn alle Tanken weg sind und wir weniger haben, als der Gegner - Fliehen!
             fleeEnemy();
         else
-            %Nächste Tankstelle noch vorhanden?
+            %Erreicht der Gegner die anvisierte Tankstelle vor uns? dann löschen
             checkTankPath()
             %wenn Wegpunktliste leer => Pfad zur besten Tankstelle setzen
             createPathToNextTanke()
