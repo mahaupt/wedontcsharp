@@ -13,7 +13,7 @@ function bes = beschleunigung(spiel, farbe)
     persistent nodeGrid;
     persistent waypointList;
     persistent drawHandles; %debug drawing
-    persistent NumberOfMines; %Zur Bestimmung des Minenverschwindens benötigt
+    persistent ArrayOfMines; %Zur Bestimmung des Minenverschwindens benötigt
     persistent NumberOfTank; %Zur Entscheidung über Angriff und Tanken benötigt
     persistent ignoreTanke; %number of tanke to be ignored by targetNextTanke
     
@@ -35,19 +35,19 @@ function bes = beschleunigung(spiel, farbe)
         drawHandles = [];
         waypointList = [];
         ignoreTanke = 0;
-        NumberOfMines = spiel.n_mine;
+        ArrayOfMines = spiel.mine;
         NumberOfTank = spiel.n_tanke;
         setupNodeGrid();
     end
     
     
     %Nodegrid beim Verschwinden einer Mine aktualisieren:
-    if spiel.n_mine < NumberOfMines
+    if numel(spiel.mine) < numel(ArrayOfMines)
         disp('Updating NodeGrid');
-        nodeGrid = [];
-        setupNodeGrid();
-        NumberOfMines = spiel.n_mine;
+        NumberOfMine = setdiff(spiel.mine, ArrayOfMines);
+        updateNodeGrid(NumberOfMine.pos, spiel.mine_radius);
         waypointList = simplifyPath(waypointList);
+        ArrayOfMines = spiel.mine;
     end
 
     
@@ -280,6 +280,37 @@ function bes = beschleunigung(spiel, farbe)
         end
     end
 
+
+    function updateNodeGrid(PosOfMine, radius)
+        gridSizeX = round(1/(constGridRadius*2));
+        gridSizeY = round(1/(constGridRadius*2));
+        
+        radius = radius+0.1+constSafeBorder;
+        radius = round(radius / 2 / constGridRadius);
+        gridPos = worldPosToGridPos(PosOfMine);
+       
+        startX = clamp(gridPos(1)-radius,1,gridSizeX);
+        startY = clamp(gridPos(2)-radius,1,gridSizeY);
+        endX = clamp(gridPos(1)+radius,1,gridSizeX);
+        endY = clamp(gridPos(2)+radius,1,gridSizeY);
+        
+        %create grid
+        for x = startX : endX
+            for y = startY : endY
+                worldPos = [constGridRadius*2*x, constGridRadius*2*y];
+                nodeGrid(x,y).isWalkable = isWalkable(worldPos, constSafeBorder + spiel.spaceball_radius);
+                mineCost = 0;
+                
+                %Je dichter an Mine, desto teurer!
+                for i=1:spiel.n_mine
+                    if (norm(nodeGrid(x,y).worldPos-spiel.mine(i).pos)-spiel.mine_radius < 0.1)
+                        mineCost = mineCost + constMineProxPenality/(norm(nodeGrid(x,y).worldPos-spiel.mine(i).pos)-spiel.mine_radius);
+                    end
+                end
+                nodeGrid(x,y).mineCost = mineCost;
+            end
+        end
+    end
 
 
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -715,7 +746,7 @@ function bes = beschleunigung(spiel, farbe)
                 for i=1:numel(waypointList)
                     %is there a tanke between this and next waypoint
                     Tanknumber=isThereATankeOnPath(lastPoint, waypointList{i}, 0.2, ignoredTankenList);
-                    if (Tanknumber ~= 0 && Tanknumber ~= next_tanke)
+                    if (Tanknumber ~= 0 && Tanknumber ~= ignoreTanke)
 
                         %angle specific
                         dirWayp = vecNorm(spiel.tanke(next_tanke).pos - me.pos);
