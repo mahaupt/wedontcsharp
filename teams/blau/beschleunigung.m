@@ -1,12 +1,12 @@
 function bes = beschleunigung(spiel, farbe)
 
     %Konstanten
-    constSafeBorder = 0.005; %collision border around mines
-    constGridRadius = 0.005; 
+    constSafeBorder = 0.001; %collision border around mines
+    constGridRadius = 0.003; 
     constNavSecurity = 0.03; %simplify path
     constWayPointReachedRadius = 0.02; %0.01
     constMineProxPenality = 0.0006; %Strafpunkte für Nodes - je dichter an Mine, desto höher
-    constCornerBreaking = 0.03; %je größer der Winkel zum nächsten Wegpunkt, desto höheres Bremsen. Faktor.
+    constCornerBreaking = 0.04; %0.03 je größer der Winkel zum nächsten Wegpunkt, desto höheres Bremsen. Faktor.
    
     
     %statische variablen definieren
@@ -98,16 +98,17 @@ function bes = beschleunigung(spiel, farbe)
         breakingEndVel = calcBreakingEndVel();
         
         tooFast = checkIfTooFast();
+        emergencyBreak = emergencyBreaking();
         
         %decelleration
         distanceToWaypoint=norm(waypointList{1}-me.pos);
         breakDistance = calcBreakDistance(norm(me.ges), breakingEndVel);
-        if (breakDistance > distanceToWaypoint)
+        if (breakDistance > distanceToWaypoint || tooFast)
             erg=-dir + corr*5;
         end
         
         %emergencyBreaking
-        if (tooFast)
+        if (emergencyBreak)
             erg = -me.ges;
         end
         
@@ -150,12 +151,19 @@ function bes = beschleunigung(spiel, farbe)
             return;
         end
         
+    end
+
+
+
+    function erg = emergencyBreaking()
+        erg = false;
+        velocity = norm(me.ges);
         
         %collision check only on direct-mode
         if (numel(waypointList) == 1)
             %%check if about to collide
             safeSpaceballRadius = constSafeBorder + spiel.spaceball_radius;
-            breakDist = calcBreakDistance(norm(velocity), 0)*1.1;
+            breakDist = calcBreakDistance(norm(velocity), 0)*1.3;
             checkPoint = me.pos + vecNorm(me.ges)*breakDist;
             if (~isWalkable(checkPoint, safeSpaceballRadius) && velocity >= 0.01)
                 erg = true;
@@ -679,8 +687,9 @@ function bes = beschleunigung(spiel, farbe)
     %Search for nearest Tanken and create Path between them
     function createPathToNextTanke()
         waypointCount = numel(waypointList);
+        headedTankenList = getHeadedTanken();
         
-        if waypointCount <= 1 && spiel.n_tanke > 1 || ...
+        if numel(headedTankenList) <= 1 && spiel.n_tanke > 1 || ...
                 waypointCount == 0 && spiel.n_tanke == 1 %prevent loop on last tanke
             
             lastWaypoint = me.pos;
@@ -699,10 +708,34 @@ function bes = beschleunigung(spiel, farbe)
             next_tanke = tankdistance(1,1);
             waypointList = appendToArray(waypointList, findPath(lastWaypoint, spiel.tanke(next_tanke).pos));
             
-            %Tanknumber=isThereATankeOnPath(0.1)
-            %    if Tanknumber ~= 0
-            %        waypointList = appendToArray(findPath(me.pos, spiel.tanke(Tanknumber).pos), waypointList);
-            %    end
+            if (spiel.n_tanke > 2)
+                lastPoint = me.pos;
+                ignoredTankenList = getHeadedTanken();
+
+                for i=1:numel(waypointList)
+                    %is there a tanke between this and next waypoint
+                    Tanknumber=isThereATankeOnPath(lastPoint, waypointList{i}, 0.2, ignoredTankenList);
+                    if (Tanknumber ~= 0 && Tanknumber ~= next_tanke)
+
+                        %angle specific
+                        dirWayp = vecNorm(spiel.tanke(next_tanke).pos - me.pos);
+                        dirToTanke = vecNorm(spiel.tanke(Tanknumber).pos-me.pos);
+                        if (dot(dirWayp, dirToTanke) > 0.86)
+
+                            disp('Tanke auf Weg gefunden')
+
+                            additionalWP1 = findPath(waypointList{1}, spiel.tanke(Tanknumber).pos);
+                            additionalWP2 = findPath(spiel.tanke(Tanknumber).pos, spiel.tanke(next_tanke).pos);
+
+                            waypointList = appendToArray(additionalWP1, additionalWP2);
+                            break;
+                        end
+                    end
+
+                    lastPoint = waypointList{i};
+                end %for
+            end % if
+            
             debugDRAW();
         end
     end
@@ -741,7 +774,7 @@ function bes = beschleunigung(spiel, farbe)
                 end
                 a=a+1/norm(spiel.tanke(i).pos-spiel.tanke(j).pos);
             end
-            erg(i,4) = a*0.3+(1/erg(i,2))-0.3*(1/erg(i,3)); %Spalte 4: Anzahl Tankstellen in der Nähe und deren Dichte und deren Dichte zum Gegner
+            erg(i,4) = a*0.5+(1/erg(i,2))-0.3*(1/erg(i,3)); %Spalte 4: Anzahl Tankstellen in der Nähe und deren Dichte und deren Dichte zum Gegner
             
             %set evaluation bad if this is the ignore tanken
             if (ignoreTanke == i)
@@ -769,6 +802,9 @@ function bes = beschleunigung(spiel, farbe)
                 end
             end
         end
+        
+        %remove duplicates
+        tankenList = unique(tankenList);
     end
 
     %Check if target tanke is still there
@@ -829,7 +865,7 @@ function bes = beschleunigung(spiel, farbe)
                 else
                     startPos = spiel.tanke(reTargetedTanken(i-1)).pos;
                 end
-                endPos = spiel.tanke(reTargetedTanken(i)).pos
+                endPos = spiel.tanke(reTargetedTanken(i)).pos;
                 waypointList = appendToArray(waypointList, findPath(startPos, endPos));
             end
             
@@ -841,43 +877,40 @@ function bes = beschleunigung(spiel, farbe)
 
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     %Überprüfen, ob Tankstelle auf aktuellem Pfad liegt
-    function erg=isThereATankeOnPath(radius)
+    function erg=isThereATankeOnPath(startp, endp, radius, tankeIgnoreList)
         erg=0;
-        if numel(waypointList)>= 1
-            for i=1:spiel.n_tanke
-                if corridorTankColliding(me.pos,waypointList{1},radius,spiel.tanke(i).pos)
-                    erg=i;
+        for i=1:spiel.n_tanke
+            %ignore headed to tanken
+            ignoreThis = false;
+            for j=1:numel(tankeIgnoreList)
+                if (tankeIgnoreList(j) == i)
+                    ignoreThis = true;
                 end
+            end
+            if (ignoreThis)
+                continue;
+            end
+            
+            if corridorTankColliding(startp,endp,radius,spiel.tanke(i).pos)
+                erg=i;
             end
         end
     end
 
     function erg=corridorTankColliding(startp, endp, radius, tanknumber)
-        dir = vecNorm(endp-startp);
-        n = getPerpend(dir);
         erg = false;
         
             %middle line
-            if (lineTankColliding(startp - dir*radius, endp + dir*radius, tanknumber))
-                erg = true;
-                return;
-            end
-
-            if (lineTankColliding(startp + n*radius, endp + n*radius, tanknumber))
-                erg = true;
-                return;
-            end
-
-            if (lineTankColliding(startp - n*radius, endp - n*radius, tanknumber))
+            if (lineTankColliding(startp, endp, radius, tanknumber))
                 erg = true;
                 return;
             end
     end
 
-    function erg=lineTankColliding(startp, endp, tanknumber)
+    function erg=lineTankColliding(startp, endp, radius, tanknumber)
         erg=false;
         dist = distanceLinePoint(startp, endp, tanknumber);
-        if (dist < spiel.tanke_radius)
+        if (dist < spiel.tanke_radius+radius)
             erg = true;
             return;
         end
@@ -1105,6 +1138,7 @@ function bes = beschleunigung(spiel, farbe)
             endPosition = waypointList{endIndex};
         end
     end
+
     
 
 
