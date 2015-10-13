@@ -1,5 +1,4 @@
 function bes = beschleunigung(spiel, farbe)
-
     %Konstanten
     constSafeBorder = 0.005; %collision border around mines
     constGridRadius = 0.005; 
@@ -8,7 +7,6 @@ function bes = beschleunigung(spiel, farbe)
     constMineProxPenality = 0.0006; %Strafpunkte für Nodes - je dichter an Mine, desto höher
     constCornerBreaking = 0.03; %je größer der Winkel zum nächsten Wegpunkt, desto höheres Bremsen. Faktor.
    
-    
     %statische variablen definieren
     persistent nodeGrid;
     persistent waypointList;
@@ -16,7 +14,6 @@ function bes = beschleunigung(spiel, farbe)
     persistent NumberOfMines; %Zur Bestimmung des Minenverschwindens benötigt
     persistent NumberOfTank; %Zur Entscheidung über Angriff und Tanken benötigt
     persistent ignoreTanke; %number of tanke to be ignored by targetNextTanke
-    
     
     %%Farbe prüfen und zuweisen
     if strcmp (farbe, 'rot')
@@ -26,7 +23,6 @@ function bes = beschleunigung(spiel, farbe)
         me = spiel.blau;
         enemy = spiel.rot;
     end
-    
     
     %%wird einmal am Anfang ausgeführt
     %setup node grid and empty persistent vars
@@ -40,7 +36,6 @@ function bes = beschleunigung(spiel, farbe)
         setupNodeGrid();
     end
     
-    
     %Nodegrid beim Verschwinden einer Mine aktualisieren:
     if spiel.n_mine < NumberOfMines
         disp('Updating NodeGrid');
@@ -50,16 +45,12 @@ function bes = beschleunigung(spiel, farbe)
         waypointList = simplifyPath(waypointList);
     end
 
-    
     %Entscheidung über Angriff/Verteidigung/Tanken
     whatToDo();
-    
     
     %Beschleunigung berechnen:
     bes=calculateBES();
 
-    
-    
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     %Tanken oder Angreifen oder Verteidigen?
     function whatToDo()
@@ -79,8 +70,6 @@ function bes = beschleunigung(spiel, farbe)
         end
     end
     
-
-
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     %Path To Acceleration (bes)
     function erg=calculateBES()
@@ -90,8 +79,8 @@ function bes = beschleunigung(spiel, farbe)
         end
         
         %acceleration
+        corr = vecNorm(waypointList{1}-me.pos)-vecNorm(me.ges);
         dir = vecNorm(waypointList{1}-me.pos);
-        corr = dir-vecNorm(me.ges);
         erg = dir + corr*5;
         
         %calculate safe breaking endvelocity
@@ -117,8 +106,6 @@ function bes = beschleunigung(spiel, farbe)
             debugDRAW();
         end
     end
-
-
 
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     %check if overshooting next waypoint
@@ -236,7 +223,6 @@ function bes = beschleunigung(spiel, farbe)
                 nodeGrid(x,y).hCost = 0;
                 nodeGrid(x,y).fCost = 0;
                 nodeGrid(x,y).gCost = 0;
-                nodeGrid(x,y).heapIndex = 0;
                 mineCost = 0;
                 
                 %Je dichter an Mine, desto teurer!
@@ -272,8 +258,6 @@ function bes = beschleunigung(spiel, farbe)
         end
     end
 
-
-
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     %Pathfinder
     function waypoints = findPath(startp, endp)
@@ -287,8 +271,7 @@ function bes = beschleunigung(spiel, farbe)
             disp('Pathfinder: stard equals end, return zero waypoints');
         end
         
-        openSet = {};
-        openSet = insertHeapNode(openSet, startPos);
+        openSet = {startPos};
         closedSet = {};
         closedSetIndex = 1;
         
@@ -304,13 +287,22 @@ function bes = beschleunigung(spiel, farbe)
         
         %find path...
         while(numel(openSet) > 0)
-            %get first heap node and resort heap
             currentNode = nodeFromGridCoords(openSet{1});
-            openSet = removeHeapNode(openSet, 1);
-            openSet = sortHeapNodeDown(openSet, 1);
+            openSetIndex = 1;
             
+            %get node woth lowest fcost (or hcost) and remove it from openlist
+            for i=1:numel(openSet)
+                cn = nodeFromGridCoords(openSet{i});
+                if (cn.fCost < currentNode.fCost || cn.fCost == currentNode.fCost && cn.hCost < currentNode.hCost)
+                    currentNode = nodeFromGridCoords(openSet{i});    
+                    openSetIndex = i;
+                end
+            end
+            
+            %remove node from open set
+            openSet(openSetIndex) = [];
             %add node to closed set
-            closedSet = insertHeapNode(closedSet, currentNode.gridPos);
+            closedSet{closedSetIndex} = currentNode.gridPos;
             closedSetIndex = closedSetIndex + 1;
             
             %if it is target - close - path found!
@@ -323,28 +315,23 @@ function bes = beschleunigung(spiel, farbe)
             neighbours = getNeighbourNodes(currentNode);
             for i = 1 : numel(neighbours)
                 neighbour = neighbours(i);
-                if (~neighbour.isWalkable || containsHeapNode(closedSet, neighbour.gridPos))
+                if (~neighbour.isWalkable || containsNode(closedSet, neighbour.gridPos))
                     continue;
                 end
                 
                 %update costs for neighbours
                 movementCostToNeighbour = currentNode.gCost + norm(currentNode.worldPos - neighbour.worldPos);
-                if (movementCostToNeighbour < neighbour.gCost || ~containsHeapNode(openSet, neighbour.gridPos))
+                if (movementCostToNeighbour < neighbour.gCost || ~containsNode(openSet, neighbour.gridPos))
                     
                     nodeGrid(neighbour.gridPos(1), neighbour.gridPos(2)).gCost = movementCostToNeighbour;
                     nodeGrid(neighbour.gridPos(1), neighbour.gridPos(2)).hCost = norm(endp - neighbour.worldPos);
                     nodeGrid(neighbour.gridPos(1), neighbour.gridPos(2)).fCost = movementCostToNeighbour + norm(endp - neighbour.worldPos) + neighbour.mineCost;
                     nodeGrid(neighbour.gridPos(1), neighbour.gridPos(2)).parent = currentNode.gridPos;
-                    heapIndex = neighbour.heapIndex;
-                    
+
                     %add neighbour to openSet
-                    if (~containsHeapNode(openSet, neighbour.gridPos))
-                        %insert node into heap and resort heap
-                        openSet = insertHeapNode(openSet, neighbour.gridPos);
-                        heapIndex = numel(openSet);
-                        openSet = sortHeapNodeUp(openSet, heapIndex);
-                    else
-                        openSet = sortHeapNodeUp(openSet, heapIndex);
+                    if (~containsNode(openSet, neighbour.gridPos))
+                        insertIndex = numel(openSet)+1;
+                        openSet{insertIndex} = neighbour.gridPos;
                     end
                 end
             end
@@ -370,6 +357,7 @@ function bes = beschleunigung(spiel, farbe)
         end
     end
 
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % if node is not walkable, check for valid node in neighbours
     function erg = getValidNodePos(gridPos)
         node = nodeFromGridCoords(gridPos);
@@ -391,8 +379,6 @@ function bes = beschleunigung(spiel, farbe)
             end
         end   
     end
-
-
 
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     %calculate nodegrid position from world position
@@ -504,152 +490,21 @@ function bes = beschleunigung(spiel, farbe)
     end
 
 
-
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    %check if heap contains node
-    function erg = containsHeapNode(nodes, pos)
+    %check if array contains node
+    function erg = containsNode(nodes, pos)
         erg = false;
-        index = nodeGrid(pos(1), pos(2)).heapIndex;
-        if (index < 1 || index > numel(nodes))
-            return;
-        end
         
-        node = nodes{index};
-        
-        if (node(1) == pos(1) && node(2) == pos(2))
-            erg = true;
-            return;
-        end
-
-    end
-
-    %insert node into heap
-    function erg = insertHeapNode(heap, nodePos)
-        insertIndex = numel(heap) + 1;
-        heap{insertIndex} = nodePos;
-        nodeGrid(nodePos(1), nodePos(2)).heapIndex = insertIndex;
-        
-        erg = heap;
-    end
-
-    %remove node from heap
-    %replace last node in heap with given node
-    function erg = removeHeapNode(heap, index)
-        
-        nodePos = heap{index};
-        nodeGrid(nodePos(1), nodePos(2)).heapIndex = 0;
-        
-        lastIndex = numel(heap);
-        lastNode = heap{lastIndex};
-        if (lastIndex ~= index)
-            nodeGrid(lastNode(1), lastNode(2)).heapIndex = index;
-        end
-        
-        heap{index} = lastNode;
-        heap(lastIndex) = [];
-        
-        erg = heap;
-    end
-
-    function erg = sortHeapNodeDown(heap, index)
-        erg = heap;
-        %nothing to do
-        if (index > numel(heap))
-            return;
-        end
-        
-        parentPos = heap{index};
-        parentNode = nodeFromGridCoords(parentPos);
-        
-        child1 = round(index*2);
-        child2 = round(index*2+1);
-        
-        %node has no child nodes
-        if (child1 > numel(heap))
-            return;
-        end
-        
-        childPos1 = heap{child1};
-        childNode1 = nodeFromGridCoords(childPos1);
-        
-        swapIndex = 0;
-        
-        %node has two child nodes
-        if (child2 <= numel(heap))
-            childPos2 = heap{child2};
-            childNode2 = nodeFromGridCoords(childPos2);
-
-
-            if (childNode1.fCost > childNode2.fCost)
-                if (childNode2.fCost < parentNode.fCost)
-                    swapIndex = child2;
-                end
-            else
-                if (childNode1.fCost < parentNode.fCost)
-                    swapIndex = child1;
-                end
-            end
-        else
-            %node has one child node
-            if (childNode1.fCost < parentNode.fCost)
-                    swapIndex = child1;
+        for i=1:numel(nodes)
+            if (nodes{i}(1) == pos(1) && nodes{i}(2) == pos(2))
+                erg = true;
+                return;
             end
         end
-        
-        
-        if (swapIndex > 0)
-            %swap nodes
-            erg = swapHeapNodes(erg, swapIndex, index);
-            
-            %get new index and continue downsorting
-            newNode = nodeFromGridCoords(parentPos);
-            erg = sortHeapNodeDown(erg, newNode.heapIndex);
-        end
     end
-
-    function erg = sortHeapNodeUp(heap, index)
-        erg = heap;
-        parentIndex = round(index/2-0.25);
-        
-        if (parentIndex <= 0)
-            return;
-        end
-        
-        parentPos = heap{parentIndex};
-        childPos = heap{index};
-        
-        
-        parentNode = nodeFromGridCoords(parentPos);
-        childNode = nodeFromGridCoords(childPos);
-        
-        if (parentNode.fCost > childNode.fCost)
-            %swap position
-            erg = swapHeapNodes(erg, index, parentIndex);
-            
-            %get new node index
-            newNode = nodeFromGridCoords(childPos);
-            newIndex = newNode.heapIndex;
-            erg = sortHeapNodeUp(erg, newIndex);
-        end
-    end
-
-    %Swap two nodes saved in heap;
-    function erg = swapHeapNodes(heap, index1, index2)
-        nodePos1 = heap{index1};
-        nodeGrid(nodePos1(1), nodePos1(2)).heapIndex = index2;
-        
-        nodePos2 = heap{index2};
-        nodeGrid(nodePos2(1), nodePos2(2)).heapIndex = index1;
-        
-        heap{index1} = nodePos2;
-        heap{index2} = nodePos1;
-        erg = heap;
-    end
-
-
 
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    %Normalize 2D vector
+    %normalize 2D vector
     function erg = vecNorm(vec)
         n = norm(vec);
         erg = [vec(1)/n, vec(2)/n];
@@ -659,10 +514,8 @@ function bes = beschleunigung(spiel, farbe)
         end
     end
 
-
-
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    %Append to existing cell arrray
+    %append to existing cell arrray
     function erg = appendToArray(array1, array2)
         array1index = numel(array1)+1;
         erg = array1;
@@ -673,20 +526,16 @@ function bes = beschleunigung(spiel, farbe)
         end
     end
     
-
-
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    %Search for nearest Tanken and create Path between them
+    %%%Search for nearest Tanken and create Path between them
     function createPathToNextTanke()
         waypointCount = numel(waypointList);
         
         if waypointCount <= 1 && spiel.n_tanke > 0
-            disp('finding Path to next Tanke');
             if (waypointCount == 1)
                 %waypointlist not empty => append new waypoints
                 tankdistance=createTankEvaluation(waypointList{waypointCount});
                 next_tanke = tankdistance(1,1);
-                
                 
                 %possible that current tanke waypoint == next_tanke
                 if (norm(spiel.tanke(next_tanke).pos-waypointList{waypointCount}) < spiel.tanke_radius+constGridRadius)
@@ -704,16 +553,16 @@ function bes = beschleunigung(spiel, farbe)
                 next_tanke = tankdistance(1,1);
                 waypointList = findPath(me.pos, spiel.tanke(next_tanke).pos);
             end
-            %Tanknumber=isThereATankeOnPath(0.1)
-            %    if Tanknumber ~= 0
-            %        waypointList = appendToArray(findPath(me.pos, spiel.tanke(Tanknumber).pos), waypointList);
-            %    end
+            
+            disp('finding Path to next Tanke');
             debugDRAW();
         end
     end
 
-    %Create Tank Distance Table
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    %create Tank Distance Table
     function erg=createTankEvaluation(position)
+
         erg = zeros(spiel.n_tanke,4);
         for i=1:spiel.n_tanke
             erg(i,1) = i;                                   %Spalte 1: Tankstellennummer
@@ -736,7 +585,8 @@ function bes = beschleunigung(spiel, farbe)
         erg=sortrows(erg,[-4 2 -3 1]);
     end
 
-    %Check if target tanke is still there
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    %check if target tanke is still there
     function checkTankPath()
         tankenList = [];
         
@@ -790,8 +640,7 @@ function bes = beschleunigung(spiel, farbe)
         end
         
         
-        %recalculate tanken - Wegpunkte neu berechnen, da Tanke nicht mehr
-        %angefahren werden soll
+        %recalculate tanken
         if (recalculateTankenWPs)
             startP = safeDeleteWaypoints();
             
@@ -814,14 +663,18 @@ function bes = beschleunigung(spiel, farbe)
     end
 
 
+Tanknumber=isThereATankeOnPath()
+if Tanknumber ~= 0
+    waypointList=appendToArray(findPath(spiel.tanke(Tanknumber)),waypointList);
+end
 
-    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     %Überprüfen, ob Tankstelle auf aktuellem Pfad liegt
-    function erg=isThereATankeOnPath(radius)
+    function erg=isThereATankeOnPath()
         erg=0;
         if numel(waypointList)>= 1
             for i=1:spiel.n_tanke
-                if corridorTankColliding(me.pos,waypointList{1},radius,spiel.tanke(i).pos)
+                if corridorTankColliding(me.pos,waypointList{1},0.1,spiel.tanke(i).pos)
                     erg=i;
                 end
             end
@@ -851,16 +704,14 @@ function bes = beschleunigung(spiel, farbe)
     end
 
     function erg=lineTankColliding(startp, endp, tanknumber)
-        erg=false;
+        erg=0;
         dist = distanceLinePoint(startp, endp, tanknumber);
         if (dist < spiel.tanke_radius)
             erg = true;
             return;
         end
     end
-
-
-
+        
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     %Angriff
     function attackEnemy()
@@ -903,6 +754,7 @@ function bes = beschleunigung(spiel, farbe)
         end
     end
 
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     function erg = calcEnemyHitPosition()
         thit = norm(me.pos - enemy.pos)/norm(me.ges);
         if (thit > 1)
@@ -912,6 +764,7 @@ function bes = beschleunigung(spiel, farbe)
         end
     end
 
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     %get point behind enemy so it doesn't have to decellerate before this wp
     function erg = getEnemyAccPos(enemypos)
         stepsize = 0.02;
@@ -926,8 +779,6 @@ function bes = beschleunigung(spiel, farbe)
             length = length + stepsize;
         end
     end
-
-
 
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     %Verteidigung
@@ -948,11 +799,9 @@ function bes = beschleunigung(spiel, farbe)
             end
             RandPoints=sortrows(RandPoints,[-5 -3 4 -1 -2])
             waypointList = appendToArray(waypointList, findPath(startPos, [RandPoints(1,1),RandPoints(1,2)]));
-            debugDRAW();
+            debugDRAW;
         end
     end
-
-
 
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     %corridor colliding
@@ -961,23 +810,23 @@ function bes = beschleunigung(spiel, farbe)
         n = getPerpend(dir);
         erg = false;
         
-            %middle line
-            if (lineColliding(startp - dir*radius, endp + dir*radius))
-                erg = true;
-                return;
-            end
+        %middle line
+        if (lineColliding(startp - dir*radius, endp + dir*radius))
+            erg = true;
+            return;
+        end
 
-            if (lineColliding(startp + n*radius, endp + n*radius))
-                erg = true;
-                return;
-            end
+        if (lineColliding(startp + n*radius, endp + n*radius))
+            erg = true;
+            return;
+        end
 
-            if (lineColliding(startp - n*radius, endp - n*radius))
-                erg = true;
-                return;
-            end
+        if (lineColliding(startp - n*radius, endp - n*radius))
+            erg = true;
+            return;
+        end
     end
-
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     function erg=lineColliding(startp, endp)
         erg = false;
 
@@ -990,8 +839,6 @@ function bes = beschleunigung(spiel, farbe)
                 end
             end 
     end
-
-
 
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     function erg = distanceLinePoint(startp, endp, point)
@@ -1028,6 +875,7 @@ function bes = beschleunigung(spiel, farbe)
         erg = norm(vec1)*dot(vec1, vec2);
     end
 
+
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     function erg = getTimeToAlignVelocity(vel1, vec)
         length = norm(vel1);
@@ -1036,6 +884,7 @@ function bes = beschleunigung(spiel, farbe)
         deltaV = vec - vel1;
         erg = norm(deltaV)/spiel.bes;
     end
+
 
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     function endPosition = safeDeleteWaypoints()
@@ -1083,9 +932,8 @@ function bes = beschleunigung(spiel, farbe)
     end
     
 
-
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    %Debugging
+    %%%%%%%%%DEBUGGING%%%%%%%
     function debugDRAW()
         %delete all draw handles
         for i = 1 : numel(drawHandles)
