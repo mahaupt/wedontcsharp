@@ -4,7 +4,6 @@ clear variables
 close all
 clc
 
-
 rng shuffle
 %rng (18)
 
