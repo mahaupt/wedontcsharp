@@ -6,7 +6,7 @@ function bes = beschleunigung(spiel, farbe)
     constNavSecurity = 0.03; %simplify path
     constWayPointReachedRadius = 0.02; %0.01
     constMineProxPenality = 0.0006; %Strafpunkte für Nodes - je dichter an Mine, desto höher
-    constCornerBreaking = 0.04; %0.03 je größer der Winkel zum nächsten Wegpunkt, desto höheres Bremsen. Faktor.
+    constCornerBreaking = 0.03; %0.03 je größer der Winkel zum nächsten Wegpunkt, desto höheres Bremsen. Faktor.
    
     
     %statische variablen definieren
