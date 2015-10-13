@@ -13,14 +13,9 @@ function bes = beschleunigung(spiel, farbe)
     persistent nodeGrid;
     persistent waypointList;
     persistent drawHandles; %debug drawing
-<<<<<<< HEAD
     persistent ArrayOfMines; %Zur Bestimmung des Minenverschwindens benötigt
-    persistent NumberOfTank; %Zur Entscheidung über Angriff und Tanken benötigt
-=======
-    persistent NumberOfMines; %Zur Bestimmung des Minenverschwindens benötigt
     persistent StartNumberOfTank; %Zur Entscheidung über Angriff und Tanken benötigt
     persistent NumberOfTank; %Momentane Anzahl der Tankstellen
->>>>>>> master
     persistent ignoreTanke; %number of tanke to be ignored by targetNextTanke
     
     
@@ -41,12 +36,8 @@ function bes = beschleunigung(spiel, farbe)
         drawHandles = [];
         waypointList = [];
         ignoreTanke = 0;
-<<<<<<< HEAD
         ArrayOfMines = spiel.mine;
-=======
-        NumberOfMines = spiel.n_mine;
         StartNumberOfTank = spiel.n_tanke;
->>>>>>> master
         NumberOfTank = spiel.n_tanke;
         setupNodeGrid();
     end
@@ -55,7 +46,7 @@ function bes = beschleunigung(spiel, farbe)
     %Nodegrid beim Verschwinden einer Mine aktualisieren:
     if numel(spiel.mine) < numel(ArrayOfMines)
         disp('Updating NodeGrid');
-        NumberOfMine = setdiff(spiel.mine, ArrayOfMines);
+        NumberOfMine = customSetdiff(spiel.mine, ArrayOfMines);
         updateNodeGrid(NumberOfMine.pos, spiel.mine_radius);
         waypointList = simplifyPath(waypointList);
         ArrayOfMines = spiel.mine;
@@ -328,6 +319,24 @@ function bes = beschleunigung(spiel, farbe)
         end
     end
 
+    function erg=customSetdiff(array1, array2)
+        erg=null(1);
+        for i=1:numel(array1)
+            containsElement = false;
+            for j=1:numel(array2)
+                if equalsVec(array1(i).pos, array2(j).pos)
+                    containsElement = true;
+                end
+            end
+            if containsElement == false
+                erg=array1(i);
+                return;
+            end
+        end
+        if isempty(erg)
+            erg=customSetdiff(array2, array1);
+        end
+    end
 
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     %Pathfinder
@@ -761,38 +770,6 @@ function bes = beschleunigung(spiel, farbe)
             
             next_tanke = tankdistance(1,1);
             waypointList = appendToArray(waypointList, findPath(lastWaypoint, spiel.tanke(next_tanke).pos));
-<<<<<<< HEAD
-            
-            if (spiel.n_tanke > 2)
-                lastPoint = me.pos;
-                ignoredTankenList = getHeadedTanken();
-
-                for i=1:numel(waypointList)
-                    %is there a tanke between this and next waypoint
-                    Tanknumber=isThereATankeOnPath(lastPoint, waypointList{i}, 0.2, ignoredTankenList);
-                    if (Tanknumber ~= 0 && Tanknumber ~= ignoreTanke)
-
-                        %angle specific
-                        dirWayp = vecNorm(spiel.tanke(next_tanke).pos - me.pos);
-                        dirToTanke = vecNorm(spiel.tanke(Tanknumber).pos-me.pos);
-                        if (dot(dirWayp, dirToTanke) > 0.86)
-
-                            disp('Tanke auf Weg gefunden')
-
-                            additionalWP1 = findPath(waypointList{1}, spiel.tanke(Tanknumber).pos);
-                            additionalWP2 = findPath(spiel.tanke(Tanknumber).pos, spiel.tanke(next_tanke).pos);
-
-                            waypointList = appendToArray(additionalWP1, additionalWP2);
-                            break;
-                        end
-                    end
-
-                    lastPoint = waypointList{i};
-                end %for
-            end % if
-            
-=======
->>>>>>> master
             debugDRAW();
         end
     end
@@ -892,7 +869,7 @@ function bes = beschleunigung(spiel, farbe)
             tvown = getTimeToAlignVelocity(me.ges, ownPath);
             
             %only if tanke is about to get taken
-            if (tenemy > 0 && tenemy < 0.3)
+            if (tenemy > 0 && tenemy < 0.2)
                 if (tenemy+tvenemy < town+tvown)
                     disp('enemy reaches tanke before us .. get new target tanke');
                     ignoreTanke = tankeIndex;
