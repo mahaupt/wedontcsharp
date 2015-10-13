@@ -2,11 +2,12 @@ function bes = beschleunigung(spiel, farbe)
 
     %Konstanten
     constSafeBorder = 0.001; %collision border around mines
-    constGridRadius = 0.003; 
+    constGridRadius = 0.003;
     constNavSecurity = 0.03; %simplify path
     constWayPointReachedRadius = 0.02; %0.01
     constMineProxPenality = 0.0006; %Strafpunkte für Nodes - je dichter an Mine, desto höher
-    constCornerBreaking = 0.03; %0.03 je größer der Winkel zum nächsten Wegpunkt, desto höheres Bremsen. Faktor.
+    constCornerBreaking = 0.00000001; %0.03 je größer der Winkel zum nächsten Wegpunkt, desto höheres Bremsen. Faktor.
+    constCompetitionModeThreshold = 0.075;
    
     
     %statische variablen definieren
@@ -17,6 +18,7 @@ function bes = beschleunigung(spiel, farbe)
     persistent StartNumberOfTank; %Zur Entscheidung über Angriff und Tanken benötigt
     persistent NumberOfTank; %Momentane Anzahl der Tankstellen
     persistent ignoreTanke; %number of tanke to be ignored by targetNextTanke
+    persistent tankeCompetition;
     
     
     %%Farbe prüfen und zuweisen
@@ -39,6 +41,7 @@ function bes = beschleunigung(spiel, farbe)
         ArrayOfMines = spiel.mine;
         StartNumberOfTank = spiel.n_tanke;
         NumberOfTank = spiel.n_tanke;
+        tankeCompetition = false;
         setupNodeGrid();
     end
     
@@ -55,6 +58,7 @@ function bes = beschleunigung(spiel, farbe)
     %beim Verschwinden einer Tanke:
     if (NumberOfTank ~= spiel.n_tanke)
         NumberOfTank = spiel.n_tanke;
+        tankeCompetition = false;
         ignoreTanke = 0;
     end
 
@@ -209,18 +213,22 @@ function bes = beschleunigung(spiel, farbe)
             
             %calculate minimal turningspeed 
             minSpeed = 0;
-            if (angle < 90 && waypointIndex < numel(waypointList))
+            if (angle < 60 && waypointIndex < numel(waypointList))
                 minSpeed = constCornerBreaking/sind(angle);
             end
+            
+            length = length + nextDist;
             
             %get the point where i have to start breaking first
             breakStartPoint = length-calcBreakDistance(norm(me.ges), minSpeed);
             if (breakStartPoint < globalBreakStartPoint)
                 globalBreakStartPoint = breakStartPoint;
-                globalMinSpeed = minSpeed;
+                
+                if (globalBreakStartPoint < 0)
+                    globalMinSpeed = minSpeed;
+                end
             end
             
-            length = length + nextDist;
             lastDir = nextDir;
             waypointIndex = waypointIndex +1;
         end
@@ -870,14 +878,28 @@ function bes = beschleunigung(spiel, farbe)
             
             %check mine between enemy and tanke
             enemyColliding = corridorColliding(enemy.pos, spiel.tanke(tankeIndex).pos, spiel.spaceball_radius);
+            ownColliding = corridorColliding(me.pos, spiel.tanke(tankeIndex).pos, constNavSecurity);
             
             %only if tanke is about to get taken
-            if (tenemy > 0 && tenemy < 0.2 && ~enemyColliding)
-                if (tenemy+tvenemy < town+tvown)
+            if (tenemy > 0 && tenemy < 0.25 && ~enemyColliding)
+                if (i==1 && norm(tenemy- town) < constCompetitionModeThreshold && ~tankeCompetition && ~ownColliding)
+                    disp('competition mode activated');
+                    tankeCompetition = true;
+                    
+                    %competition mode activated
+                    accpos = getAccPos(spiel.tanke(tankeIndex).pos);
+                    
+                    waypointList = [];
+                    waypointList{1} = spiel.tanke(tankeIndex).pos;
+                    waypointList{2} = accpos;
+                    debugDRAW();
+                    return;
+                    
+                elseif (tenemy+tvenemy < town+tvown && ~tankeCompetition)
                     disp('enemy reaches tanke before us .. get new target tanke');
                     ignoreTanke = tankeIndex;
                     safeDeleteWaypoints();
-                    break;
+                    return;
                 end
             end
         end
@@ -903,7 +925,7 @@ function bes = beschleunigung(spiel, farbe)
                 endIndex = 1;
             end
             
-            waypointList{endIndex} = getEnemyAccPos(enemypos);
+            waypointList{endIndex} = getAccPos(enemypos);
             debugDRAW();
         else
             %calculate indirect path to enemy
@@ -936,12 +958,12 @@ function bes = beschleunigung(spiel, farbe)
     end
 
     %get point behind enemy so it doesn't have to decellerate before this wp
-    function erg = getEnemyAccPos(enemypos)
+    function erg = getAccPos(pos)
         stepsize = 0.02;
         maxsize = 0.2;
         
-        dir = vecNorm(enemypos - me.pos);
-        erg = enemypos -dir*stepsize;
+        dir = vecNorm(pos - me.pos);
+        erg = pos -dir*stepsize;
         
         length = 0;
         while(isWalkable(erg+dir*stepsize, constNavSecurity) && length < maxsize)
