@@ -868,8 +868,11 @@ function bes = beschleunigung(spiel, farbe)
             town = norm(ownPath) / projectVectorNorm(me.ges, ownPath);
             tvown = getTimeToAlignVelocity(me.ges, ownPath);
             
+            %check mine between enemy and tanke
+            enemyColliding = corridorColliding(enemy.pos, spiel.tanke(tankeIndex).pos, spiel.spaceball_radius);
+            
             %only if tanke is about to get taken
-            if (tenemy > 0 && tenemy < 0.2)
+            if (tenemy > 0 && tenemy < 0.2 && ~enemyColliding)
                 if (tenemy+tvenemy < town+tvown)
                     disp('enemy reaches tanke before us .. get new target tanke');
                     ignoreTanke = tankeIndex;
