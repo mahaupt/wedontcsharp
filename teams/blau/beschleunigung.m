@@ -19,6 +19,7 @@ function bes = beschleunigung(spiel, farbe)
     persistent NumberOfTank; %Momentane Anzahl der Tankstellen
     persistent ignoreTanke; %number of tanke to be ignored by targetNextTanke
     persistent tankeCompetition;
+    persistent waitForEnemy;
     
     
     %%Farbe prüfen und zuweisen
@@ -42,6 +43,7 @@ function bes = beschleunigung(spiel, farbe)
         StartNumberOfTank = spiel.n_tanke;
         NumberOfTank = spiel.n_tanke;
         tankeCompetition = false;
+        waitForEnemy = false;
         setupNodeGrid();
     end
     
@@ -967,9 +969,19 @@ function bes = beschleunigung(spiel, farbe)
     %Verteidigung
     function fleeEnemy()
         if numel(waypointList) == 0
-            disp('searching for cover');
-            startPos = safeDeleteWaypoints();
-            RandPoints = rand(4,2);
+            a=rand();
+            if a < 0.5
+                cornerTricking();
+            elseif waitForEnemy == false
+                randomFlee();
+            end
+        end
+    end
+
+    function randomFlee()
+        disp('randomFlee');
+        startPos = safeDeleteWaypoints();
+        RandPoints = rand(4,2);
             for i=1:4
                 RandPoints(i,3)=norm([RandPoints(i,1),RandPoints(i,2)]-enemy.pos);
                 RandPoints(i,4)=0;
@@ -983,10 +995,33 @@ function bes = beschleunigung(spiel, farbe)
             RandPoints=sortrows(RandPoints,[-5 -3 4 -1 -2]);
             waypointList = appendToArray(waypointList, findPath(startPos, [RandPoints(1,1),RandPoints(1,2)]));
             debugDRAW();
-        end
     end
 
-
+    function cornerTricking()
+        if waitForEnemy == false
+            disp('cornerTricking Pt1');
+            %get nearest corner, go there and wait
+            if waitForEnemy == false
+                cornerNodes = [0.08,0.92,0;0.92,0.92,0;0.08,0.08,0;0.92,0.08,0];
+                for i=1:4
+                    cornerNodes(i,3)=norm([cornerNodes(i,1), cornerNodes(i,2)]-me.pos);
+                end
+                cornerNodes = sortrows(cornerNodes, [3 2 1]);
+                waypointList = appendToArray(waypointList, findPath(me.pos,[cornerNodes(1,1), cornerNodes(1,2)]));
+                waitForEnemy = true;
+            end
+        elseif waitForEnemy == true && norm(enemy.pos-me.pos) < 0.2
+            disp('cornerTricking Pt2');
+            cornerNodes2 = [0.08,0.92,0;0.92,0.92,0;0.08,0.08,0;0.92,0.08,0];
+                for i=1:4
+                    cornerNodes2(i,3)=norm([cornerNodes2(i,1), cornerNodes2(i,2)]-me.pos-enemy.ges);
+                end
+            cornerNodes2 = sortrows(cornerNodes2, [3 2 1]);
+            pos = [cornerNodes2(2,1), cornerNodes2(2,2)];
+            waypointList = appendToArray(waypointList, findPath(me.pos, pos));
+            waitForEnemy = false;
+        end
+    end
 
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     %corridor colliding
