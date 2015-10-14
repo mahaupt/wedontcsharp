@@ -867,7 +867,7 @@ function bes = beschleunigung(spiel, farbe)
         
         %check if path to enemy is free
         enemypos = calcEnemyHitPosition();
-        if (~corridorColliding(me.pos, enemypos, constNavSecurity))
+        if (~corridorColliding(me.pos, enemy.pos, constNavSecurity))
             %delete all other waypoints
             if (numel(waypointList) > 1)
                 safeDeleteWaypoints();
