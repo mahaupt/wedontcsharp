@@ -1,6 +1,5 @@
 function bes = beschleunigung(spiel, farbe)
-
-    %Konstanten
+%% Konstanten & Variablen zu Beginn des Spiels festlegen
     constSafeBorder = 0.001; %collision border around mines
     constGridRadius = 0.003;
     constNavSecurity = 0.03; %simplify path
@@ -8,9 +7,8 @@ function bes = beschleunigung(spiel, farbe)
     constMineProxPenality = 0.0006; %Strafpunkte für Nodes - je dichter an Mine, desto höher
     constCornerBreaking = 0.3; %0.03 je größer der Winkel zum nächsten Wegpunkt, desto höheres Bremsen. Faktor.
     constCompetitionModeThreshold = 0.075;
-   
     
-    %statische variablen definieren
+    %statische Variablen definieren
     persistent nodeGrid;
     persistent waypointList;
     persistent drawHandles; %debug drawing
@@ -19,8 +17,7 @@ function bes = beschleunigung(spiel, farbe)
     persistent NumberOfTank; %Momentane Anzahl der Tankstellen
     persistent ignoreTanke; %number of tanke to be ignored by targetNextTanke
     persistent tankeCompetition;
-    persistent waitForEnemy;
-    
+    persistent waitForEnemy; %benötigt, um auf den Gegner warten zu können
     
     %%Farbe prüfen und zuweisen
     if strcmp (farbe, 'rot')
@@ -31,8 +28,7 @@ function bes = beschleunigung(spiel, farbe)
         enemy = spiel.rot;
     end
     
-    
-    %%wird einmal am Anfang ausgeführt
+    %wird einmal am Anfang ausgeführt
     %setup node grid and empty persistent vars
     if spiel.i_t==1
         nodeGrid = [];
@@ -48,6 +44,8 @@ function bes = beschleunigung(spiel, farbe)
     end
     
     
+    
+%% Veränderungen des Spielfeldes bemerken und dementsprechend handeln
     %Nodegrid beim Verschwinden einer Mine aktualisieren:
     if numel(spiel.mine) < numel(ArrayOfMines)
         disp('Updating NodeGrid');
@@ -65,16 +63,17 @@ function bes = beschleunigung(spiel, farbe)
     end
 
     
+    
+%% Entscheidungen fällen und Beschleunigung berechnen
     %Entscheidung über Angriff/Verteidigung/Tanken
     whatToDo();
-    
     
     %Beschleunigung berechnen:
     bes=calculateBES();
 
     
     
-    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% Was soll der Spaceball tun?
     %Tanken oder Angreifen oder Verteidigen?
     function whatToDo()
         if StartNumberOfTank*0.5 < me.getankt || (norm(me.pos-enemy.pos)<0.2 && me.getankt>enemy.getankt)
@@ -95,8 +94,7 @@ function bes = beschleunigung(spiel, farbe)
     
 
 
-    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    %Path To Acceleration (bes)
+%% Beschleunigung berechnen
     function erg=calculateBES()
         if (numel(waypointList) <= 0)
             erg = -me.ges;
@@ -133,9 +131,6 @@ function bes = beschleunigung(spiel, farbe)
         end
     end
 
-
-
-    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     %check if overshooting next waypoint
     function erg = checkIfTooFast()
         erg = false;
@@ -166,8 +161,7 @@ function bes = beschleunigung(spiel, farbe)
         
     end
 
-
-
+    %emergency breaking
     function erg = emergencyBreaking()
         erg = false;
         velocity = norm(me.ges);
@@ -185,7 +179,6 @@ function bes = beschleunigung(spiel, farbe)
         end
     end
 
-    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     %calculate minimum velocity at next waypoint
     function erg=calcBreakingEndVel()
         erg = 0;
@@ -220,13 +213,14 @@ function bes = beschleunigung(spiel, farbe)
         end
     end
 
-    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     %calculate distance for breaking from vel to endvel
     function erg = calcBreakDistance(vel, endvel)
         erg = ((vel)^2 - (endvel)^2)/(2*spiel.bes);
     end
-        
-    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+     
+
+
+%% Node-Grid erstellen, bzw. updaten
     %setup node grid for path finding
     function setupNodeGrid()
         gridSizeX = round(1/(constGridRadius*2));
@@ -258,7 +252,6 @@ function bes = beschleunigung(spiel, farbe)
         end
     end
 
-    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     %check if node is a collider (mine, border)
     function erg=isWalkable(pos, radius)
         erg = true;
@@ -278,7 +271,6 @@ function bes = beschleunigung(spiel, farbe)
             end
         end
     end
-
 
     function updateNodeGrid(PosOfMine, radius)
         gridSizeX = round(1/(constGridRadius*2));
@@ -330,8 +322,10 @@ function bes = beschleunigung(spiel, farbe)
         end
     end
 
-    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    %Pathfinder
+
+
+%% Pathfinder
+    %Wegpunkte finden
     function waypoints = findPath(startp, endp)
         pathSuccess = false; % - Pfad gefunden
         
@@ -448,16 +442,12 @@ function bes = beschleunigung(spiel, farbe)
         end   
     end
 
-
-
-    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     %calculate nodegrid position from world position
     function erg = worldPosToGridPos(pos)
         erg = [round(pos(1)/constGridRadius/2), round(pos(2)/constGridRadius/2)];
         erg = clamp(erg, 1, round(1/(constGridRadius*2)));
     end
 
-    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     %clamps value between min and max
     function erg = clamp(value, min, max)
        for i=1:numel(value)
@@ -471,12 +461,11 @@ function bes = beschleunigung(spiel, farbe)
        erg = value;
     end
     
-    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    %get node-number from grid coordinates
     function erg = nodeFromGridCoords(pos)
         erg = nodeGrid(pos(1), pos(2));
     end
 
-    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     %check if nodes are equal
     function erg = equalsNode(a, b)
         erg = false;
@@ -485,7 +474,6 @@ function bes = beschleunigung(spiel, farbe)
         end
     end
 
-    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     %check if vectors are equal
     function erg = equalsVec(a, b)
         erg = false;
@@ -494,7 +482,6 @@ function bes = beschleunigung(spiel, farbe)
         end
     end
 
-    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     %get node neighbours
     function erg = getNeighbourNodes(node)
         gridSizeX = round(1/(constGridRadius*2));
@@ -517,7 +504,9 @@ function bes = beschleunigung(spiel, farbe)
         end
     end
 
-    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+%% Den Pfad vereinfachen
     % simplify path
     function erg = simplifyPath(path)
         checkIndex = 1;
@@ -561,7 +550,7 @@ function bes = beschleunigung(spiel, farbe)
 
 
 
-    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% Heap-System
     %check if heap contains node
     function erg = containsHeapNode(nodes, pos)
         erg = false;
@@ -607,6 +596,7 @@ function bes = beschleunigung(spiel, farbe)
         erg = heap;
     end
 
+    %sorts the heap system downwards
     function erg = sortHeapNodeDown(heap, index)
         erg = heap;
         %nothing to do
@@ -663,6 +653,7 @@ function bes = beschleunigung(spiel, farbe)
         end
     end
 
+    %sorts the heap system upwards
     function erg = sortHeapNodeUp(heap, index)
         erg = heap;
         parentIndex = round(index/2-0.25);
@@ -704,7 +695,7 @@ function bes = beschleunigung(spiel, farbe)
 
 
 
-    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% Andere Funktionen
     %Normalize 2D vector
     function erg = vecNorm(vec)
         n = norm(vec);
@@ -715,9 +706,6 @@ function bes = beschleunigung(spiel, farbe)
         end
     end
 
-
-
-    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     %Append to existing cell arrray
     function erg = appendToArray(array1, array2)
         array1index = numel(array1)+1;
@@ -728,10 +716,100 @@ function bes = beschleunigung(spiel, farbe)
             array1index = array1index + 1;
         end
     end
+
+    %corridor colliding
+    function erg = corridorColliding(startp, endp, radius)
+        dir = vecNorm(endp-startp);
+        erg = false;
+        
+            %middle line
+            if (lineColliding(startp - dir*radius, endp + dir*radius, radius))
+                erg = true;
+                return;
+            end
+    end
+
+    function erg=lineColliding(startp, endp, radius)
+        erg = false;
+
+            for i=1:spiel.n_mine
+                dist = distanceLinePoint(startp, endp, spiel.mine(i).pos);
+
+                if (dist < spiel.mine_radius+radius)
+                    erg = true;
+                    return;
+                end
+            end 
+    end
+
+    function erg = distanceLinePoint(startp, endp, point)
+        length = norm(startp - endp);
+        dir = vecNorm(endp-startp);
+        n = getPerpend(dir);
+       
+        
+        y = (startp(2)*n(1)-point(2)*n(1)-n(2)*startp(1)+point(1)*n(2))/(dir(1)*n(2)-dir(2)*n(1));
+        
+        linePoint = startp + dir*y;
+        
+        %point is outside of line
+        if (norm(linePoint-startp) > length || norm(linePoint-endp) > length)
+            erg=Inf;
+            return;
+        end
+        
+        erg = norm(point-linePoint);
+    end
+
+    %get perpendicular vector
+    function erg = getPerpend(vec)
+        erg = [-vec(2), vec(1)];
+    end
+
+    %return projected norm of vector 1 projected on vector2
+    function erg = projectVectorNorm(vec1, vec2)
+        vec1 = vecNorm(vec1);
+        vec2 = vecNorm(vec2);
+        
+        erg = norm(vec1)*dot(vec1, vec2);
+    end
+
+    function erg = getTimeToAlignVelocity(vel1, vec)
+        length = norm(vel1);
+        vec = vecNorm(vec) * length;
+        
+        deltaV = vec - vel1;
+        erg = norm(deltaV)/spiel.bes;
+    end
+
+    function erg = getMaxVelocityToAlignInTime(vec1, vec2, time)
+        vec1 = vecNorm(vec1);
+        vec2 = vecNorm(vec2);
+        deltaVec = vec2-vec1;
+        erg = time*spiel.bes/norm(deltaVec);
+    end
+
+    function endPosition = safeDeleteWaypoints()
+        %nothing to do
+        endPosition = me.pos;
+        if (numel(waypointList) <= 0)
+            return;
+        end
+        
+        %break distance and direction to next waypoint
+        breakDistance = calcBreakDistance(norm(me.ges), 0)*0.8;
+        dir = vecNorm(waypointList{1}-me.pos);
+        
+        %end position = full break distance
+        endPosition = me.pos + dir*breakDistance;
+        
+        waypointList = [];
+        waypointList{1} = endPosition;
+    end
     
 
 
-    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% Tankenfindungs-System
     %Search for nearest Tanken and create Path between them
     function createPathToNextTanke()
         waypointCount = numel(waypointList);
@@ -893,7 +971,7 @@ function bes = beschleunigung(spiel, farbe)
 
 
 
-    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% Angriff
     %Angriff
     function attackEnemy()
         
@@ -965,7 +1043,7 @@ function bes = beschleunigung(spiel, farbe)
 
 
 
-    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% Verteidigung
     %Verteidigung
     function fleeEnemy()
         if numel(waypointList) == 0
@@ -1023,109 +1101,10 @@ function bes = beschleunigung(spiel, farbe)
         end
     end
 
-    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    %corridor colliding
-    function erg = corridorColliding(startp, endp, radius)
-        dir = vecNorm(endp-startp);
-        erg = false;
-        
-            %middle line
-            if (lineColliding(startp - dir*radius, endp + dir*radius, radius))
-                erg = true;
-                return;
-            end
-    end
-
-    function erg=lineColliding(startp, endp, radius)
-        erg = false;
-
-            for i=1:spiel.n_mine
-                dist = distanceLinePoint(startp, endp, spiel.mine(i).pos);
-
-                if (dist < spiel.mine_radius+radius)
-                    erg = true;
-                    return;
-                end
-            end 
-    end
 
 
-
-    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    function erg = distanceLinePoint(startp, endp, point)
-        length = norm(startp - endp);
-        dir = vecNorm(endp-startp);
-        n = getPerpend(dir);
-       
-        
-        y = (startp(2)*n(1)-point(2)*n(1)-n(2)*startp(1)+point(1)*n(2))/(dir(1)*n(2)-dir(2)*n(1));
-        
-        linePoint = startp + dir*y;
-        
-        %point is outside of line
-        if (norm(linePoint-startp) > length || norm(linePoint-endp) > length)
-            erg=Inf;
-            return;
-        end
-        
-        erg = norm(point-linePoint);
-    end
-
-    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    %get perpendicular vector
-    function erg = getPerpend(vec)
-        erg = [-vec(2), vec(1)];
-    end
-
-    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    %return projected norm of vector 1 projected on vector2
-    function erg = projectVectorNorm(vec1, vec2)
-        vec1 = vecNorm(vec1);
-        vec2 = vecNorm(vec2);
-        
-        erg = norm(vec1)*dot(vec1, vec2);
-    end
-
-    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    function erg = getTimeToAlignVelocity(vel1, vec)
-        length = norm(vel1);
-        vec = vecNorm(vec) * length;
-        
-        deltaV = vec - vel1;
-        erg = norm(deltaV)/spiel.bes;
-    end
-
-    function erg = getMaxVelocityToAlignInTime(vec1, vec2, time)
-        vec1 = vecNorm(vec1);
-        vec2 = vecNorm(vec2);
-        deltaVec = vec2-vec1;
-        erg = time*spiel.bes/norm(deltaVec);
-    end
-
-    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    function endPosition = safeDeleteWaypoints()
-        %nothing to do
-        endPosition = me.pos;
-        if (numel(waypointList) <= 0)
-            return;
-        end
-        
-        %break distance and direction to next waypoint
-        breakDistance = calcBreakDistance(norm(me.ges), 0)*0.8;
-        dir = vecNorm(waypointList{1}-me.pos);
-        
-        %end position = full break distance
-        endPosition = me.pos + dir*breakDistance;
-        
-        waypointList = [];
-        waypointList{1} = endPosition;
-    end
-
-    
-
-
-    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    %Debugging
+%% Debugging
+    %Wegpunkte einzeichnen
     function debugDRAW()
         %delete all draw handles
         for i = 1 : numel(drawHandles)
