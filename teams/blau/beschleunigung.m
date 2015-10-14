@@ -6,7 +6,7 @@ function bes = beschleunigung(spiel, farbe)
     constNavSecurity = 0.03; %simplify path
     constWayPointReachedRadius = 0.02; %0.01
     constMineProxPenality = 0.0006; %Strafpunkte für Nodes - je dichter an Mine, desto höher
-    constCornerBreaking = 0.00000001; %0.03 je größer der Winkel zum nächsten Wegpunkt, desto höheres Bremsen. Faktor.
+    constCornerBreaking = 0.3; %0.03 je größer der Winkel zum nächsten Wegpunkt, desto höheres Bremsen. Faktor.
     constCompetitionModeThreshold = 0.075;
    
     
@@ -193,47 +193,29 @@ function bes = beschleunigung(spiel, farbe)
             return;
         end
         
-        %calculate vectors to next waypoint
-        length = norm(waypointList{1} - me.pos);
-        lastDir = vecNorm(waypointList{1} - me.pos);
-        waypointIndex = 2;
+        %break to zero at last waypoint
+        erg = 0;
         
-        %return values - try to get the lowest minspeed
-        globalMinSpeed = 100;
-        globalBreakStartPoint = 100;
-        
-        %iterate waypoints within fullstop breaking range
-        nullBreakDistance = calcBreakDistance(norm(me.ges), 0);
-        while(length < nullBreakDistance && waypointIndex <= numel(waypointList))
-            nextDist = norm(waypointList{waypointIndex} - waypointList{waypointIndex-1});
-            nextDir = vecNorm(waypointList{waypointIndex} - waypointList{waypointIndex-1});
+        %go backwards through waypoints
+        for i=fliplr(1:numel(waypointList)-1)
             
-            %angle between waypoints 
-            angle = acosd(dot(lastDir, nextDir));
-            
-            %calculate minimal turningspeed 
-            minSpeed = 0;
-            if (angle < 60 && waypointIndex < numel(waypointList))
-                minSpeed = constCornerBreaking/sind(angle);
+            %get minimal velocity for this waypoint
+            if (i==1)
+                vec1 = waypointList{i} - me.pos;
+            else
+                vec1 = waypointList{i} - waypointList{i-1};
             end
+            vec2 = waypointList{i+1} - waypointList{i};
+            length = norm(vec1);
+            minVel = getMaxVelocityToAlignInTime(vec1, vec2, constCornerBreaking);
             
-            length = length + nextDist;
+            tway = (sqrt(erg^2+2*spiel.bes*length)-erg)/spiel.bes;
+            erg = erg + spiel.bes * tway;
             
-            %get the point where i have to start breaking first
-            breakStartPoint = length-calcBreakDistance(norm(me.ges), minSpeed);
-            if (breakStartPoint < globalBreakStartPoint)
-                globalBreakStartPoint = breakStartPoint;
-                
-                if (globalBreakStartPoint < 0)
-                    globalMinSpeed = minSpeed;
-                end
+            if (minVel < erg)
+                erg = minVel;
             end
-            
-            lastDir = nextDir;
-            waypointIndex = waypointIndex +1;
         end
-        
-        erg = globalMinSpeed;
     end
 
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -835,7 +817,7 @@ function bes = beschleunigung(spiel, farbe)
 
     %get tanken list from current waypoints
     function tankenList = getHeadedTanken()
-        tankenList = [];
+        tankenList = zeros(5,1);
         
         %get targeted tanken
         for i=1:numel(waypointList)
@@ -850,12 +832,14 @@ function bes = beschleunigung(spiel, farbe)
         
         %remove duplicates
         tankenList = unique(tankenList);
+        %remove zeros
+        tankenList = tankenList(tankenList > 0);
     end
 
     %Check if target tanke is still there
     function checkTankPath()
-        %avoid loop when only 1 tanke exists
-        if numel(spiel.n_tanke) == 1 && ignoreTanke == 1
+        %avoid loop when ignoreTanke checked
+        if ignoreTanke
             return;
         end
         
@@ -949,7 +933,12 @@ function bes = beschleunigung(spiel, farbe)
     end
 
     function erg = calcEnemyHitPosition()
-        thit = norm(me.pos - enemy.pos)/norm(me.ges);
+        vel = norm(me.ges-enemy.ges);
+        acc = norm(me.bes-enemy.bes);
+        dist = norm(me.pos-enemy.pos);
+        
+        thit = (sqrt(vel^2+2*acc*dist)-vel)/acc;
+        
         if (thit > 1)
             erg = enemy.pos;
         else
@@ -991,7 +980,7 @@ function bes = beschleunigung(spiel, farbe)
                 end
                 RandPoints(i,5)=RandPoints(i,3)*10-RandPoints(i,4)*0.8;
             end
-            RandPoints=sortrows(RandPoints,[-5 -3 4 -1 -2])
+            RandPoints=sortrows(RandPoints,[-5 -3 4 -1 -2]);
             waypointList = appendToArray(waypointList, findPath(startPos, [RandPoints(1,1),RandPoints(1,2)]));
             debugDRAW();
         end
@@ -1003,7 +992,6 @@ function bes = beschleunigung(spiel, farbe)
     %corridor colliding
     function erg = corridorColliding(startp, endp, radius)
         dir = vecNorm(endp-startp);
-        n = getPerpend(dir);
         erg = false;
         
             %middle line
@@ -1072,6 +1060,13 @@ function bes = beschleunigung(spiel, farbe)
         erg = norm(deltaV)/spiel.bes;
     end
 
+    function erg = getMaxVelocityToAlignInTime(vec1, vec2, time)
+        vec1 = vecNorm(vec1);
+        vec2 = vecNorm(vec2);
+        deltaVec = vec2-vec1;
+        erg = time*spiel.bes/norm(deltaVec);
+    end
+
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     function endPosition = safeDeleteWaypoints()
         %nothing to do
@@ -1080,7 +1075,15 @@ function bes = beschleunigung(spiel, farbe)
             return;
         end
         
+        %break distance and direction to next waypoint
+        breakDistance = calcBreakDistance(norm(me.ges), 0)*0.8;
+        dir = vecNorm(waypointList{1}-me.pos);
+        
+        %end position = full break distance
+        endPosition = me.pos + dir*breakDistance;
+        
         waypointList = [];
+        waypointList{1} = endPosition;
     end
 
     
