@@ -4,9 +4,10 @@ clear variables
 close all
 clc
 
-
 %rng shuffle
-rng (42)
+%rng (9474)
+r = round(rand(1)*10000)
+rng(r)
 
 
 %% Konstanten definieren
@@ -43,7 +44,7 @@ spiel.farbe.hellblau = hsv2rgb ([0.6 0.4 1]);
 spiel.farbe.grau = [0.4 0.4 0.4];
 spiel.farbe.hellgrau = [0.8 0.8 0.8];
 
-spiel.spur_anfangswert = 0.1*spiel.n_t;
+spiel.spur_anfangswert = 1*spiel.n_t;
 spiel.zeitlupe_anfangswert = 0;
 spiel.ges_checkbox_anfangswert = true;
 spiel.bes_checkbox_anfangswert = true;
