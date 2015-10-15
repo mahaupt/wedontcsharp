@@ -1048,7 +1048,7 @@ function bes = beschleunigung(spiel, farbe)
     function fleeEnemy()
         if numel(waypointList) == 0
             a=rand();
-            if a < 0.5
+            if a < 0.6
                 cornerTricking();
             elseif waitForEnemy == false
                 randomFlee();
@@ -1076,28 +1076,31 @@ function bes = beschleunigung(spiel, farbe)
     end
 
     function cornerTricking()
+        cornerNodes = [0.03,0.97,0;0.97,0.97,0;0.03,0.03,0;0.97,0.03,0];
         if waitForEnemy == false
             disp('cornerTricking Pt1');
             %get nearest corner, go there and wait
             if waitForEnemy == false
-                cornerNodes = [0.08,0.92,0;0.92,0.92,0;0.08,0.08,0;0.92,0.08,0];
                 for i=1:4
-                    cornerNodes(i,3)=norm([cornerNodes(i,1), cornerNodes(i,2)]-me.pos);
+                    cornerNodes(i,3)=norm(cornerNodes(i,1:2)-me.pos);
                 end
-                cornerNodes = sortrows(cornerNodes, [3 2 1]);
-                waypointList = appendToArray(waypointList, findPath(me.pos,[cornerNodes(1,1), cornerNodes(1,2)]));
+                nearestCorner = sortrows(cornerNodes, [3 2 1]);
+                waypointList = appendToArray(waypointList, findPath(me.pos,nearestCorner(1,1:2)));
                 waitForEnemy = true;
             end
-        elseif waitForEnemy == true && norm(enemy.pos-me.pos) < 0.2
-            disp('cornerTricking Pt2');
-            cornerNodes2 = [0.08,0.92,0;0.92,0.92,0;0.08,0.08,0;0.92,0.08,0];
-                for i=1:4
-                    cornerNodes2(i,3)=norm([cornerNodes2(i,1), cornerNodes2(i,2)]-me.pos-enemy.ges);
-                end
-            cornerNodes2 = sortrows(cornerNodes2, [3 2 1]);
-            pos = [cornerNodes2(2,1), cornerNodes2(2,2)];
-            waypointList = appendToArray(waypointList, findPath(me.pos, pos));
-            waitForEnemy = false;
+        elseif waitForEnemy == true
+            enemyPath = me.pos-enemy.pos;
+            tenemy  = norm(enemyPath)/projectVectorNorm(enemy.ges, enemyPath);
+            enemyColliding = corridorColliding(enemy.pos, me.pos, spiel.spaceball_radius);
+            if (tenemy > 0 && tenemy < 0.1 && ~enemyColliding)
+                disp('cornerTricking Pt2');
+                    for i=1:4
+                        cornerNodes(i,3)=norm(cornerNodes(i,1:2)-me.pos-enemy.ges);
+                    end
+                nextCorner = sortrows(cornerNodes, [3 2 1]);
+                waypointList = appendToArray(waypointList, findPath(me.pos, nextCorner(2,1:2)));
+                waitForEnemy = false;
+            end
         end
     end
 
