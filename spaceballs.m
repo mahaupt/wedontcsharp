@@ -7,7 +7,7 @@ clc
 %rng shuffle
 %rng (9474)
 r = round(rand(1)*10000)
-rng(6136)
+rng(r)
 
 
 %% Konstanten definieren
