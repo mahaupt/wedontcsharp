@@ -524,8 +524,8 @@ function bes = beschleunigung(spiel, farbe)
         ergInsertIndex = 1;
         
         %add first waypoint
-        erg{ergInsertIndex} = path{1};
-        ergInsertIndex = ergInsertIndex+1;
+        %erg{ergInsertIndex} = path{1};
+        %ergInsertIndex = ergInsertIndex+1;
         
         while(checkIndex < pathLength)
             isCollided = false;
@@ -1026,6 +1026,10 @@ function bes = beschleunigung(spiel, farbe)
             erg = enemy.pos;
         else
             erg = enemy.pos + enemy.ges*thit + 0.5*enemy.bes*thit^2;
+            
+            %clamping erg
+            safeSpaceballRadius = spiel.spaceball_radius + constSafeBorder;
+            erg = clamp(erg, safeSpaceballRadius, 1-safeSpaceballRadius);
         end
     end
 
