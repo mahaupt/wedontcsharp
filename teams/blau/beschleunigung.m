@@ -110,18 +110,15 @@ function bes = beschleunigung(spiel, farbe)
         %calculate safe breaking endvelocity
         breakingEndVel = calcBreakingEndVel();
         
-        tooFast = checkIfTooFast();
-        emergencyBreak = emergencyBreaking();
-        
         %decelleration
         distanceToWaypoint=norm(waypointList{1}-me.pos);
         breakDistance = calcBreakDistance(norm(me.ges), breakingEndVel);
-        if (breakDistance > distanceToWaypoint || tooFast)
+        if (breakDistance > distanceToWaypoint || checkIfTooFast())
             erg=-dir + corr*5;
         end
         
         %emergencyBreaking
-        if (emergencyBreak)
+        if (emergencyBreaking())
             disp('emergency Break active');
             erg = -me.ges;
         end
@@ -170,8 +167,15 @@ function bes = beschleunigung(spiel, farbe)
         
         %%check if about to collide
         safeSpaceballRadius = constSafeBorder + spiel.spaceball_radius;
-        breakDist = calcBreakDistance(norm(velocity), 0)*1.3;
-        checkPoint = me.pos + vecNorm(me.ges)*breakDist;
+
+        %new emergency breaking - is it better?
+        breakTime = norm(me.ges) / spiel.bes;
+        checkPoint = me.pos + me.ges*breakTime + me.bes*0.1*breakTime^2;
+ 
+        %old emergency breaking
+        %breakDist = calcBreakDistance(norm(velocity), 0)*1.3;
+        %checkPoint = me.pos + vecNorm(me.ges)*breakDist;
+        
         if (~isWalkable(checkPoint, safeSpaceballRadius) && velocity >= 0.01)
             erg = true;
             return
