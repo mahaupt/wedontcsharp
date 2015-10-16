@@ -170,7 +170,7 @@ function bes = beschleunigung(spiel, farbe)
 
         %new emergency breaking - is it better?
         breakTime = norm(me.ges) / spiel.bes;
-        checkPoint = me.pos + me.ges*breakTime + me.bes*0.1*breakTime^2;
+        checkPoint = me.pos + me.ges*breakTime*1.3 + me.bes*0.1*breakTime^2;
  
         %old emergency breaking
         %breakDist = calcBreakDistance(norm(velocity), 0)*1.3;
