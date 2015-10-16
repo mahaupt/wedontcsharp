@@ -119,7 +119,6 @@ function bes = beschleunigung(spiel, farbe)
         
         %emergencyBreaking
         if (emergencyBreaking())
-            disp('emergency Break active');
             erg = -me.ges;
         end
         
@@ -524,8 +523,8 @@ function bes = beschleunigung(spiel, farbe)
         ergInsertIndex = 1;
         
         %add first waypoint
-        %erg{ergInsertIndex} = path{1};
-        %ergInsertIndex = ergInsertIndex+1;
+        erg{ergInsertIndex} = path{1};
+        ergInsertIndex = ergInsertIndex+1;
         
         while(checkIndex < pathLength)
             isCollided = false;
@@ -949,9 +948,13 @@ function bes = beschleunigung(spiel, farbe)
             
             %only if tanke is about to get taken
             if (tenemy > 0 && tenemy < 0.25 && ~enemyColliding)
-                if (i==1 && norm(tenemy- town) < constCompetitionModeThreshold && ~tankeCompetition && ~ownColliding)
+                if (i==1 && norm(tenemy- town) < constCompetitionModeThreshold && ~tankeCompetition && ~ownColliding ...
+                        && tvown < 0.5)
                     disp('competition mode activated');
                     tankeCompetition = true;
+                    
+                    disp(tvown);
+                    disp(tvenemy);
                     
                     %competition mode activated
                     accpos = getAccPos(spiel.tanke(tankeIndex).pos);
