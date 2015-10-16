@@ -45,7 +45,7 @@ function bes = beschleunigung(spiel, farbe)
     if enemy.getankt == 4
         constCompetitionModeThreshold = 0.2;
     else
-        constCompetitionModeThreshold = 0.075;
+        constCompetitionModeThreshold = 0.1;
     end
     
 %% Veränderungen des Spielfeldes bemerken und dementsprechend handeln
