@@ -172,11 +172,10 @@ function bes = beschleunigung(spiel, farbe)
 
         %new emergency breaking - is it better?
         breakTime = norm(me.ges) / spiel.bes;
-        checkPoint = me.pos + me.ges*breakTime*1.3 + me.bes*0.1*breakTime^2;
- 
-        %old emergency breaking
-        %breakDist = calcBreakDistance(norm(velocity), 0)*1.3;
-        %checkPoint = me.pos + vecNorm(me.ges)*breakDist;
+        %only get the direction changing acceleration (90° from v)
+        gesPerpend = vecNorm(getPerpend(me.ges)); %vector 90° from v
+        besPerpend = gesPerpend*projectVectorNorm(me.bes, gesPerpend);
+        checkPoint = me.pos + me.ges*breakTime*1.3 + besPerpend*0.1*breakTime^2;
         
         if (~isWalkable(checkPoint, safeSpaceballRadius) && velocity >= 0.01)
             erg = true;
@@ -955,9 +954,6 @@ function bes = beschleunigung(spiel, farbe)
                         && tvown < 0.5)
                     disp('competition mode activated');
                     tankeCompetition = true;
-                    
-                    disp(tvown);
-                    disp(tvenemy);
                     
                     %competition mode activated
                     accpos = getAccPos(spiel.tanke(tankeIndex).pos);
