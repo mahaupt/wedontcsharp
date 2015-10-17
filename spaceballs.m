@@ -4,9 +4,9 @@ clear variables
 close all
 clc
 
-%rng shuffle
+rng shuffle
 %rng (9474)
-r = round(rand(1)*10000)
+r = round(rand(1)*1000000)
 rng(r)
 
 
