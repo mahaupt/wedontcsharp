@@ -1,17 +1,18 @@
-<<<<<<< HEAD
 % Wichtig:
 % clear variables in spaceballs.m muss auskommentiert sein!
+% in spaceballs spiel.zeitraffer_checkbox_anfangswert true setzen!
+% shuffle mode on
 
 clear all
-range = 10
+range = 2
 data = cell(range,5);
 
 
     for stat_i = 1 : 1 : range
         % run spaceballs, zeitraffer auto-on
+        
         spaceballs
-        zeitraffer_checkbox_anfangswert = true;
-       
+              
         % aktueller Schritt in data Zeile i, Spalte 2 eintragen
         data{stat_i,1} = horzcat('Lauf Nr.:  ', num2str(stat_i));      
         
