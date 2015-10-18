@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 % Wichtig:
 % clear variables in spaceballs.m muss auskommentiert sein!
 
@@ -41,9 +42,6 @@ Quote = horzcat('Von ', num2str(range), ' Spielen wurde(n) ', num2str(sumWins), 
 Statistische_Erhebung = data
  
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% debugging / playground
 
 
-
-   
+ 
