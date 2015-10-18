@@ -733,7 +733,7 @@ function bes = beschleunigung(spiel, farbe)
             end
     end
 
-    function erg=lineColliding(startp, endp, radius)
+    function erg = lineColliding(startp, endp, radius)
         erg = false;
 
             for i=1:spiel.n_mine
@@ -883,7 +883,7 @@ function bes = beschleunigung(spiel, farbe)
             dirToTanke = vecNorm(spiel.tanke(i).pos-position);
             for j=1:spiel.n_tanke 
                 dirToNextTanke = vecNorm(spiel.tanke(j).pos-spiel.tanke(i).pos);
-                if (dot(dirToTanke, dirToNextTanke) > 0.86) 
+                if (dot(dirToTanke, dirToNextTanke) > 0.8) 
                     erg(i,4) = erg(i,4) + 1;
                 end
             end
