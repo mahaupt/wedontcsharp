@@ -1033,6 +1033,7 @@ function bes = beschleunigung(spiel, farbe)
         
         thit = (sqrt(vel^2+2*acc*dist)-vel)/acc;
         
+        %vorher : (thit < 1)
         if (dist > 0.2)
             erg = enemy.pos;
         else
