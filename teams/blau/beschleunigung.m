@@ -733,7 +733,7 @@ function bes = beschleunigung(spiel, farbe)
             end
     end
 
-    function erg=lineColliding(startp, endp, radius)
+    function erg = lineColliding(startp, endp, radius)
         erg = false;
 
             for i=1:spiel.n_mine
