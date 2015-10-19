@@ -70,7 +70,7 @@ data = cell(range,9);
         else
            data{stat_i,1} = 99;
            data{stat_i,3} = 'ERROR';
-           data{stat_i,4} = 'ERROR';
+           data{stat_i,4} = me.ereignis;
            data{stat_i,5} = spiel.i_t/100;
            data{stat_i,6} = horzcat('# ', num2str(r));
         end

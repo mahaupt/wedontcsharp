@@ -1086,8 +1086,6 @@ function bes = beschleunigung(spiel, farbe)
         end
     end
 
-
-
     function cornerTricking()
         
         %define a Matrix that contains all corner positions
