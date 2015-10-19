@@ -6,7 +6,7 @@ clear all
 close all
 clc
 
-range = 3; % Anzahl Durchgänge
+range = 100; % Anzahl Durchgänge
 color = 1; % Eigene Farbe eintragen: 1 für Blau, 2 für Rot
 
 
@@ -119,6 +119,8 @@ for i=1:range
     end
 end
 medianTime = medianTime/sumWins;
+
+
 
 Satz = horzcat('Von ', num2str(range), ' Spielen wurden ', num2str(sumWins), ' in durchschnittlich ', num2str(medianTime), ' Sekunden gewonnen.');
 Quote1 = horzcat('Gewonnen: ', num2str(sumWins/range*100),' %');
