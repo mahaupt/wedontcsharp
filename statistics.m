@@ -6,14 +6,14 @@ clear all
 close all
 clc
 
-range = 1; % Anzahl Durchgänge
-color = 1; % 1 für Blau, 2 für Rot
+range = 3; % Anzahl Durchgänge
+color = 1; % Eigene Farbe eintragen: 1 für Blau, 2 für Rot
+
+
+
 
 
 data = cell(range,9);
-data{:,7} = 0;
-data{:,8} = 0;
-data{:,9} = 0;
 
     for stat_i = 1 : 1 : range
         % run spaceballs
@@ -29,6 +29,10 @@ data{:,9} = 0;
         
         % aktueller Schritt in data Zeile i, Spalte 2 eintragen
         data{stat_i,2} = horzcat(num2str(stat_i));
+        data{stat_i,7} = 0;
+        data{stat_i,8} = 0;
+        data{stat_i,9} = 0;
+        
         
         % data füllen: wenn verloren, dann den Seed und den Grund ausgeben
         if spiel.blau.punkte == 1
@@ -72,7 +76,7 @@ data{:,9} = 0;
         end
         
         % clear variables vgl. Spaceballs.m ausführen, Ausnahme: data und range
-        clearvars -except data range
+        clearvars -except data range color
 
         
     end
@@ -82,6 +86,7 @@ sumWins = 0;
 sumLose = 0;
 sumAttack = 0;
 sumDefense = 0;
+sumERROR = 0;
 gegErwischt = 0;
 MineGetr = 0;
 BandeGetr = 0;
@@ -102,6 +107,8 @@ for i=1:range
         sumAttack = sumAttack + 1;
     elseif cellfun(@double,data(i,1)) == 3
         sumDefense = sumDefense + 1;
+    elseif cellfun(@double,data(i,1)) == 99
+        sumERROR = sumERROR + 1;
     end
 end
 
@@ -121,6 +128,7 @@ Quote4 = horzcat('   davon in Mine gefahren: ', num2str(MineGetr/sumLose*100),' 
 Quote5 = horzcat('   davon in Bande gefahren: ', num2str(BandeGetr/sumLose*100),' %');
 Quote6 = horzcat('Unentschieden im Angriff: ', num2str(sumAttack/range*100),' %');
 Quote7 = horzcat('Unentschieden in der Verteidigung: ', num2str(sumDefense/range*100),' %');
+Quote8 = horzcat('Error: ', num2str(sumERROR/range*100),' %');
 
 Statistische_Erhebung = data(:,2:6);
 clc;
@@ -137,6 +145,8 @@ disp(' ');
 disp(Quote6);
 disp(' ');
 disp(Quote7);
+disp(' ');
+disp(Quote8);
 disp(' ');
 disp(' ');
 disp(Statistische_Erhebung);
