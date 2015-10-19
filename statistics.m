@@ -10,7 +10,10 @@ range = 1; % Anzahl Durchgänge
 color = 1; % 1 für Blau, 2 für Rot
 
 
-data = cell(range,7);
+data = cell(range,9);
+data{:,7} = 0;
+data{:,8} = 0;
+data{:,9} = 0;
 
     for stat_i = 1 : 1 : range
         % run spaceballs
@@ -36,8 +39,6 @@ data = cell(range,7);
            data{stat_i,6} = horzcat('# ', num2str(r));
            if strcmp(me.ereignis,'Rot trifft Blau.') || strcmp(me.ereignis,'Blau trifft Rot.')
                 data{stat_i,7} = 1;
-           else
-               data{stat_i,7} = 0;
            end
         elseif spiel.rot.punkte == 1
            data{stat_i,1} = 0;
@@ -45,15 +46,20 @@ data = cell(range,7);
            data{stat_i,4} = me.ereignis;
            data{stat_i,5} = spiel.i_t/100;
            data{stat_i,6} = horzcat('# ', num2str(r));
+           if strcmp(me.ereignis,'Rot trifft Mine.') || strcmp(me.ereignis,'Blau trifft Mine.')
+               data{stat_i,8} = 1;
+           elseif strcmp(me.ereignis,'Rot trifft Bande.') || strcmp(me.ereignis,'Blau trifft Bande.')
+               data{stat_i,9} = 1;
+           end
         elseif spiel.blau.getankt > spiel.rot.getankt
            data{stat_i,1} = 2;
-           data{stat_i,3} = 'Unent. Angr.';
+           data{stat_i,3} = 'Unent. Angriff';
            data{stat_i,4} = me.ereignis;
            data{stat_i,5} = spiel.i_t/100;
            data{stat_i,6} = horzcat('# ', num2str(r));
         elseif spiel.blau.getankt < spiel.rot.getankt
            data{stat_i,1} = 3;
-           data{stat_i,3} = 'Unent. Vert.';
+           data{stat_i,3} = 'Unent. Verteifigung';
            data{stat_i,4} = me.ereignis;
            data{stat_i,5} = spiel.i_t/100;
            data{stat_i,6} = horzcat('# ', num2str(r));
@@ -77,13 +83,20 @@ sumLose = 0;
 sumAttack = 0;
 sumDefense = 0;
 gegErwischt = 0;
+MineGetr = 0;
+BandeGetr = 0;
 for i=1:range
     if cellfun(@double,data(i,1)) == 1
         sumWins = sumWins + 1;
-    elseif cellfun(@double,data(i,1)) == 0
-        sumLose = sumLose + 1;
         if cellfun(@double,data(i,7)) == 1
             gegErwischt = gegErwischt + 1;
+        end
+    elseif cellfun(@double,data(i,1)) == 0
+        sumLose = sumLose + 1;
+        if cellfun(@double,data(i,8)) == 1
+            MineGetr = MineGetr + 1;
+        elseif cellfun(@double,data(i,9)) == 1
+            BandeGetr = BandeGetr + 1;
         end
     elseif cellfun(@double,data(i,1)) == 2
         sumAttack = sumAttack + 1;
@@ -102,10 +115,10 @@ medianTime = medianTime/sumWins;
 
 Satz = horzcat('Von ', num2str(range), ' Spielen wurden ', num2str(sumWins), ' in durchschnittlich ', num2str(medianTime), ' Sekunden gewonnen.');
 Quote1 = horzcat('Gewonnen: ', num2str(sumWins/range*100),' %');
-Quote2 = horzcat('   davon den Gegner erwischt: ', num2str(gegErwischt/sumWins),' %');
+Quote2 = horzcat('   davon den Gegner erwischt: ', num2str(gegErwischt/sumWins*100),' %');
 Quote3 = horzcat('Verloren: ', num2str(sumLose/range*100),' %');
-Quote4 = horzcat('   davon in Mine gefahren: ');
-Quote5 = horzcat('   davon in Bande gefahren: ');
+Quote4 = horzcat('   davon in Mine gefahren: ', num2str(MineGetr/sumLose*100),' %');
+Quote5 = horzcat('   davon in Bande gefahren: ', num2str(BandeGetr/sumLose*100),' %');
 Quote6 = horzcat('Unentschieden im Angriff: ', num2str(sumAttack/range*100),' %');
 Quote7 = horzcat('Unentschieden in der Verteidigung: ', num2str(sumDefense/range*100),' %');
 
@@ -113,12 +126,17 @@ Statistische_Erhebung = data(:,2:6);
 clc;
 disp(Satz);
 disp(' ');
+disp(' ');
 disp(Quote1);
 disp(Quote2);
+disp(' ');
 disp(Quote3);
 disp(Quote4);
 disp(Quote5);
+disp(' ');
 disp(Quote6);
+disp(' ');
 disp(Quote7);
+disp(' ');
 disp(' ');
 disp(Statistische_Erhebung);

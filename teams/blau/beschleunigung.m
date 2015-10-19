@@ -1094,12 +1094,9 @@ function bes = beschleunigung(spiel, farbe)
 
 
     function cornerTricking()
-<<<<<<< HEAD
+        
         %define a Matrix that contains all corner positions
-        cornerNodes = [0.015,0.985,0;0.985,0.985,0;0.015,0.015,0;0.985,0.015,0];
-=======
         cornerNodes = [0.01,0.99,0;0.99,0.99,0;0.01,0.01,0;0.99,0.01,0];
->>>>>>> master
         if waitForEnemy == false
             disp('cornerTricking Pt1');
 %             get nearest corner, go there and wait
@@ -1119,13 +1116,9 @@ function bes = beschleunigung(spiel, farbe)
             tenemy  = norm(enemyPath)/projectVectorNorm(enemy.ges, enemyPath);
             %check if there is a mine on the enemy's path towards us
             enemyColliding = corridorColliding(enemy.pos, me.pos, spiel.spaceball_radius);
-<<<<<<< HEAD
-            %if the enemy takes in between 0 and 0.1 to get to us and ther is no mine on its path
-            if (tenemy > 0 && tenemy < 0.2 && ~enemyColliding)
-=======
+
             
             if checkIfTooFastE () == true %|| tenemy < 0.0001
->>>>>>> master
                 disp('cornerTricking Pt2');
                     %sort all corners based on the direction the enemy is coming from and their distance to us
                     for i=1:4
