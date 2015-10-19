@@ -8,6 +8,7 @@ function bes = beschleunigung(spiel, farbe)
     constCornerBreaking = 0.25; %0.03 je größer der Winkel zum nächsten Wegpunkt, desto höheres Bremsen. Faktor.
     constEmrBrkAccFac = 0.2; %betrachtet Seitwärtsbbeschleunigungen fürs Emergencybreaking
     constEmrBrkVelFac = 1.3; %betrachtet Geschwindigkeit fürs Emergencybreaking
+    constCompetitionModeThreshold = 0.1;
     
     %statische Variablen definieren
     persistent nodeGrid;
@@ -44,11 +45,11 @@ function bes = beschleunigung(spiel, farbe)
         setupNodeGrid();
     end
     
-    if enemy.getankt == 4
-        constCompetitionModeThreshold = 0.2;
-    else
-        constCompetitionModeThreshold = 0.1;
-    end
+    %if enemy.getankt == 4
+    %    constCompetitionModeThreshold = 0.2;
+    %else
+    %    constCompetitionModeThreshold = 0.1;
+    %end
     
 %% Veränderungen des Spielfeldes bemerken und dementsprechend handeln
     %Nodegrid beim Verschwinden einer Mine aktualisieren:
@@ -131,6 +132,11 @@ function bes = beschleunigung(spiel, farbe)
         if norm(me.pos-waypointList{1}) < constWayPointReachedRadius
             waypointList(1) = [];
             debugDRAW();
+            
+        elseif (corridorColliding(me.pos, waypointList{1}, spiel.spaceball_radius))
+            %%überprüfe, ob 1. Wegpunkt erreichbar ist - wenn nicht, lösche und
+            %%berechne neu
+            waypointList = [];
         end
     end
 

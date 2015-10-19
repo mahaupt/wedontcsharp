@@ -7,7 +7,7 @@ clc
 rng shuffle
 %rng (9474);
 r = round(rand(1)*1000000);
-rng(537065);
+rng(r);
 
 
 %% Konstanten definieren
