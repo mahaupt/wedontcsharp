@@ -1,9 +1,8 @@
-<<<<<<< HEAD
 % Wichtig:
 % clear variables in spaceballs.m muss auskommentiert sein!
 
 clear all
-range = 10
+range = 100
 data = cell(range,5);
 
 
