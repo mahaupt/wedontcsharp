@@ -17,8 +17,8 @@ spiel.t_end = 60;
 spiel.n_t = round (spiel.t_end/spiel.dt);
 spiel.i_t = 0;
 
-spiel.n_mine = 0; % Muss gerade sein! (Default: 12)
-spiel.n_tanke = 5; % Muss ungerade sein! (Default: 9)
+spiel.n_mine = 12; % Muss gerade sein! (Default: 12)
+spiel.n_tanke = 9; % Muss ungerade sein! (Default: 9)
 
 spiel.kreis_radius = 0.075;
 spiel.mine_radius = 0.05;
