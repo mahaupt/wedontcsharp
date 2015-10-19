@@ -2,7 +2,7 @@
 % clear variables in spaceballs.m muss auskommentiert sein!
 
 clear all
-range = 100
+range = 10
 data = cell(range,5);
 
 

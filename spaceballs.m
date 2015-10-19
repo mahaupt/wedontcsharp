@@ -1,8 +1,8 @@
 %% Initialisierung
 
-clear variables
+%clear variables
 close all
-clc
+%clc
 
 rng shuffle
 %rng (9474)
@@ -48,7 +48,7 @@ spiel.spur_anfangswert = 1*spiel.n_t;
 spiel.zeitlupe_anfangswert = 0;
 spiel.ges_checkbox_anfangswert = true;
 spiel.bes_checkbox_anfangswert = true;
-spiel.zeitraffer_checkbox_anfangswert = false;
+spiel.zeitraffer_checkbox_anfangswert = true;
 
 spiel.rot.spur(spiel.n_t, 2) = 0;
 spiel.blau.spur(spiel.n_t, 2) = 0;
