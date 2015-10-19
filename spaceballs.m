@@ -1,8 +1,8 @@
 %% Initialisierung
 
-%clear variables
+clear variables
 close all
-%clc
+clc
 
 rng shuffle
 %rng (9474);
