@@ -6,8 +6,8 @@ function bes = beschleunigung(spiel, farbe)
     constWayPointReachedRadius = 0.02; %0.01
     constMineProxPenality = 0.0006; %Strafpunkte für Nodes - je dichter an Mine, desto höher
     constCornerBreaking = 0.3; %0.03 je größer der Winkel zum nächsten Wegpunkt, desto höheres Bremsen. Faktor.
-    constEmrBrkAccFac = 0.1; %betrachtet Seitwärtsbbeschleunigungen fürs Emergencybreaking
-    constEmrBrkVelFac = 1.2; %betrachtet Geschwindigkeit fürs Emergencybreaking
+    constEmrBrkAccFac = 0.05; %betrachtet Seitwärtsbbeschleunigungen fürs Emergencybreaking
+    constEmrBrkVelFac = 1.1; %betrachtet Geschwindigkeit fürs Emergencybreaking
     
     %statische Variablen definieren
     persistent nodeGrid;
@@ -182,18 +182,19 @@ function bes = beschleunigung(spiel, farbe)
     %emergency breaking
     function erg = emergencyBreaking()
         erg = false;
+        
         velocity = norm(me.ges);
         
         %%check if about to collide
-        safeSpaceballRadius = constSafeBorder + spiel.spaceball_radius;
+        safeSpaceballRadius = (spiel.spaceball_radius);
 
         %new emergency breaking - is it better?
-        breakTime = norm(me.ges) / spiel.bes;
+        breakTime = velocity / spiel.bes;
         %only get the direction changing acceleration (90° from v)
         gesPerpend = vecNorm(getPerpend(me.ges)); %vector 90° from v
         besPerpend = gesPerpend*projectVectorNorm(me.bes, gesPerpend);
-        checkPoint1 = me.pos + me.ges*breakTime*constEmrBrkVelFac + besPerpend*constEmrBrkAccFac*breakTime^2;
-        checkPoint2 = me.pos + me.ges*breakTime*constEmrBrkVelFac; %without acceleration
+        checkPoint1 = me.pos + 0.5*me.ges*breakTime*constEmrBrkVelFac + 0.5*besPerpend*constEmrBrkAccFac*breakTime^2;
+        checkPoint2 = me.pos + 0.5*me.ges*breakTime*constEmrBrkVelFac; %without acceleration
         
         %check if breaking corridors are free
         %check endpoints are free (includes barriers)
@@ -201,7 +202,7 @@ function bes = beschleunigung(spiel, farbe)
                 ~isWalkable(checkPoint2, safeSpaceballRadius) || ...
             corridorColliding(me.pos, checkPoint1, safeSpaceballRadius) || ...
             corridorColliding(me.pos, checkPoint2, safeSpaceballRadius)))
-        
+
             erg = true;
             return
         end
