@@ -7,7 +7,7 @@ function bes = beschleunigung(spiel, farbe)
     constMineProxPenality = 0.0006; %Strafpunkte für Nodes - je dichter an Mine, desto höher
     constCornerBreaking = 0.25; %0.03 je größer der Winkel zum nächsten Wegpunkt, desto höheres Bremsen. Faktor.
     constEmrBrkAccFac = 0.2; %betrachtet Seitwärtsbbeschleunigungen fürs Emergencybreaking
-    constEmrBrkVelFac = 1.3; %betrachtet Geschwindigkeit fürs Emergencybreaking
+    constEmrBrkVelFac = 1.2; %betrachtet Geschwindigkeit fürs Emergencybreaking
     constCompetitionModeThreshold = 0.1;
     
     %statische Variablen definieren
