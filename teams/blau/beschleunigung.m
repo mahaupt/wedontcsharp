@@ -6,8 +6,8 @@ function bes = beschleunigung(spiel, farbe)
     constWayPointReachedRadius = 0.02; %0.01
     constMineProxPenality = 0.0006; %Strafpunkte für Nodes - je dichter an Mine, desto höher
     constCornerBreaking = 0.3; %0.03 je größer der Winkel zum nächsten Wegpunkt, desto höheres Bremsen. Faktor.
-    constEmrBrkAccFac = 0.1; %betrachtet Seitwärtsbbeschleunigungen fürs Emergencybreaking
-    constEmrBrkVelFac = 1.2; %betrachtet Geschwindigkeit fürs Emergencybreaking
+    constEmrBrkAccFac = 0.05; %betrachtet Seitwärtsbbeschleunigungen fürs Emergencybreaking
+    constEmrBrkVelFac = 1.1; %betrachtet Geschwindigkeit fürs Emergencybreaking
     
     %statische Variablen definieren
     persistent nodeGrid;
@@ -164,21 +164,37 @@ function bes = beschleunigung(spiel, farbe)
         
     end
 
+    %check if enemy is too fast 
+    function erg = checkIfTooFastE ()
+        
+%         enemyPath = me.pos-enemy.pos;
+              
+          if  (norm(me.pos-enemy.pos)) < (((norm(enemy.ges))^2)/(norm(enemy.bes)*2)+0.03);
+            erg = true;
+            
+          else 
+              erg = false 
+        
+        end
+    end
+
+
     %emergency breaking
     function erg = emergencyBreaking()
         erg = false;
+        
         velocity = norm(me.ges);
         
         %%check if about to collide
-        safeSpaceballRadius = constSafeBorder + spiel.spaceball_radius;
+        safeSpaceballRadius = (spiel.spaceball_radius);
 
         %new emergency breaking - is it better?
-        breakTime = norm(me.ges) / spiel.bes;
+        breakTime = velocity / spiel.bes;
         %only get the direction changing acceleration (90° from v)
         gesPerpend = vecNorm(getPerpend(me.ges)); %vector 90° from v
         besPerpend = gesPerpend*projectVectorNorm(me.bes, gesPerpend);
-        checkPoint1 = me.pos + me.ges*breakTime*constEmrBrkVelFac + besPerpend*constEmrBrkAccFac*breakTime^2;
-        checkPoint2 = me.pos + me.ges*breakTime*constEmrBrkVelFac; %without acceleration
+        checkPoint1 = me.pos + 0.5*me.ges*breakTime*constEmrBrkVelFac + 0.5*besPerpend*constEmrBrkAccFac*breakTime^2;
+        checkPoint2 = me.pos + 0.5*me.ges*breakTime*constEmrBrkVelFac; %without acceleration
         
         %check if breaking corridors are free
         %check endpoints are free (includes barriers)
@@ -186,7 +202,7 @@ function bes = beschleunigung(spiel, farbe)
                 ~isWalkable(checkPoint2, safeSpaceballRadius) || ...
             corridorColliding(me.pos, checkPoint1, safeSpaceballRadius) || ...
             corridorColliding(me.pos, checkPoint2, safeSpaceballRadius)))
-        
+
             erg = true;
             return
         end
@@ -991,7 +1007,7 @@ function bes = beschleunigung(spiel, farbe)
         
         %check if path to enemy is free
         enemypos = calcEnemyHitPosition();
-        if (~corridorColliding(me.pos, enemypos, constNavSecurity))
+        if (~corridorColliding(me.pos, enemy.pos, constNavSecurity))
             %delete all other waypoints
             if (numel(waypointList) > 1)
                 safeDeleteWaypoints();
@@ -1075,36 +1091,18 @@ function bes = beschleunigung(spiel, farbe)
         end
     end
 
-    function randomFlee()
-        disp('randomFlee');
-        startPos = safeDeleteWaypoints();
-        %create a matrix with four random points
-        RandPoints = rand(4,2);
-            for i=1:4
-                %get the distance to enemy and write to 3rd column
-                RandPoints(i,3)=norm(RandPoints(i,1:2)-enemy.pos);
-                RandPoints(i,4)=0;
-                %get the distances to all mines, add them up and write to 4th column
-                if spiel.n_mine > 1
-                    for j=1:spiel.n_mine
-                        RandPoints(i,4)=RandPoints(i,4)+norm(spiel.mine(j).pos-RandPoints(i,1:2));
-                    end
-                end
-                %add 3rd and 4th columns and prioritize the distance from enemy
-                RandPoints(i,5)=RandPoints(i,3)*10-RandPoints(i,4)*0.8;
-            end
-            RandPoints=sortrows(RandPoints,[-5 -3 4 -1 -2]);
-            %go to the best waypoint from the list
-            waypointList = appendToArray(waypointList, findPath(startPos, RandPoints(1,1:2)));
-            debugDRAW();
-    end
+
 
     function cornerTricking()
+<<<<<<< HEAD
         %define a Matrix that contains all corner positions
         cornerNodes = [0.015,0.985,0;0.985,0.985,0;0.015,0.015,0;0.985,0.015,0];
+=======
+        cornerNodes = [0.01,0.99,0;0.99,0.99,0;0.01,0.01,0;0.99,0.01,0];
+>>>>>>> master
         if waitForEnemy == false
             disp('cornerTricking Pt1');
-            %get nearest corner, go there and wait
+%             get nearest corner, go there and wait
             if waitForEnemy == false
                 for i=1:4
                     cornerNodes(i,3)=norm(cornerNodes(i,1:2)-me.pos);
@@ -1121,8 +1119,13 @@ function bes = beschleunigung(spiel, farbe)
             tenemy  = norm(enemyPath)/projectVectorNorm(enemy.ges, enemyPath);
             %check if there is a mine on the enemy's path towards us
             enemyColliding = corridorColliding(enemy.pos, me.pos, spiel.spaceball_radius);
+<<<<<<< HEAD
             %if the enemy takes in between 0 and 0.1 to get to us and ther is no mine on its path
             if (tenemy > 0 && tenemy < 0.2 && ~enemyColliding)
+=======
+            
+            if checkIfTooFastE () == true %|| tenemy < 0.0001
+>>>>>>> master
                 disp('cornerTricking Pt2');
                     %sort all corners based on the direction the enemy is coming from and their distance to us
                     for i=1:4
