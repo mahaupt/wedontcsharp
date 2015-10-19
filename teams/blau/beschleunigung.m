@@ -908,7 +908,7 @@ function bes = beschleunigung(spiel, farbe)
             dirToTanke = vecNorm(spiel.tanke(i).pos-position);
             for j=1:spiel.n_tanke 
                 dirToNextTanke = vecNorm(spiel.tanke(j).pos-spiel.tanke(i).pos);
-                if (dot(dirToTanke, dirToNextTanke) > 0.8) 
+                if (dot(dirToTanke, dirToNextTanke) > 0.7) 
                     erg(i,4) = erg(i,4) + 1;
                 end
             end
@@ -1094,6 +1094,8 @@ function bes = beschleunigung(spiel, farbe)
 
 
     function cornerTricking()
+        
+        %define a Matrix that contains all corner positions
         cornerNodes = [0.01,0.99,0;0.99,0.99,0;0.01,0.01,0;0.99,0.01,0];
         if waitForEnemy == false
             disp('cornerTricking Pt1');
@@ -1114,6 +1116,7 @@ function bes = beschleunigung(spiel, farbe)
             tenemy  = norm(enemyPath)/projectVectorNorm(enemy.ges, enemyPath);
             %check if there is a mine on the enemy's path towards us
             enemyColliding = corridorColliding(enemy.pos, me.pos, spiel.spaceball_radius);
+
             
             if checkIfTooFastE () == true %|| tenemy < 0.0001
                 disp('cornerTricking Pt2');
