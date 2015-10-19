@@ -1082,12 +1082,7 @@ function bes = beschleunigung(spiel, farbe)
     %Verteidigung
     function fleeEnemy()
         if numel(waypointList) == 0
-            a=rand();
-            if a < 1
-                cornerTricking();
-            elseif waitForEnemy == false
-                randomFlee();
-            end
+            cornerTricking();
         end
     end
 
