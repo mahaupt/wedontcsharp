@@ -6,7 +6,8 @@ function bes = beschleunigung(spiel, farbe)
     constWayPointReachedRadius = 0.02; %0.01
     constMineProxPenality = 0.0006; %Strafpunkte für Nodes - je dichter an Mine, desto höher
     constCornerBreaking = 0.3; %0.03 je größer der Winkel zum nächsten Wegpunkt, desto höheres Bremsen. Faktor.
-    constCompetitionModeThreshold = 0.075;
+    constEmrBrkAccFac = 0.05; %betrachtet Seitwärtsbbeschleunigungen fürs Emergencybreaking
+    constEmrBrkVelFac = 1.1; %betrachtet Geschwindigkeit fürs Emergencybreaking
     
     %statische Variablen definieren
     persistent nodeGrid;
@@ -43,7 +44,11 @@ function bes = beschleunigung(spiel, farbe)
         setupNodeGrid();
     end
     
-    
+    if enemy.getankt == 4
+        constCompetitionModeThreshold = 0.2;
+    else
+        constCompetitionModeThreshold = 0.1;
+    end
     
 %% Veränderungen des Spielfeldes bemerken und dementsprechend handeln
     %Nodegrid beim Verschwinden einer Mine aktualisieren:
@@ -96,6 +101,7 @@ function bes = beschleunigung(spiel, farbe)
 
 %% Beschleunigung berechnen
     function erg=calculateBES()
+        %Ist kein Wegpunkt vorhanden, schnellstmöglich auf 0 abbremsen und stehen bleiben
         if (numel(waypointList) <= 0)
             erg = -me.ges;
             return;
@@ -109,18 +115,15 @@ function bes = beschleunigung(spiel, farbe)
         %calculate safe breaking endvelocity
         breakingEndVel = calcBreakingEndVel();
         
-        tooFast = checkIfTooFast();
-        emergencyBreak = emergencyBreaking();
-        
         %decelleration
         distanceToWaypoint=norm(waypointList{1}-me.pos);
         breakDistance = calcBreakDistance(norm(me.ges), breakingEndVel);
-        if (breakDistance > distanceToWaypoint || tooFast)
+        if (breakDistance > distanceToWaypoint || checkIfTooFast())
             erg=-dir + corr*5;
         end
         
         %emergencyBreaking
-        if (emergencyBreak)
+        if (emergencyBreaking())
             erg = -me.ges;
         end
         
@@ -179,18 +182,29 @@ function bes = beschleunigung(spiel, farbe)
     %emergency breaking
     function erg = emergencyBreaking()
         erg = false;
+        
         velocity = norm(me.ges);
         
-        %collision check only on direct-mode
-        if (numel(waypointList) == 1)
-            %%check if about to collide
-            safeSpaceballRadius = constSafeBorder + spiel.spaceball_radius;
-            breakDist = calcBreakDistance(norm(velocity), 0)*1.3;
-            checkPoint = me.pos + vecNorm(me.ges)*breakDist;
-            if (~isWalkable(checkPoint, safeSpaceballRadius) && velocity >= 0.01)
-                erg = true;
-                return
-            end
+        %%check if about to collide
+        safeSpaceballRadius = (spiel.spaceball_radius);
+
+        %new emergency breaking - is it better?
+        breakTime = velocity / spiel.bes;
+        %only get the direction changing acceleration (90° from v)
+        gesPerpend = vecNorm(getPerpend(me.ges)); %vector 90° from v
+        besPerpend = gesPerpend*projectVectorNorm(me.bes, gesPerpend);
+        checkPoint1 = me.pos + 0.5*me.ges*breakTime*constEmrBrkVelFac + 0.5*besPerpend*constEmrBrkAccFac*breakTime^2;
+        checkPoint2 = me.pos + 0.5*me.ges*breakTime*constEmrBrkVelFac; %without acceleration
+        
+        %check if breaking corridors are free
+        %check endpoints are free (includes barriers)
+        if (velocity >= 0.01 && (~isWalkable(checkPoint1, safeSpaceballRadius) || ... 
+                ~isWalkable(checkPoint2, safeSpaceballRadius) || ...
+            corridorColliding(me.pos, checkPoint1, safeSpaceballRadius) || ...
+            corridorColliding(me.pos, checkPoint2, safeSpaceballRadius)))
+
+            erg = true;
+            return
         end
     end
 
@@ -744,7 +758,7 @@ function bes = beschleunigung(spiel, farbe)
             end
     end
 
-    function erg=lineColliding(startp, endp, radius)
+    function erg = lineColliding(startp, endp, radius)
         erg = false;
 
             for i=1:spiel.n_mine
@@ -894,7 +908,7 @@ function bes = beschleunigung(spiel, farbe)
             dirToTanke = vecNorm(spiel.tanke(i).pos-position);
             for j=1:spiel.n_tanke 
                 dirToNextTanke = vecNorm(spiel.tanke(j).pos-spiel.tanke(i).pos);
-                if (dot(dirToTanke, dirToNextTanke) > 0.86) 
+                if (dot(dirToTanke, dirToNextTanke) > 0.7) 
                     erg(i,4) = erg(i,4) + 1;
                 end
             end
@@ -961,7 +975,8 @@ function bes = beschleunigung(spiel, farbe)
             
             %only if tanke is about to get taken
             if (tenemy > 0 && tenemy < 0.25 && ~enemyColliding)
-                if (i==1 && norm(tenemy- town) < constCompetitionModeThreshold && ~tankeCompetition && ~ownColliding)
+                if (i==1 && norm(tenemy- town) < constCompetitionModeThreshold && ~tankeCompetition && ~ownColliding ...
+                        && tvown < 0.5)
                     disp('competition mode activated');
                     tankeCompetition = true;
                     
@@ -1034,10 +1049,15 @@ function bes = beschleunigung(spiel, farbe)
         
         thit = (sqrt(vel^2+2*acc*dist)-vel)/acc;
         
-        if (thit > 1)
+        %vorher : (thit > 1) neu : (dist > 0.2)
+        if (dist > 0.2)
             erg = enemy.pos;
         else
             erg = enemy.pos + enemy.ges*thit + 0.5*enemy.bes*thit^2;
+            
+            %clamping erg
+            safeSpaceballRadius = spiel.spaceball_radius + constSafeBorder;
+            erg = clamp(erg, safeSpaceballRadius, 1-safeSpaceballRadius);
         end
     end
 
@@ -1062,35 +1082,15 @@ function bes = beschleunigung(spiel, farbe)
     %Verteidigung
     function fleeEnemy()
         if numel(waypointList) == 0
-            a=rand();
-            if a < 1
-                cornerTricking();
-            elseif waitForEnemy == false
-                randomFlee();
-            end
+            cornerTricking();
         end
     end
 
-%     function randomFlee()
-%         disp('randomFlee');
-%         startPos = safeDeleteWaypoints();
-%         RandPoints = rand(4,2);
-%             for i=1:4
-%                 RandPoints(i,3)=norm([RandPoints(i,1),RandPoints(i,2)]-enemy.pos);
-%                 RandPoints(i,4)=0;
-%                 if spiel.n_mine > 1
-%                     for j=1:spiel.n_mine
-%                         RandPoints(i,4)=RandPoints(i,4)+norm(spiel.mine(j).pos-[RandPoints(i,1),RandPoints(i,2)]);
-%                     end
-%                 end
-%                 RandPoints(i,5)=RandPoints(i,3)*10-RandPoints(i,4)*0.8;
-%             end
-%             RandPoints=sortrows(RandPoints,[-5 -3 4 -1 -2]);
-%             waypointList = appendToArray(waypointList, findPath(startPos, [RandPoints(1,1),RandPoints(1,2)]));
-%             debugDRAW();
-%     end
+
 
     function cornerTricking()
+        
+        %define a Matrix that contains all corner positions
         cornerNodes = [0.01,0.99,0;0.99,0.99,0;0.01,0.01,0;0.99,0.01,0];
         if waitForEnemy == false
             disp('cornerTricking Pt1');
@@ -1103,37 +1103,29 @@ function bes = beschleunigung(spiel, farbe)
                 waypointList = appendToArray(waypointList, findPath(me.pos,nearestCorner(1,1:2)));
                 waitForEnemy = true;
             end
+        %waiting for the enemy
         elseif waitForEnemy == true
+            %calculate vector between us and enemy
             enemyPath = me.pos-enemy.pos;
+            %the time, enemy needs to get to our position
             tenemy  = norm(enemyPath)/projectVectorNorm(enemy.ges, enemyPath);
+            %check if there is a mine on the enemy's path towards us
             enemyColliding = corridorColliding(enemy.pos, me.pos, spiel.spaceball_radius);
+
+            
             if checkIfTooFastE () == true %|| tenemy < 0.0001
                 disp('cornerTricking Pt2');
+                    %sort all corners based on the direction the enemy is coming from and their distance to us
                     for i=1:4
                         cornerNodes(i,3)=norm(cornerNodes(i,1:2)-me.pos-enemy.ges);
                     end
                 nextCorner = sortrows(cornerNodes, [3 2 1]);
+                %go to the second corner, since the first one is on ourcurrent position
                 waypointList = appendToArray(waypointList, findPath(me.pos, nextCorner(2,1:2)));
                 waitForEnemy = false;
             end
         end
     end
-
-% 
-% elseif waitForEnemy == true
-%             enemyPath = me.pos-enemy.pos;
-%             tenemy  = norm(enemyPath)/projectVectorNorm(enemy.ges, enemyPath);
-%             enemyColliding = corridorColliding(enemy.pos, me.pos, spiel.spaceball_radius);
-%             if (tenemy > 0 && tenemy < 0.1 && ~enemyColliding)
-%                 disp('cornerTricking Pt2');
-%                     for i=1:4
-%                         cornerNodes(i,3)=norm(cornerNodes(i,1:2)-me.pos-enemy.ges);
-%                     end
-%                 nextCorner = sortrows(cornerNodes, [3 2 1]);
-%                 waypointList = appendToArray(waypointList, findPath(me.pos, nextCorner(2,1:2)));
-%                 waitForEnemy = false;
-%             end
-%         end
 
 
 
