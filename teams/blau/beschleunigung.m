@@ -892,7 +892,7 @@ function bes = beschleunigung(spiel, farbe)
             dirToTanke = vecNorm(spiel.tanke(i).pos-position);
             for j=1:spiel.n_tanke 
                 dirToNextTanke = vecNorm(spiel.tanke(j).pos-spiel.tanke(i).pos);
-                if (dot(dirToTanke, dirToNextTanke) > 0.8) 
+                if (dot(dirToTanke, dirToNextTanke) > 0.7) 
                     erg(i,4) = erg(i,4) + 1;
                 end
             end
@@ -1067,7 +1067,7 @@ function bes = beschleunigung(spiel, farbe)
     function fleeEnemy()
         if numel(waypointList) == 0
             a=rand();
-            if a < 0.6
+            if a < 1
                 cornerTricking();
             elseif waitForEnemy == false
                 randomFlee();
@@ -1101,7 +1101,7 @@ function bes = beschleunigung(spiel, farbe)
 
     function cornerTricking()
         %define a Matrix that contains all corner positions
-        cornerNodes = [0.03,0.97,0;0.97,0.97,0;0.03,0.03,0;0.97,0.03,0];
+        cornerNodes = [0.015,0.985,0;0.985,0.985,0;0.015,0.015,0;0.985,0.015,0];
         if waitForEnemy == false
             disp('cornerTricking Pt1');
             %get nearest corner, go there and wait
@@ -1122,7 +1122,7 @@ function bes = beschleunigung(spiel, farbe)
             %check if there is a mine on the enemy's path towards us
             enemyColliding = corridorColliding(enemy.pos, me.pos, spiel.spaceball_radius);
             %if the enemy takes in between 0 and 0.1 to get to us and ther is no mine on its path
-            if (tenemy > 0 && tenemy < 0.15 && ~enemyColliding)
+            if (tenemy > 0 && tenemy < 0.2 && ~enemyColliding)
                 disp('cornerTricking Pt2');
                     %sort all corners based on the direction the enemy is coming from and their distance to us
                     for i=1:4
