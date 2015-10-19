@@ -6,8 +6,8 @@ function bes = beschleunigung(spiel, farbe)
     constWayPointReachedRadius = 0.02; %0.01
     constMineProxPenality = 0.0006; %Strafpunkte für Nodes - je dichter an Mine, desto höher
     constCornerBreaking = 0.3; %0.03 je größer der Winkel zum nächsten Wegpunkt, desto höheres Bremsen. Faktor.
-    constEmrBrkAccFac = 0.05; %betrachtet Seitwärtsbbeschleunigungen fürs Emergencybreaking
-    constEmrBrkVelFac = 1.1; %betrachtet Geschwindigkeit fürs Emergencybreaking
+    constEmrBrkAccFac = 0.1; %betrachtet Seitwärtsbbeschleunigungen fürs Emergencybreaking
+    constEmrBrkVelFac = 1.15; %betrachtet Geschwindigkeit fürs Emergencybreaking
     
     %statische Variablen definieren
     persistent nodeGrid;
