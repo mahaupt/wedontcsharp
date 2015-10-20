@@ -5,9 +5,10 @@ function bes = beschleunigung(spiel, farbe)
     constNavSecurity = 0.03; %simplify path
     constWayPointReachedRadius = 0.02; %0.01
     constMineProxPenality = 0.0006; %Strafpunkte für Nodes - je dichter an Mine, desto höher
-    constCornerBreaking = 0.3; %0.03 je größer der Winkel zum nächsten Wegpunkt, desto höheres Bremsen. Faktor.
-    constEmrBrkAccFac = 0.05; %betrachtet Seitwärtsbbeschleunigungen fürs Emergencybreaking
-    constEmrBrkVelFac = 1.1; %betrachtet Geschwindigkeit fürs Emergencybreaking
+    constCornerBreaking = 0.25; %0.03 je größer der Winkel zum nächsten Wegpunkt, desto höheres Bremsen. Faktor.
+    constEmrBrkAccFac = 0.2; %betrachtet Seitwärtsbbeschleunigungen fürs Emergencybreaking
+    constEmrBrkVelFac = 1.2; %betrachtet Geschwindigkeit fürs Emergencybreaking
+    constCompetitionModeThreshold = 0.1;
     
     %statische Variablen definieren
     persistent nodeGrid;
@@ -44,11 +45,11 @@ function bes = beschleunigung(spiel, farbe)
         setupNodeGrid();
     end
     
-    if enemy.getankt == 4
-        constCompetitionModeThreshold = 0.2;
-    else
-        constCompetitionModeThreshold = 0.1;
-    end
+    %if enemy.getankt == 4
+    %    constCompetitionModeThreshold = 0.2;
+    %else
+    %    constCompetitionModeThreshold = 0.1;
+    %end
     
 %% Veränderungen des Spielfeldes bemerken und dementsprechend handeln
     %Nodegrid beim Verschwinden einer Mine aktualisieren:
@@ -131,6 +132,11 @@ function bes = beschleunigung(spiel, farbe)
         if norm(me.pos-waypointList{1}) < constWayPointReachedRadius
             waypointList(1) = [];
             debugDRAW();
+            
+        elseif (corridorColliding(me.pos, waypointList{1}, spiel.spaceball_radius))
+            %%überprüfe, ob 1. Wegpunkt erreichbar ist - wenn nicht, lösche und
+            %%berechne neu
+            waypointList = [];
         end
     end
 
@@ -186,7 +192,7 @@ function bes = beschleunigung(spiel, farbe)
         velocity = norm(me.ges);
         
         %%check if about to collide
-        safeSpaceballRadius = (spiel.spaceball_radius);
+        safeSpaceballRadius = (spiel.spaceball_radius + constSafeBorder/2);
 
         %new emergency breaking - is it better?
         breakTime = velocity / spiel.bes;
@@ -1050,7 +1056,7 @@ function bes = beschleunigung(spiel, farbe)
         thit = (sqrt(vel^2+2*acc*dist)-vel)/acc;
         
         %vorher : (thit > 1) neu : (dist > 0.2)
-        if (dist > 0.2)
+        if (thit > 1)
             erg = enemy.pos;
         else
             erg = enemy.pos + enemy.ges*thit + 0.5*enemy.bes*thit^2;
@@ -1058,6 +1064,11 @@ function bes = beschleunigung(spiel, farbe)
             %clamping erg
             safeSpaceballRadius = spiel.spaceball_radius + constSafeBorder;
             erg = clamp(erg, safeSpaceballRadius, 1-safeSpaceballRadius);
+            
+            %point is not walkable -> set own point
+            if (~isWalkable(erg, spiel.spaceball_radius + constSafeBorder))
+                erg = enemy.pos;
+            end
         end
     end
 
@@ -1085,8 +1096,6 @@ function bes = beschleunigung(spiel, farbe)
             cornerTricking();
         end
     end
-
-
 
     function cornerTricking()
         
