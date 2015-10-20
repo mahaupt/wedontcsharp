@@ -11,10 +11,6 @@ clc
 % in spaceballs spiel.zeitraffer_checkbox_anfangswert true setzen!
 % shuffle mode on
 
-clear all
-range = 2
-data = cell(range,5);
-
 Durchgaenge = 1; % Anzahl Durchgänge
 Farbe = 'blau'; % Farbe des eigenen SpaceBalls eintragen: 'rot' oder 'blau'
 
@@ -35,13 +31,7 @@ data = cell(Durchgaenge,9);
             me = spiel.blau;
             enemy = spiel.rot;
         end
-        
-
-    for stat_i = 1 : 1 : range
-        % run spaceballs, zeitraffer auto-on
-        
-        spaceballs
-              
+                    
         % aktueller Schritt in data Zeile i, Spalte 2 eintragen
         data{stat_i,2} = horzcat(num2str(stat_i));
         data{stat_i,7} = 0;
@@ -169,7 +159,7 @@ disp(' ');
 disp(' ');
 disp(Statistische_Erhebung);
 
-Quote = horzcat('Von ', num2str(range), ' Spielen wurde(n) ', num2str(sumWins), ' gewonnen! (', num2str(sumWins/range*100),'%)')
+Quote = horzcat('Von ', num2str(Durchgaenge), ' Spielen wurde(n) ', num2str(sumWins), ' gewonnen! (', num2str(sumWins/Durchgaenge*100),'%)')
 Statistische_Erhebung = data
 
-    end
+   
