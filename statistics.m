@@ -172,3 +172,4 @@ disp(Statistische_Erhebung);
 Quote = horzcat('Von ', num2str(range), ' Spielen wurde(n) ', num2str(sumWins), ' gewonnen! (', num2str(sumWins/range*100),'%)')
 Statistische_Erhebung = data
 
+    end
