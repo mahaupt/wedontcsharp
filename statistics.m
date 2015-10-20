@@ -6,8 +6,13 @@ clear all
 close all
 clc
 
-Durchgaenge = 2; % Anzahl Durchgänge
-Farbe = 'rot'; % Farbe des eigenen SpaceBalls eintragen: 'rot' oder 'blau'
+% Wichtig:
+% clear variables in spaceballs.m muss auskommentiert sein!
+% in spaceballs spiel.zeitraffer_checkbox_anfangswert true setzen!
+% shuffle mode on
+
+Durchgaenge = 1; % Anzahl Durchgänge
+Farbe = 'blau'; % Farbe des eigenen SpaceBalls eintragen: 'rot' oder 'blau'
 
 
 
@@ -26,7 +31,7 @@ data = cell(Durchgaenge,9);
             me = spiel.blau;
             enemy = spiel.rot;
         end
-        
+                    
         % aktueller Schritt in data Zeile i, Spalte 2 eintragen
         data{stat_i,2} = horzcat(num2str(stat_i));
         data{stat_i,7} = 0;
@@ -76,7 +81,7 @@ data = cell(Durchgaenge,9);
         end
         
         % clear variables vgl. Spaceballs.m ausführen, Ausnahme: data und range
-        clearvars -except data range Farbe
+        clearvars -except data Durchgaenge Farbe
 
         
     end
@@ -122,6 +127,7 @@ medianTime = medianTime/sumWins;
 
 
 
+
 Satz = horzcat('Von ', num2str(Durchgaenge), ' Spielen wurden ', num2str(sumWins), ' in durchschnittlich ', num2str(medianTime), ' Sekunden gewonnen.');
 Quote1 = horzcat('Gewonnen: ', num2str(sumWins/Durchgaenge*100),' %');
 Quote2 = horzcat('   davon den Gegner erwischt: ', num2str(gegErwischt/sumWins*100),' %');
@@ -152,3 +158,8 @@ disp(Quote8);
 disp(' ');
 disp(' ');
 disp(Statistische_Erhebung);
+
+Quote = horzcat('Von ', num2str(Durchgaenge), ' Spielen wurde(n) ', num2str(sumWins), ' gewonnen! (', num2str(sumWins/Durchgaenge*100),'%)')
+Statistische_Erhebung = data
+
+   
