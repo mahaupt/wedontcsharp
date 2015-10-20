@@ -6,8 +6,8 @@ clear all
 close all
 clc
 
-Durchgaenge = 2; % Anzahl Durchgänge
-Farbe = 'rot'; % Farbe des eigenen SpaceBalls eintragen: 'rot' oder 'blau'
+Durchgaenge = 1; % Anzahl Durchgänge
+Farbe = 'blau'; % Farbe des eigenen SpaceBalls eintragen: 'rot' oder 'blau'
 
 
 
@@ -76,7 +76,7 @@ data = cell(Durchgaenge,9);
         end
         
         % clear variables vgl. Spaceballs.m ausführen, Ausnahme: data und range
-        clearvars -except data range Farbe
+        clearvars -except data Durchgaenge Farbe
 
         
     end
