@@ -173,9 +173,9 @@ function bes = beschleunigung(spiel, farbe)
     %check if enemy is too fast 
     function erg = checkIfTooFastE ()
         
-%         enemyPath = me.pos-enemy.pos;
+        enemyPath = me.pos-enemy.pos;
               
-          if  (norm(me.pos-enemy.pos)) < (((norm(enemy.ges))^2)/(norm(enemy.bes)*2)+0.03);
+          if  (norm(enemyPath)) < (((norm(enemy.ges))^2)/(norm(enemy.bes)*2)+0.03);
             erg = true;
             
           else 
@@ -1102,28 +1102,30 @@ function bes = beschleunigung(spiel, farbe)
         %define a Matrix that contains all corner positions
         cornerNodes = [0.01,0.99,0;0.99,0.99,0;0.01,0.01,0;0.99,0.01,0];
         if waitForEnemy == false
-            disp('cornerTricking Pt1');
-%             get nearest corner, go there and wait
+            disp('cornerTricking Part 1')
+            %get to the nearest corner, go there and wait
             if waitForEnemy == false
-                for i=1:4
-                    cornerNodes(i,3)=norm(cornerNodes(i,1:2)-me.pos);
+                for i=1:4 % checking every corner
+                    % calculating distance to each corner
+                    cornerNodes(i,3)=norm(cornerNodes(i,1:2)-me.pos-enemy.ges);   
                 end
-                nearestCorner = sortrows(cornerNodes, [3 2 1]);
-                waypointList = appendToArray(waypointList, findPath(me.pos,nearestCorner(1,1:2)));
-                waitForEnemy = true;
+                nearestCorner = sortrows(cornerNodes, [3 2 1]); % finding the best corner 
+                % add nodes of nearest corner to wplist 
+                waypointList = appendToArray(waypointList, findPath(me.pos,nearestCorner(1,1:2))); 
+                waitForEnemy = true; 
             end
         %waiting for the enemy
         elseif waitForEnemy == true
-            %calculate vector between us and enemy
-            enemyPath = me.pos-enemy.pos;
-            %the time, enemy needs to get to our position
-            tenemy  = norm(enemyPath)/projectVectorNorm(enemy.ges, enemyPath);
-            %check if there is a mine on the enemy's path towards us
-            enemyColliding = corridorColliding(enemy.pos, me.pos, spiel.spaceball_radius);
+%             %calculate vector between us and enemy
+%             enemyPath = me.pos-enemy.pos;
+%             %the time, enemy needs to get to our position
+%             tenemy  = norm(enemyPath)/projectVectorNorm(enemy.ges, enemyPath);
+%             %check if there is a mine on the enemy's path towards us
+%             enemyColliding = corridorColliding(enemy.pos, me.pos, spiel.spaceball_radius);
 
             
             if checkIfTooFastE () == true %|| tenemy < 0.0001
-                disp('cornerTricking Pt2');
+                disp('cornerTricking Part 2');
                     %sort all corners based on the direction the enemy is coming from and their distance to us
                     for i=1:4
                         cornerNodes(i,3)=norm(cornerNodes(i,1:2)-me.pos-enemy.ges);
