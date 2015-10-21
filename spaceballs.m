@@ -1,13 +1,12 @@
 %% Initialisierung
 
-%clear variables
+% clear variables
 close all
-%clc
+clc
 
 rng shuffle
-%rng (9474)
-r = round(rand(1)*1000000)
-rng(r)
+r = round(rand(1)*1000000);
+rng(r);
 
 
 %% Konstanten definieren
