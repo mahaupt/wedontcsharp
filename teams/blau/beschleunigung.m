@@ -5,7 +5,7 @@ function bes = beschleunigung(spiel, farbe)
     constGridRadius = 0.003;
     constNavSecurity = 0.03; %simplify path
     constMineProxPenality = 0.0006; %Strafpunkte für Nodes - je dichter an Mine, desto höher
-    constCornerBreaking = 0.3; %0.03 je größer der Winkel zum nächsten Wegpunkt, desto höheres Bremsen. Faktor.
+    constCornerBreaking = 0.26; %0.03 je größer der Winkel zum nächsten Wegpunkt, desto höheres Bremsen. Faktor.
     constEmrBrkAccFac = 0.2; %betrachtet Seitwärtsbbeschleunigungen fürs Emergencybreaking
     constEmrBrkVelFac = 1.2; %betrachtet Geschwindigkeit fürs Emergencybreaking
     constCompetitionModeThreshold = 0.1;
@@ -20,7 +20,10 @@ function bes = beschleunigung(spiel, farbe)
     persistent ignoreTanke; %number of tanke to be ignored by targetNextTanke
     persistent tankeCompetition;
     persistent waitForEnemy; %benötigt, um auf den Gegner warten zu können
-    persistent EMERGENCY;
+    
+    
+    %globale Variablen
+    overrideBesCalculation = false;
 
     
     %%Farbe prüfen und zuweisen
@@ -44,13 +47,9 @@ function bes = beschleunigung(spiel, farbe)
         NumberOfTank = spiel.n_tanke;
         tankeCompetition = false;
         waitForEnemy = false;
-        EMERGENCY = false;
         setupNodeGrid();
     end
     
-    if EMERGENCY && norm(me.ges) <= 0.05
-        EMERGENCY = false;
-    end
     
 %% Veränderungen des Spielfeldes bemerken und dementsprechend handeln
     %Nodegrid beim Verschwinden einer Mine aktualisieren:
@@ -103,8 +102,14 @@ function bes = beschleunigung(spiel, farbe)
 
 %% Beschleunigung berechnen
     function erg=calculateBES()
+        if (overrideBesCalculation)
+            erg = bes;
+            return;
+        end
+        
+        
         %Ist kein Wegpunkt vorhanden, schnellstmöglich auf 0 abbremsen und stehen bleiben
-        if (numel(waypointList) <= 0) || EMERGENCY
+        if (numel(waypointList) <= 0)
             erg = -me.ges;
             return;
         end
@@ -1030,15 +1035,16 @@ function bes = beschleunigung(spiel, farbe)
                     return;
                 end
             end
-            
-            if tankeCompetition == true
+          
+            %currently disabled
+            if false && tankeCompetition && i==1 && tenemy > town
                 PointWhereWeStop = me.pos + vecNorm(me.ges) * (norm(me.ges) / -spiel.bes);
                 PointOfEnemy = enemy.pos + vecNorm(enemy.ges) * (norm(me.ges) / -spiel.bes);
                 Distance = norm(PointWhereWeStop - PointOfEnemy)
                 if Distance <= spiel.spaceball_radius * 2
                     disp('Notbremse, Tanke wird nicht vor Gegner erreicht');
-                    waypointList = [];
-                    EMERGENCY = true;
+                    safeDeleteWaypoints();
+                    ignoreTanke = tankeIndex;
                     tankeCompetition == false;
                 end
             end
@@ -1100,18 +1106,38 @@ function bes = beschleunigung(spiel, farbe)
 
     function slowAttack()
         
-        secureSpaceballRadus = spiel.spaceball_radius;
+        secureSpaceballRadus = spiel.spaceball_radius + constSafeBorder/2;
         
-        t = 1;
-        axisPos = enemy.pos(2) + t*enemy.ges(2) + t^2*enemy.bes(2);
+        %get waypoint position (bes * 0.9)
+        axisPos = enemy.pos(2) + enemy.ges(2) + enemy.bes(2);
         axisPos = clamp(axisPos, secureSpaceballRadus, 1-secureSpaceballRadus);
         axisLen = clamp(norm(axisPos - me.pos(2)), 0.04, 10);
         
+        %set waypoint pos to enemy
         toEnemy = vecNorm(enemy.pos - me.pos);
-        otherAxisPos = me.pos(1) + toEnemy(1)*axisLen * 0.5;
+        otherAxisPos = me.pos(1) + toEnemy(1)*axisLen * 0.2;
         
-        
+        %set waypoint
         waypointList{1} = [otherAxisPos, axisPos];
+        debugDRAW();
+        
+        %position aligned - finetune position
+        if (norm(me.pos(2)-enemy.pos(2)) < 0.01 && ...
+                norm(me.ges(2)-enemy.ges(2)) < 0.1)
+            %test
+            overrideBesCalculation = true;
+            ycomp = enemy.bes(2);
+            
+            %y velocity correction
+            deltaA = (enemy.ges(2)-me.ges(2))/spiel.dt;
+            ycomp = clamp(ycomp+deltaA, -spiel.bes, spiel.bes);
+            
+            %valid x component to enemy
+            xcomp = sqrt(spiel.bes^2 - ycomp^2) * toEnemy(1)/norm(toEnemy(1));
+            
+            bes = [xcomp, ycomp];
+        end
+        
         
         constEmrBrkVelFac = 1.1;
     end
