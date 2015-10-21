@@ -5,9 +5,8 @@ close all
 clc
 
 rng shuffle
-r = round(rand(1)*1000000)
-rng(r);
-
+r = round(rand(1)*1000000);
+rng(793541);
 
 %% Konstanten definieren
 
