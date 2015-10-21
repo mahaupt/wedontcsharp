@@ -20,6 +20,7 @@ function bes = beschleunigung(spiel, farbe)
     persistent ignoreTanke; %number of tanke to be ignored by targetNextTanke
     persistent tankeCompetition;
     persistent waitForEnemy; %benötigt, um auf den Gegner warten zu können
+    persistent EMERGENCY;
 
     
     %%Farbe prüfen und zuweisen
@@ -43,14 +44,13 @@ function bes = beschleunigung(spiel, farbe)
         NumberOfTank = spiel.n_tanke;
         tankeCompetition = false;
         waitForEnemy = false;
+        EMERGENCY = false;
         setupNodeGrid();
     end
     
-    %if enemy.getankt == 4
-    %    constCompetitionModeThreshold = 0.2;
-    %else
-    %    constCompetitionModeThreshold = 0.1;
-    %end
+    if EMERGENCY && norm(me.ges) <= 0.05
+        EMERGENCY = false;
+    end
     
 %% Veränderungen des Spielfeldes bemerken und dementsprechend handeln
     %Nodegrid beim Verschwinden einer Mine aktualisieren:
@@ -104,7 +104,7 @@ function bes = beschleunigung(spiel, farbe)
 %% Beschleunigung berechnen
     function erg=calculateBES()
         %Ist kein Wegpunkt vorhanden, schnellstmöglich auf 0 abbremsen und stehen bleiben
-        if (numel(waypointList) <= 0)
+        if (numel(waypointList) <= 0) || EMERGENCY
             erg = -me.ges;
             return;
         end
@@ -1008,6 +1008,13 @@ function bes = beschleunigung(spiel, farbe)
                     safeDeleteWaypoints();
                     return;
                 end
+            end
+            
+            if tankeCompetition == true && (tenemy > 0 && tenemy < 0.15)
+                disp('Notbremse, Tanke wird nicht vor Gegner erreicht');
+                waypointList = [];
+                EMERGENCY = true;
+                tankeCompetition == false;
             end
         end
     end
