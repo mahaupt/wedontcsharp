@@ -9,8 +9,6 @@ r = round(rand(1)*1000000);
 rng(793541);
 
 
-
-
 %% Konstanten definieren
 
 spiel.dt = 1/100;
