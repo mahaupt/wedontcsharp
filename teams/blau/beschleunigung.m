@@ -92,10 +92,10 @@ function bes = beschleunigung(spiel, farbe)
             %%Erst wenn alle Tanken weg sind und wir weniger haben, als der Gegner - Fliehen!
             fleeEnemy();
         else
-            %Erreicht der Gegner die anvisierte Tankstelle vor uns? dann löschen
-            checkTankPath()
             %wenn Wegpunktliste leer => Pfad zur besten Tankstelle setzen
             createPathToNextTanke()
+            %Erreicht der Gegner die anvisierte Tankstelle vor uns? dann löschen
+            checkTankPath()
         end
     end
     
@@ -1186,7 +1186,7 @@ function bes = beschleunigung(spiel, farbe)
         drawHandles = [];
         
         for i = 1 : numel(waypointList)
-            drawHandles(i) = rectangle ('Parent', spiel.spielfeld_handle, 'Position', [waypointList{i}-0.0025, 0.005, 0.005], 'Curvature', [1 1], 'FaceColor', spiel.farbe.rot, 'EdgeColor', 'none');
+            drawHandles(i) = rectangle ('Parent', spiel.spielfeld_handle, 'Position', [waypointList{i}-0.0025, 0.005, 0.005], 'Curvature', [1 1], 'FaceColor', spiel.farbe.blau, 'EdgeColor', 'none');
         end
     end
 end
