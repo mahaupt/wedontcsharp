@@ -5,8 +5,13 @@ close all
 clc
 
 rng shuffle
+<<<<<<< HEAD
 r = round(rand(1)*1000000);
 rng(793541);
+=======
+r = round(rand(1)*1000000)
+rng(r);
+>>>>>>> master
 
 
 %% Konstanten definieren

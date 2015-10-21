@@ -20,6 +20,7 @@ function bes = beschleunigung(spiel, farbe)
     persistent ignoreTanke; %number of tanke to be ignored by targetNextTanke
     persistent tankeCompetition;
     persistent waitForEnemy; %benötigt, um auf den Gegner warten zu können
+
     
     %%Farbe prüfen und zuweisen
     if strcmp (farbe, 'rot')
@@ -57,7 +58,7 @@ function bes = beschleunigung(spiel, farbe)
         disp('Updating NodeGrid');
         NumberOfMine = customSetdiff(spiel.mine, ArrayOfMines);
         updateNodeGrid(NumberOfMine.pos, spiel.mine_radius);
-        waypointList = simplifyPath(waypointList);
+        resimplifyWaypoints();
         ArrayOfMines = spiel.mine;
     end
     
@@ -91,10 +92,10 @@ function bes = beschleunigung(spiel, farbe)
             %%Erst wenn alle Tanken weg sind und wir weniger haben, als der Gegner - Fliehen!
             fleeEnemy();
         else
-            %Erreicht der Gegner die anvisierte Tankstelle vor uns? dann löschen
-            checkTankPath()
             %wenn Wegpunktliste leer => Pfad zur besten Tankstelle setzen
             createPathToNextTanke()
+            %Erreicht der Gegner die anvisierte Tankstelle vor uns? dann löschen
+            checkTankPath()
         end
     end
     
@@ -176,10 +177,10 @@ function bes = beschleunigung(spiel, farbe)
 %         enemyPath = me.pos-enemy.pos;
               
           if  (norm(me.pos-enemy.pos)) < (((norm(enemy.ges))^2)/(norm(enemy.bes)*2)+0.03);
-            erg = true;
+          erg = true;
             
           else 
-              erg = false 
+            erg = false;
         
         end
     end
@@ -556,8 +557,8 @@ function bes = beschleunigung(spiel, farbe)
         ergInsertIndex = 1;
         
         %add first waypoint
-        erg{ergInsertIndex} = path{1};
-        ergInsertIndex = ergInsertIndex+1;
+        %erg{ergInsertIndex} = path{1};
+        %ergInsertIndex = ergInsertIndex+1;
         
         while(checkIndex < pathLength)
             isCollided = false;
@@ -583,6 +584,12 @@ function bes = beschleunigung(spiel, farbe)
         erg{ergInsertIndex} = path{pathLength};
     end
 
+
+    %bestehende Waypoints erneut vereinfachen
+    function resimplifyWaypoints()
+        waypointList = appendToArray({me.pos}, waypointList);
+        waypointList = simplifyPath(waypointList);
+    end
 
 
 %% Heap-System
@@ -1010,6 +1017,15 @@ function bes = beschleunigung(spiel, farbe)
 %% Angriff
     %Angriff
     function attackEnemy()
+        if (spiel.n_mine > 0)
+            directAttack();
+        else
+            slowAttack();
+        end
+    end
+
+    
+    function directAttack()
         
         %check if path to enemy is free
         enemypos = calcEnemyHitPosition();
@@ -1047,6 +1063,26 @@ function bes = beschleunigung(spiel, farbe)
             end
         end
     end
+
+
+    function slowAttack()
+        
+        secureSpaceballRadus = spiel.spaceball_radius;
+        
+        t = 1;
+        axisPos = enemy.pos(2) + t*enemy.ges(2) + t^2*enemy.bes(2);
+        axisPos = clamp(axisPos, secureSpaceballRadus, 1-secureSpaceballRadus);
+        axisLen = clamp(norm(axisPos - me.pos(2)), 0.04, 10);
+        
+        toEnemy = vecNorm(enemy.pos - me.pos);
+        otherAxisPos = me.pos(1) + toEnemy(1)*axisLen * 0.5;
+        
+        
+        waypointList{1} = [otherAxisPos, axisPos];
+        
+        constEmrBrkVelFac = 1.1;
+    end
+
 
     function erg = calcEnemyHitPosition()
         vel = norm(me.ges-enemy.ges);
@@ -1150,7 +1186,7 @@ function bes = beschleunigung(spiel, farbe)
         drawHandles = [];
         
         for i = 1 : numel(waypointList)
-            drawHandles(i) = rectangle ('Parent', spiel.spielfeld_handle, 'Position', [waypointList{i}-0.0025, 0.005, 0.005], 'Curvature', [1 1], 'FaceColor', spiel.farbe.rot, 'EdgeColor', 'none');
+            drawHandles(i) = rectangle ('Parent', spiel.spielfeld_handle, 'Position', [waypointList{i}-0.0025, 0.005, 0.005], 'Curvature', [1 1], 'FaceColor', spiel.farbe.blau, 'EdgeColor', 'none');
         end
     end
 end
