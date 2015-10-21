@@ -1035,11 +1035,16 @@ function bes = beschleunigung(spiel, farbe)
                     return;
                 end
             end
-            
-            if false && i==1 && tankeCompetition && calcBreakDistance(norm(me.ges),0) <= norm(enemy.pos-me.pos)
-                if tenemy > town
+          
+            %currently disabled
+            if false && tankeCompetition && i==1 && tenemy > town
+                PointWhereWeStop = me.pos + vecNorm(me.ges) * (norm(me.ges) / -spiel.bes);
+                PointOfEnemy = enemy.pos + vecNorm(enemy.ges) * (norm(me.ges) / -spiel.bes);
+                Distance = norm(PointWhereWeStop - PointOfEnemy)
+                if Distance <= spiel.spaceball_radius * 2
                     disp('Notbremse, Tanke wird nicht vor Gegner erreicht');
                     safeDeleteWaypoints();
+                    ignoreTanke = tankeIndex;
                     tankeCompetition == false;
                 end
             end

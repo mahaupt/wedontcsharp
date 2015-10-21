@@ -8,6 +8,7 @@ rng shuffle
 r = round(rand(1)*1000000);
 rng(r);
 
+
 %% Konstanten definieren
 
 spiel.dt = 1/100;
