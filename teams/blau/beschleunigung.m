@@ -1031,7 +1031,7 @@ function bes = beschleunigung(spiel, farbe)
                 end
             end
             
-            if tankeCompetition == true && calcBreakDistance(norm(me.ges),0) <= norm(enemy.pos-me.pos)
+            if tankeCompetition == true && calcBreakDistance(norm(me.ges),0) <= norm(enemy.pos-(me.pos+vecNorm(me.ges)*calcBreakDistance(norm(me.ges),0)))
                 if tenemy > town
                     disp('Notbremse, Tanke wird nicht vor Gegner erreicht');
                     waypointList = [];
