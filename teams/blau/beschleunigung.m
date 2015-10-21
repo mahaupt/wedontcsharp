@@ -58,7 +58,7 @@ function bes = beschleunigung(spiel, farbe)
         disp('Updating NodeGrid');
         NumberOfMine = customSetdiff(spiel.mine, ArrayOfMines);
         updateNodeGrid(NumberOfMine.pos, spiel.mine_radius);
-        waypointList = simplifyPath(waypointList);
+        resimplifyWaypoints();
         ArrayOfMines = spiel.mine;
     end
     
@@ -557,8 +557,8 @@ function bes = beschleunigung(spiel, farbe)
         ergInsertIndex = 1;
         
         %add first waypoint
-        erg{ergInsertIndex} = path{1};
-        ergInsertIndex = ergInsertIndex+1;
+        %erg{ergInsertIndex} = path{1};
+        %ergInsertIndex = ergInsertIndex+1;
         
         while(checkIndex < pathLength)
             isCollided = false;
@@ -584,6 +584,12 @@ function bes = beschleunigung(spiel, farbe)
         erg{ergInsertIndex} = path{pathLength};
     end
 
+
+    %bestehende Waypoints erneut vereinfachen
+    function resimplifyWaypoints()
+        waypointList = appendToArray({me.pos}, waypointList);
+        waypointList = simplifyPath(waypointList);
+    end
 
 
 %% Heap-System
@@ -1011,8 +1017,11 @@ function bes = beschleunigung(spiel, farbe)
 %% Angriff
     %Angriff
     function attackEnemy()
-        %directAttack();
-        slowAttack();
+        if (spiel.n_mine > 0)
+            directAttack();
+        else
+            slowAttack();
+        end
     end
 
     
