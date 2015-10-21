@@ -1,11 +1,11 @@
 function bes = beschleunigung(spiel, farbe)
 %% Konstanten & Variablen zu Beginn des Spiels festlegen
     constSafeBorder = 0.001; %collision border around mines
+    constWayPointReachedRadius = 0.02;
     constGridRadius = 0.003;
     constNavSecurity = 0.03; %simplify path
-    constWayPointReachedRadius = 0.02; %0.01
     constMineProxPenality = 0.0006; %Strafpunkte für Nodes - je dichter an Mine, desto höher
-    constCornerBreaking = 0.25; %0.03 je größer der Winkel zum nächsten Wegpunkt, desto höheres Bremsen. Faktor.
+    constCornerBreaking = 0.3; %0.03 je größer der Winkel zum nächsten Wegpunkt, desto höheres Bremsen. Faktor.
     constEmrBrkAccFac = 0.2; %betrachtet Seitwärtsbbeschleunigungen fürs Emergencybreaking
     constEmrBrkVelFac = 1.2; %betrachtet Geschwindigkeit fürs Emergencybreaking
     constCompetitionModeThreshold = 0.1;
@@ -129,8 +129,11 @@ function bes = beschleunigung(spiel, farbe)
             erg = -me.ges;
         end
         
+        
+        wpReachedDist = calcWaypointReachedRadius(breakingEndVel);
+        
         %%Überprüfen, ob Wegpunkt erreicht wurde, dann 1. Punkt löschen
-        if norm(me.pos-waypointList{1}) < constWayPointReachedRadius
+        if norm(me.pos-waypointList{1}) < wpReachedDist
             waypointList(1) = [];
             debugDRAW();
             
@@ -252,6 +255,23 @@ function bes = beschleunigung(spiel, farbe)
     %calculate distance for breaking from vel to endvel
     function erg = calcBreakDistance(vel, endvel)
         erg = ((vel)^2 - (endvel)^2)/(2*spiel.bes);
+    end
+
+
+
+    function erg = calcWaypointReachedRadius(endvel)
+        erg = constWayPointReachedRadius; %0.01
+        if (numel(waypointList) < 2)
+            return;
+        end
+        
+        %direction to next wp
+        dir1 = vecNorm(waypointList{1} - me.pos);
+        dir2 = vecNorm(waypointList{2} - waypointList{1});
+        
+        %get time to align waypoints
+        time = getTimeToAlignVelocity(endvel*dir1, dir2);
+        erg = clamp(time/2 * norm(me.ges), constWayPointReachedRadius, 0.1);
     end
      
 
@@ -901,8 +921,9 @@ function bes = beschleunigung(spiel, farbe)
                 end
             end
             
+            
             %avoid setting tanke as new wp before collecting it
-            if (norm(me.pos - spiel.tanke(i).pos) < 2*constWayPointReachedRadius)
+            if (norm(me.pos - spiel.tanke(i).pos) < 3*constWayPointReachedRadius)
                 ignoreThisTanke = true;
             end
             
