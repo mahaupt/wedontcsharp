@@ -79,8 +79,6 @@ function bes = beschleunigung(spiel, farbe)
     
     %Beschleunigung berechnen:
     bes=calculateBES();
-
-    
     
 %% Was soll der Spaceball tun?
     %Tanken oder Angreifen oder Verteidigen?
@@ -518,7 +516,7 @@ function bes = beschleunigung(spiel, farbe)
            if (value(i) > max)
                value(i) = max;
            end
-           if (value(i) < min)
+           if (value(i) < min || isnan(value(i)))
                value(i) = min;
            end
        end
@@ -1065,14 +1063,17 @@ function bes = beschleunigung(spiel, farbe)
             directAttack();
         else
             %decide which axis to lock on
-            ax1 = norm(enemy.pos(1)-me.pos(1));
-            ax2 = norm(enemy.pos(2) - me.pos(2));
+            %ax1 = norm(enemy.pos(1)-me.pos(1));
+            %ax2 = norm(enemy.pos(2) - me.pos(2));
             
-            if (ax1 < ax2)
-                lockonAttack(2, 1);
-            else
-                lockonAttack(1, 2);
-            end
+            %if (ax1 < ax2)
+            %    lockonAttackOld(2, 1);
+            %else
+            %    lockonAttackOld(1, 2);
+            %end
+            
+            
+            lockonAttack();
         end
     end
 
@@ -1117,48 +1118,104 @@ function bes = beschleunigung(spiel, farbe)
     end
 
 
-    function lockonAttack(ax1, ax2)
+    function lockonAttack()
         persistent lockAnnouncement;
+        persistent transformationAngle;
         if (isempty(lockAnnouncement))
             lockAnnouncement = 0;
         end
         
+        %delete waypointlist
+        if (numel(waypointList) > 1)
+            waypointList = {};
+        end
+        
         secureSpaceballRadus = spiel.spaceball_radius + constSafeBorder/2;
+        
+        %rotate coordinates
+        dirToEnemy = vecNorm(enemy.pos-me.pos);
+        dirToAxis = [dirToEnemy(1)/norm(dirToEnemy(1)), 0]; % [-1, 0 ] or [1, 0] in enemy direction
+        angle = acos(dot(dirToEnemy, dirToAxis));
+        
+        %negative angle if rotated clockwise
+        if (dirToAxis(1) < 0)
+            if (dirToEnemy(2) < 0)
+                angle = -angle;
+            end
+        else
+             if (dirToEnemy(2) > 0)
+                angle = -angle;
+             end
+        end
+        
+        %keep angle when locked
+        if (lockAnnouncement == 2)
+            angle = transformationAngle;
+        end
+        
+        
+        
+        %calculate rotation matrices
+        rotMat1 = [cos(angle), -sin(angle); sin(angle), cos(angle)]; %rotate to enemy direction
+        rotMat2 = [cos(angle), sin(angle); -sin(angle), cos(angle)]; %rotate back
+        
+        %calculate rotated positions
+        rotMePos = (rotMat1*me.pos')';
+        rotMeGes = (rotMat1*me.ges')';
+        
+        rotEnemyPos = (rotMat1*enemy.pos')';
+        rotEnemyGes = (rotMat1*enemy.ges')';
+        rotEnemyBes = (rotMat1*enemy.bes')';
+        
+        
         
         %ist t größer -> Beschleunigung und Geschwindigkeit angleichen, ist
         %t kleiner -> Position angleichen
-        t = clamp(3/norm((enemy.pos(ax2)-me.pos(ax2))/(enemy.ges(ax2)-me.ges(ax2))), 0.5, 5);
+        t = clamp(3/(norm((rotEnemyPos(2)-rotMePos(2))/(rotEnemyGes(2)-rotMeGes(2)))), 0.5, 5);
         
         %wegpunktaxe berechnen
-        axisPos = enemy.pos(ax2) + t*enemy.ges(ax2) + 0.5*t^2*enemy.bes(ax2);
+        axisPos = rotEnemyPos(2) + t*rotEnemyGes(2) + 0.5*t^2*rotEnemyBes(2);
         axisPos = clamp(axisPos, secureSpaceballRadus, 1-secureSpaceballRadus);
-        axisLen = clamp(norm(axisPos - me.pos(ax2)), 0.04, 10);
+        axisLen = clamp(norm(axisPos - rotMePos(2)), 0.04, 10);
         
         %set waypoint pos to enemy
-        toEnemy = vecNorm(enemy.pos - me.pos);
-        otherAxisPos = me.pos(ax1) + toEnemy(ax1)*axisLen * 0.4;
+        toEnemy = vecNorm(rotEnemyPos - rotMePos);
+        otherAxisPos = rotMePos(1) + toEnemy(1)*axisLen * 0.6;
         
         %set waypoint
-        waypointList{1}(ax1) = otherAxisPos;
-        waypointList{1}(ax2) = axisPos;
+        waypointList{1} = clamp((rotMat2*[otherAxisPos, axisPos]')', secureSpaceballRadus, 1-secureSpaceballRadus);
         debugDRAW();
         
-        %position aligned - finetune position
-        if (norm(me.pos(ax2)-enemy.pos(ax2)) < spiel.spaceball_radius*2 && ...
-                norm(me.ges(ax2)-enemy.ges(ax2)) < 0.1)
+        %security feature: check if i am in a corner and the enemy is free
+        freeToLock = true;
+        if (dirToAxis(1) > 0)
+           if (rotMePos(1) < 0.5)
+               freeToLock = false;
+           end
+        else
+           if (rotMePos(1) > 0.5)
+               freeToLock = false;
+           end
+        end
+        
+        %position aligned - finetune position -> lock onto target
+        if (freeToLock && norm(rotMePos(2)-rotEnemyPos(2)) < spiel.spaceball_radius*2 && ...
+                norm(rotMeGes(2)-rotEnemyGes(2)) < 0.1)
             if (lockAnnouncement == 0)
                 debugDisp('LockOnAttack: Aligned... Locking...');
                 lockAnnouncement = 1;
-            elseif (lockAnnouncement ~= 2 && norm(me.ges(ax2)-enemy.ges(ax2)) < 0.001)
+            elseif (lockAnnouncement ~= 2 && norm(rotMeGes(2)-rotEnemyGes(2)) < 0.001 && ...
+                    norm(rotMePos(2)-rotEnemyPos(2)) < spiel.spaceball_radius)
                 debugDisp('LockOnAttack: Target Locked!');
                 lockAnnouncement = 2;
+                transformationAngle = angle;
             end
             
             %copy enemy acceleration
-            ax2comp = enemy.bes(ax2);
+            ax2comp = rotEnemyBes(2);
             
             %y velocity and position correction
-            deltaA = ((enemy.ges(ax2)-me.ges(ax2)) + 0.2*(enemy.pos(ax2)-me.pos(ax2)))/spiel.dt;
+            deltaA = ((rotEnemyGes(2)-rotMeGes(2)) + 0.2*(rotEnemyPos(2)-rotMePos(2)))/spiel.dt;
             ax2comp = clamp(ax2comp+deltaA, -spiel.bes, spiel.bes);
             
             %debug
@@ -1166,25 +1223,23 @@ function bes = beschleunigung(spiel, farbe)
             %debugDisp(str1);
             
             %valid x component to enemy
-            ax1comp = sqrt(spiel.bes^2 - ax2comp^2) * toEnemy(ax1)/norm(toEnemy(ax1));
+            ax1comp = sqrt(spiel.bes^2 - ax2comp^2) * toEnemy(1)/norm(toEnemy(1));
             
             %set to override acceleration calculation and set acceleration
             %manually
             overrideBesCalculation = true;
-            bes = [0, 0];
-            bes(ax1) = ax1comp;
-            bes(ax2) = ax2comp;
+            bes = (rotMat2*[ax1comp, ax2comp]')';
         else
             if (lockAnnouncement ~= 0)
                 debugDisp('LockOnAttack: Locking failed, realigning ...');
                 lockAnnouncement = 0;
+                transformationAngle = 0;
             end
         end
         
         
         constEmrBrkVelFac = 1.1;
     end
-
 
     function erg = calcEnemyHitPosition()
         vel = norm(me.ges-enemy.ges);
