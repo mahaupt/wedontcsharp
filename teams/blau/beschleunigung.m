@@ -10,6 +10,9 @@ function bes = beschleunigung(spiel, farbe)
     constEmrBrkVelFac = 1.2; %betrachtet Geschwindigkeit fürs Emergencybreaking
     constCompetitionModeThreshold = 0.1;
     
+    %DEBUG MODE
+    constDebugMode = true;
+    
     %statische Variablen definieren
     persistent nodeGrid;
     persistent waypointList;
@@ -54,7 +57,7 @@ function bes = beschleunigung(spiel, farbe)
 %% Veränderungen des Spielfeldes bemerken und dementsprechend handeln
     %Nodegrid beim Verschwinden einer Mine aktualisieren:
     if numel(spiel.mine) < numel(ArrayOfMines)
-        disp('Updating NodeGrid');
+        debugDisp('beschleunigung: Updating NodeGrid');
         NumberOfMine = customSetdiff(spiel.mine, ArrayOfMines);
         updateNodeGrid(NumberOfMine.pos, spiel.mine_radius);
         resimplifyWaypoints();
@@ -395,7 +398,7 @@ function bes = beschleunigung(spiel, farbe)
         
         %debug purposes
         if (equalsVec(startPos, endPos))
-            disp('Pathfinder: stard equals end, return zero waypoints');
+            debugDisp('findPath: stard equals end, return zero waypoints');
         end
         
         openSet = {};
@@ -409,7 +412,7 @@ function bes = beschleunigung(spiel, farbe)
         %if start and end node is invalid - abort
         if (~startNode.isWalkable || ~endNode.isWalkable)
             waypoints = [];
-            disp('findPath: invalid start or end position');
+            debugDisp('findPath: invalid start or end position');
             return;
         end
         
@@ -903,7 +906,7 @@ function bes = beschleunigung(spiel, farbe)
                 return;
             end
             
-            disp('finding Path to next Tanke');
+            debugDisp('createPathToNextTanke: finding Path to next Tanke');
             
             next_tanke = tankdistance(1,1);
             waypointList = appendToArray(waypointList, findPath(lastWaypoint, spiel.tanke(next_tanke).pos));
@@ -1016,7 +1019,7 @@ function bes = beschleunigung(spiel, farbe)
             if (tenemy > 0 && tenemy < 0.25 && ~enemyColliding)
                 if (i==1 && norm(tenemy- town) < constCompetitionModeThreshold && ~tankeCompetition && ~ownColliding ...
                         && tvown < 0.5)
-                    disp('competition mode activated');
+                    debugDisp('checkTankPath: competition mode activated');
                     tankeCompetition = true;
                     
                     %competition mode activated
@@ -1029,18 +1032,19 @@ function bes = beschleunigung(spiel, farbe)
                     return;
                     
                 elseif (tenemy+tvenemy < town+tvown && ~tankeCompetition)
-                    disp('enemy reaches tanke before us .. get new target tanke');
+                    debugDisp('checkTankPath: enemy reaches tanke before us .. get new target tanke');
                     ignoreTanke = tankeIndex;
                     safeDeleteWaypoints();
                     return;
                 end
             end
           
+
             %Notbremse bei zu spätem Erreichen einer Tanke
             if tankeCompetition && i==1
                 Distance = norm(ownPath)-calcBreakDistance(norm(me.ges),0);
                 if (Distance <= spiel.spaceball_radius * 2 && tenemy < town)
-                    disp('Notbremse, Tanke wird nicht vor Gegner erreicht');
+                    disp('checkTankPath: Notbremse, Tanke wird nicht vor Gegner erreicht');
                     safeDeleteWaypoints();
                     if isWalkable(waypointList{1} - 0.3 * enemy.ges, spiel.spaceball_radius)
                         waypointList{1} = waypointList{1} - 0.3 * enemy.ges
@@ -1060,7 +1064,15 @@ function bes = beschleunigung(spiel, farbe)
         if (spiel.n_mine > 0)
             directAttack();
         else
-            slowAttack();
+            %decide which axis to lock on
+            ax1 = norm(enemy.pos(1)-me.pos(1));
+            ax2 = norm(enemy.pos(2) - me.pos(2));
+            
+            if (ax1 < ax2)
+                lockonAttack(2, 1);
+            else
+                lockonAttack(1, 2);
+            end
         end
     end
 
@@ -1095,7 +1107,7 @@ function bes = beschleunigung(spiel, farbe)
             end
             
             if recalcPath
-                disp('finding Path to Enemy');
+                debugDisp('directAttack: finding Path to Enemy');
                 startPos = safeDeleteWaypoints();
                 waypointList = appendToArray(waypointList, findPath(startPos,enemypos));
 
@@ -1105,42 +1117,68 @@ function bes = beschleunigung(spiel, farbe)
     end
 
 
-    function slowAttack()
+    function lockonAttack(ax1, ax2)
+        persistent lockAnnouncement;
+        if (isempty(lockAnnouncement))
+            lockAnnouncement = 0;
+        end
         
         secureSpaceballRadus = spiel.spaceball_radius + constSafeBorder/2;
         
-        %get waypoint position (bes * 0.9)
-        axisPos = enemy.pos(2) + enemy.ges(2) + enemy.bes(2);
+        %ist t größer -> Beschleunigung und Geschwindigkeit angleichen, ist
+        %t kleiner -> Position angleichen
+        t = clamp(3/norm((enemy.pos(ax2)-me.pos(ax2))/(enemy.ges(ax2)-me.ges(ax2))), 0.5, 5);
+        
+        %wegpunktaxe berechnen
+        axisPos = enemy.pos(ax2) + t*enemy.ges(ax2) + 0.5*t^2*enemy.bes(ax2);
         axisPos = clamp(axisPos, secureSpaceballRadus, 1-secureSpaceballRadus);
-        axisLen = clamp(norm(axisPos - me.pos(2)), 0.04, 10);
+        axisLen = clamp(norm(axisPos - me.pos(ax2)), 0.04, 10);
         
         %set waypoint pos to enemy
         toEnemy = vecNorm(enemy.pos - me.pos);
-        otherAxisPos = me.pos(1) + toEnemy(1)*axisLen * 0.2;
+        otherAxisPos = me.pos(ax1) + toEnemy(ax1)*axisLen * 0.4;
         
         %set waypoint
-        waypointList{1} = [otherAxisPos, axisPos];
+        waypointList{1}(ax1) = otherAxisPos;
+        waypointList{1}(ax2) = axisPos;
         debugDRAW();
         
         %position aligned - finetune position
-        if (norm(me.pos(2)-enemy.pos(2)) < 0.01 && ...
-                norm(me.ges(2)-enemy.ges(2)) < 0.1)
-            %test
-            overrideBesCalculation = true;
-            ycomp = enemy.bes(2);
+        if (norm(me.pos(ax2)-enemy.pos(ax2)) < spiel.spaceball_radius*2 && ...
+                norm(me.ges(ax2)-enemy.ges(ax2)) < 0.1)
+            if (lockAnnouncement == 0)
+                debugDisp('LockOnAttack: Aligned... Locking...');
+                lockAnnouncement = 1;
+            elseif (lockAnnouncement ~= 2 && norm(me.ges(ax2)-enemy.ges(ax2)) < 0.001)
+                debugDisp('LockOnAttack: Target Locked!');
+                lockAnnouncement = 2;
+            end
             
-            %y velocity correction
-            deltaA = ((enemy.ges(2)-me.ges(2)) + 0.5*(enemy.pos(2)-me.pos(2)))/spiel.dt;
-            ycomp = clamp(ycomp+deltaA, -spiel.bes, spiel.bes);
+            %copy enemy acceleration
+            ax2comp = enemy.bes(ax2);
+            
+            %y velocity and position correction
+            deltaA = ((enemy.ges(ax2)-me.ges(ax2)) + 0.2*(enemy.pos(ax2)-me.pos(ax2)))/spiel.dt;
+            ax2comp = clamp(ax2comp+deltaA, -spiel.bes, spiel.bes);
             
             %debug
-            str1 = sprintf('Aligned: deltaV: %d   deltaS: %d', norm(enemy.ges(2)-me.ges(2)), norm(enemy.pos(2)-me.pos(2)));
-            disp(str1);
+            %str1 = sprintf('LockOnAttack: deltaV: %d   deltaS: %d', norm(enemy.ges(ax2)-me.ges(ax2)), norm(enemy.pos(ax2)-me.pos(ax2)));
+            %debugDisp(str1);
             
             %valid x component to enemy
-            xcomp = sqrt(spiel.bes^2 - ycomp^2) * toEnemy(1)/norm(toEnemy(1));
+            ax1comp = sqrt(spiel.bes^2 - ax2comp^2) * toEnemy(ax1)/norm(toEnemy(ax1));
             
-            bes = [xcomp, ycomp];
+            %set to override acceleration calculation and set acceleration
+            %manually
+            overrideBesCalculation = true;
+            bes = [0, 0];
+            bes(ax1) = ax1comp;
+            bes(ax2) = ax2comp;
+        else
+            if (lockAnnouncement ~= 0)
+                debugDisp('LockOnAttack: Locking failed, realigning ...');
+                lockAnnouncement = 0;
+            end
         end
         
         
@@ -1202,7 +1240,7 @@ function bes = beschleunigung(spiel, farbe)
         %define a Matrix that contains all corner positions
         cornerNodes = [0.01,0.99,0;0.99,0.99,0;0.01,0.01,0;0.99,0.01,0];
         if waitForEnemy == false
-            disp('cornerTricking Pt1');
+            debugDisp('cornerTricking: Pt1');
 %             get nearest corner, go there and wait
             if waitForEnemy == false
                 for i=1:4
@@ -1215,15 +1253,15 @@ function bes = beschleunigung(spiel, farbe)
         %waiting for the enemy
         elseif waitForEnemy == true
             %calculate vector between us and enemy
-            enemyPath = me.pos-enemy.pos;
+            %enemyPath = me.pos-enemy.pos;
             %the time, enemy needs to get to our position
-            tenemy  = norm(enemyPath)/projectVectorNorm(enemy.ges, enemyPath);
+            %tenemy  = norm(enemyPath)/projectVectorNorm(enemy.ges, enemyPath);
             %check if there is a mine on the enemy's path towards us
-            enemyColliding = corridorColliding(enemy.pos, me.pos, spiel.spaceball_radius);
+            %enemyColliding = corridorColliding(enemy.pos, me.pos, spiel.spaceball_radius);
 
             
             if checkIfTooFastE () == true %|| tenemy < 0.0001
-                disp('cornerTricking Pt2');
+                debugDisp('cornerTricking: Pt2');
                     %sort all corners based on the direction the enemy is coming from and their distance to us
                     for i=1:4
                         cornerNodes(i,3)=norm(cornerNodes(i,1:2)-me.pos-enemy.ges);
@@ -1241,6 +1279,10 @@ function bes = beschleunigung(spiel, farbe)
 %% Debugging
     %Wegpunkte einzeichnen
     function debugDRAW()
+        if (~constDebugMode)
+            return;
+        end
+        
         %delete all draw handles
         for i = 1 : numel(drawHandles)
             if (~isempty(drawHandles(i)))
@@ -1252,5 +1294,13 @@ function bes = beschleunigung(spiel, farbe)
         for i = 1 : numel(waypointList)
             drawHandles(i) = rectangle ('Parent', spiel.spielfeld_handle, 'Position', [waypointList{i}-0.0025, 0.005, 0.005], 'Curvature', [1 1], 'FaceColor', spiel.farbe.blau, 'EdgeColor', 'none');
         end
+    end
+
+    function debugDisp(str)
+        if (~constDebugMode)
+            return;
+        end
+        
+        disp(str);
     end
 end
