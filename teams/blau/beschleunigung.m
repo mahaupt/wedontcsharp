@@ -1129,8 +1129,12 @@ function bes = beschleunigung(spiel, farbe)
             ycomp = enemy.bes(2);
             
             %y velocity correction
-            deltaA = (enemy.ges(2)-me.ges(2))/spiel.dt;
+            deltaA = ((enemy.ges(2)-me.ges(2)) + 0.5*(enemy.pos(2)-me.pos(2)))/spiel.dt;
             ycomp = clamp(ycomp+deltaA, -spiel.bes, spiel.bes);
+            
+            %debug
+            str1 = sprintf('Aligned: deltaV: %d   deltaS: %d', norm(enemy.ges(2)-me.ges(2)), norm(enemy.pos(2)-me.pos(2)));
+            disp(str1);
             
             %valid x component to enemy
             xcomp = sqrt(spiel.bes^2 - ycomp^2) * toEnemy(1)/norm(toEnemy(1));
