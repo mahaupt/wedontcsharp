@@ -1,22 +1,21 @@
-% ACHTUNG:
-% clear variables in spaceballs.m muss auskommentiert sein!
-% Zeitraffer-Funktion in spaceballs.m sollte aktiviert sein!
-
 clear all
 close all
 clc
 
 % Wichtig:
-% clear variables in spaceballs.m muss auskommentiert sein!
-% in spaceballs spiel.zeitraffer_checkbox_anfangswert true setzen!
-% shuffle mode on
+% In spaceballs.m "clear variables" auskommentieren!
+% In spaceballs.m "spiel.zeitraffer_checkbox_anfangswert" auf true setzen!
+% In spaceballs.m "rng shuffle" durch folgendes ersetzen:
+    %rng shuffle
+    %r = round(rand(1)*1000000);
+    %rng(r);
 
-Durchgaenge = 1; % Anzahl Durchgänge
+Durchgaenge = 10; % Anzahl Durchgänge
 Farbe = 'blau'; % Farbe des eigenen SpaceBalls eintragen: 'rot' oder 'blau'
 
 
 
-
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 data = cell(Durchgaenge,9);
 

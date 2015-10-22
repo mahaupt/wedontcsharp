@@ -1,13 +1,13 @@
 %% Initialisierung
 
-% clear variables
+clear variables
 close all
 clc
 
-% rng shuffle
-rng (335426);
-r = round(rand(1)*1000000);
-rng(r);
+
+rng shuffle
+r = round(rand(1)*1000000)
+rng(r); %335426
 
 
 %% Konstanten definieren
@@ -48,7 +48,7 @@ spiel.spur_anfangswert = 1*spiel.n_t;
 spiel.zeitlupe_anfangswert = 0;
 spiel.ges_checkbox_anfangswert = true;
 spiel.bes_checkbox_anfangswert = true;
-spiel.zeitraffer_checkbox_anfangswert = true;
+spiel.zeitraffer_checkbox_anfangswert = false;
 
 spiel.rot.spur(spiel.n_t, 2) = 0;
 spiel.blau.spur(spiel.n_t, 2) = 0;
@@ -62,7 +62,7 @@ if video.abspeichern
     
     video.writer = VideoWriter ('spaceballs.avi');
     
-    video.writer.Quality = 100;
+    video.writer.Quality = 25;
     
     video.writer.FrameRate = 25;
     
