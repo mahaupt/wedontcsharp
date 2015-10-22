@@ -1042,6 +1042,9 @@ function bes = beschleunigung(spiel, farbe)
                 if (Distance <= spiel.spaceball_radius * 2 && tenemy < town)
                     disp('Notbremse, Tanke wird nicht vor Gegner erreicht');
                     safeDeleteWaypoints();
+                    if isWalkable(waypointList{1} - 0.3 * enemy.ges, spiel.spaceball_radius)
+                        waypointList{1} = waypointList{1} - 0.3 * enemy.ges
+                    end
                     ignoreTanke = tankeIndex;
                     tankeCompetition == false;
                 end
