@@ -1,13 +1,12 @@
 %% Initialisierung
 
-% clear variables
+clear variables
 close all
 clc
 
 rng shuffle
-%rng (9474)
 r = round(rand(1)*1000000)
-rng(r)
+rng(r);
 
 
 %% Konstanten definieren
@@ -17,7 +16,7 @@ spiel.t_end = 60;
 spiel.n_t = round (spiel.t_end/spiel.dt);
 spiel.i_t = 0;
 
-spiel.n_mine = 12; % Muss gerade sein! (Default: 12)
+spiel.n_mine = 0; % Muss gerade sein! (Default: 12)
 spiel.n_tanke = 9; % Muss ungerade sein! (Default: 9)
 
 spiel.kreis_radius = 0.075;
@@ -62,7 +61,7 @@ if video.abspeichern
     
     video.writer = VideoWriter ('spaceballs.avi');
     
-    video.writer.Quality = 100;
+    video.writer.Quality = 25;
     
     video.writer.FrameRate = 25;
     
