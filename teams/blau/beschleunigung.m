@@ -82,7 +82,7 @@ function bes = beschleunigung(spiel, farbe)
 %% Was soll der Spaceball tun?
     %Tanken oder Angreifen oder Verteidigen?
     function whatToDo()
-        if StartNumberOfTank*0.5 < me.getankt || (norm(me.pos-enemy.pos)<0.2 && me.getankt>enemy.getankt)
+        if StartNumberOfTank*0.5 < me.getankt || (norm(me.pos-enemy.pos)<0.2 && me.getankt>enemy.getankt && ~corridorColliding(me.pos, enemy.pos, constNavSecurity))
             
             %Wenn wir mehr als die Hälfte der Tanken haben oder nahe des Gegners sind und mehr getankt haben - Angriff!
             attackEnemy();
@@ -1036,12 +1036,10 @@ function bes = beschleunigung(spiel, farbe)
                 end
             end
           
-            %currently disabled
-            if false && tankeCompetition && i==1 && tenemy > town
-                PointWhereWeStop = me.pos + vecNorm(me.ges) * (norm(me.ges) / -spiel.bes);
-                PointOfEnemy = enemy.pos + vecNorm(enemy.ges) * (norm(me.ges) / -spiel.bes);
-                Distance = norm(PointWhereWeStop - PointOfEnemy)
-                if Distance <= spiel.spaceball_radius * 2
+            %Notbremse bei zu spätem Erreichen einer Tanke
+            if tankeCompetition && i==1
+                Distance = norm(ownPath)-calcBreakDistance(norm(me.ges),0);
+                if (Distance <= spiel.spaceball_radius * 2 && tenemy < town)
                     disp('Notbremse, Tanke wird nicht vor Gegner erreicht');
                     safeDeleteWaypoints();
                     ignoreTanke = tankeIndex;
