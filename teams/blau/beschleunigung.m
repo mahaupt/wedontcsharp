@@ -1031,7 +1031,7 @@ function bes = beschleunigung(spiel, farbe)
                     debugDRAW();
                     return;
                     
-                elseif (tenemy+tvenemy < town+tvown && ~tankeCompetition)
+                elseif (tenemy+tvenemy < town+tvown && ~tankeCompetition && tvenemy < 0.5)
                     debugDisp('checkTankPath: enemy reaches tanke before us .. get new target tanke');
                     ignoreTanke = tankeIndex;
                     safeDeleteWaypoints();
@@ -1047,7 +1047,7 @@ function bes = beschleunigung(spiel, farbe)
                     disp('checkTankPath: Notbremse, Tanke wird nicht vor Gegner erreicht');
                     safeDeleteWaypoints();
                     if isWalkable(waypointList{1} - 0.3 * enemy.ges, spiel.spaceball_radius)
-                        waypointList{1} = waypointList{1} - 0.3 * enemy.ges
+                        waypointList{1} = waypointList{1} - 0.3 * enemy.ges;
                     end
                     ignoreTanke = tankeIndex;
                     tankeCompetition == false;
