@@ -1,17 +1,52 @@
 function bes = beschleunigung(spiel, farbe)
 %% Konstanten & Variablen zu Beginn des Spiels festlegen
-    constSafeBorder = 0.001; %collision border around mines
+    
+    %NAVIGATION
+    %sicherheitsradius um Minen und Banden
+    constSafeBorder = 0.001;
+    %Standardradius zum Erreichen eines Wegpunktes
     constWayPointReachedRadius = 0.02;
+    %Auflösung des NodeGrids (Radius eines Nodes)
     constGridRadius = 0.003;
-    constNavSecurity = 0.03; %simplify path
-    constMineProxPenality = 0.0006; %Strafpunkte für Nodes - je dichter an Mine, desto höher
-    constCornerBreaking = 0.26; %0.03 je größer der Winkel zum nächsten Wegpunkt, desto höheres Bremsen. Faktor.
-    constEmrBrkAccFac = 0.2; %betrachtet Seitwärtsbbeschleunigungen fürs Emergencybreaking
-    constEmrBrkVelFac = 1.2; %betrachtet Geschwindigkeit fürs Emergencybreaking
+    %Korridorbreite für simplifyPath
+    constNavSecurity = 0.03;
+    %Strafpunkte für Nodes - je dichter an Mine, desto höher
+    %wichtig für den Pathfinder
+    constMineProxPenality = 0.0006;
+    %0.3 je größer der Winkel zum nächsten Wegpunkt, desto höheres Bremsen. Faktor.
+    constCornerBreaking = 0.26; 
+    %Faktor für Seitwärtsbbeschleunigungen fürs Emergencybreaking
+    constEmrBrkAccFac = 0.2; 
+    %Faktor für Geschwindigkeit fürs Emergencybreaking
+    constEmrBrkVelFac = 1.2; 
+    
+    %TANKEN
+    %Zeitdifferenz die der Gegner schneller bei der Tanke sein darf,
+    %wir es aber dennoch versuchen
     constCompetitionModeThreshold = 0.1;
     
+    %ATTACK
+    % Gegnerinterpolationsmethode 
+    % 0: s= v*t+ 0.5*a*t^2
+    % 1: s= v*t
+    constEnemyInterpMode = 0; 
+    %wenn true, dann wird immer interpoliert (ignoriert Konstante eins weiter unten)
+    constEnemyAlwaysInterpolate = true;
+    %Ab welcher Nähe (Zeitlich bis Treffer) interpoliert werden darf
+    constEnemyInterpolationDistance = 1; 
+    %bildet den Mittelwert aus den letzten x Beschleunigungswerten des
+    %Gegners - smoothed die Interpolations
+    constAccInterpolationSmoothing = 5;
+    %TRUE: Beschleunigungsberechnung wird überbrückt,
+    %sinnvoll für präzise Manöver ohne Waypoints
+    %ACHTUNG: jegliche Kollisionssicherung wird umgangen
+    overrideBesCalculation = false;
+    
     %DEBUG MODE
+    %true: ermöglicht ausgabe von Text und Zeichnen von gizmos
     constDebugMode = true;
+    
+    
     
     %statische Variablen definieren
     persistent nodeGrid;
@@ -23,10 +58,6 @@ function bes = beschleunigung(spiel, farbe)
     persistent ignoreTanke; %number of tanke to be ignored by targetNextTanke
     persistent tankeCompetition;
     persistent waitForEnemy; %benötigt, um auf den Gegner warten zu können
-    
-    
-    %globale Variablen
-    overrideBesCalculation = false;
 
     
     %%Farbe prüfen und zuweisen
@@ -38,40 +69,16 @@ function bes = beschleunigung(spiel, farbe)
         enemy = spiel.rot;
     end
     
+    
     %wird einmal am Anfang ausgeführt
-    %setup node grid and empty persistent vars
     if spiel.i_t==1
-        nodeGrid = [];
-        drawHandles = [];
-        waypointList = [];
-        ignoreTanke = 0;
-        ArrayOfMines = spiel.mine;
-        StartNumberOfTank = spiel.n_tanke;
-        NumberOfTank = spiel.n_tanke;
-        tankeCompetition = false;
-        waitForEnemy = false;
-        setupNodeGrid();
+        initSpaceball();
     end
     
     
 %% Veränderungen des Spielfeldes bemerken und dementsprechend handeln
-    %Nodegrid beim Verschwinden einer Mine aktualisieren:
-    if numel(spiel.mine) < numel(ArrayOfMines)
-        debugDisp('beschleunigung: Updating NodeGrid');
-        NumberOfMine = customSetdiff(spiel.mine, ArrayOfMines);
-        updateNodeGrid(NumberOfMine.pos, spiel.mine_radius);
-        resimplifyWaypoints();
-        ArrayOfMines = spiel.mine;
-    end
-    
-    %beim Verschwinden einer Tanke:
-    if (NumberOfTank ~= spiel.n_tanke)
-        NumberOfTank = spiel.n_tanke;
-        tankeCompetition = false;
-        ignoreTanke = 0;
-    end
+    gameChangeHandler()
 
-    
     
 %% Entscheidungen fällen und Beschleunigung berechnen
     %Entscheidung über Angriff/Verteidigung/Tanken
@@ -99,6 +106,44 @@ function bes = beschleunigung(spiel, farbe)
         end
     end
     
+
+    %wird einmal am Start aufgerufen
+    %initialisiert wichtige Variablen
+    function initSpaceball()
+        nodeGrid = [];
+        drawHandles = [];
+        waypointList = [];
+        ignoreTanke = 0;
+        ArrayOfMines = spiel.mine;
+        StartNumberOfTank = spiel.n_tanke;
+        NumberOfTank = spiel.n_tanke;
+        tankeCompetition = false;
+        waitForEnemy = false;
+        setupNodeGrid();
+    end
+
+    %registriert Änderungen im Spielfeld und Handelt entsprechend
+    function gameChangeHandler()
+        %Nodegrid beim Verschwinden einer Mine aktualisieren:
+        if numel(spiel.mine) < numel(ArrayOfMines)
+            debugDisp('beschleunigung: Updating NodeGrid');
+            NumberOfMine = customSetdiff(spiel.mine, ArrayOfMines);
+            updateNodeGrid(NumberOfMine.pos, spiel.mine_radius);
+            resimplifyWaypoints();
+            ArrayOfMines = spiel.mine;
+        end
+
+        %beim Verschwinden einer Tanke:
+        if (NumberOfTank ~= spiel.n_tanke)
+            if (tankeCompetition)
+                safeDeleteWaypoints();
+                tankeCompetition = false;
+            end
+
+            NumberOfTank = spiel.n_tanke;
+            ignoreTanke = 0;
+        end
+    end
 
 
 %% Beschleunigung berechnen
@@ -1072,17 +1117,6 @@ function bes = beschleunigung(spiel, farbe)
         if (spiel.n_mine > 0)
             directAttack();
         else
-            %decide which axis to lock on
-            %ax1 = norm(enemy.pos(1)-me.pos(1));
-            %ax2 = norm(enemy.pos(2) - me.pos(2));
-            
-            %if (ax1 < ax2)
-            %    lockonAttackOld(2, 1);
-            %else
-            %    lockonAttackOld(1, 2);
-            %end
-            
-            
             lockonAttack();
         end
     end
@@ -1091,7 +1125,7 @@ function bes = beschleunigung(spiel, farbe)
     function directAttack()
         
         %check if path to enemy is free
-        enemypos = calcEnemyHitPosition();
+        enemypos = calcEnemyHitPosition(constEnemyInterpMode, constEnemyAlwaysInterpolate);
         if (~corridorColliding(me.pos, enemy.pos, constNavSecurity))
             %delete all other waypoints
             if (numel(waypointList) > 1)
@@ -1107,16 +1141,20 @@ function bes = beschleunigung(spiel, farbe)
             waypointList{endIndex} = getAccPos(enemypos);
             debugDRAW();
         else
-            %calculate indirect path to enemy
+            pathResolution = clamp(norm(enemypos-me.pos)/2, 0.1, 0.5);
+            
+            %Prüfe, ob Pfad neu berechnet werden soll (Gegner liegt
+            %außerhalb von pathResolution vom letzten Wegpunkt)
             recalcPath = false;
             if numel(waypointList) >= 1
-                if norm(enemypos-waypointList{numel(waypointList)})>0.15
+                if norm(enemypos-waypointList{numel(waypointList)}) > pathResolution
                     recalcPath = true;
                 end
             else
                 recalcPath = true;
             end
             
+            %calculate indirect path to enemy
             if recalcPath
                 debugDisp('directAttack: finding Path to Enemy');
                 startPos = safeDeleteWaypoints();
@@ -1246,23 +1284,56 @@ function bes = beschleunigung(spiel, farbe)
                 transformationAngle = 0;
             end
         end
-        
-        
-        constEmrBrkVelFac = 1.1;
     end
 
-    function erg = calcEnemyHitPosition()
+    function erg = calcEnemyHitPosition(interpolationMode, alwaysInterpolate)
+        % SMOOTH ACCELERATION VALUES
+        persistent enemyAccSmooth;
+        persistent meAccSmooth;
+        if (isempty(enemyAccSmooth))
+            enemyAccSmooth = [0, 0];
+            meAccSmooth = [0, 0];
+        end
+        
+        % calculate own and enemy smoothed acceleration values
+        enemyAccSmooth = enemyAccSmooth*(constAccInterpolationSmoothing-1) + enemy.bes;
+        enemyAccSmooth = enemyAccSmooth/constAccInterpolationSmoothing;
+        meAccSmooth = meAccSmooth*(constAccInterpolationSmoothing-1) + me.bes;
+        meAccSmooth = meAccSmooth/constAccInterpolationSmoothing;
+        
+        %always interpolate
+        if (nargin <= 2)
+            alwaysInterpolate = false;
+        end
+        if (nargin <= 1)
+            interpolationMode = 0;
+        end
+        
+        enemyacc = enemyAccSmooth;
+        meacc = meAccSmooth;
+        
+        %disable acceleration if parameter is set
+        if (interpolationMode == 1)
+            enemyacc = 0;
+            meacc = 0;
+        end
+
         vel = norm(me.ges-enemy.ges);
-        acc = norm(me.bes-enemy.bes);
+        acc = norm(meacc-enemyacc);
         dist = norm(me.pos-enemy.pos);
         
+        %time to hit enemy
         thit = (sqrt(vel^2+2*acc*dist)-vel)/acc;
+        if (interpolationMode == 1)
+            thit = dist/vel;
+        end
         
         %vorher : (thit > 1) neu : (dist > 0.2)
-        if (thit > 1)
+        if (thit > constEnemyInterpolationDistance && ~alwaysInterpolate)
             erg = enemy.pos;
         else
-            erg = enemy.pos + enemy.ges*thit + 0.5*enemy.bes*thit^2;
+            %interpolate
+            erg = enemy.pos + enemy.ges*thit + 0.5*enemyacc*thit^2;
             
             %clamping erg
             safeSpaceballRadius = spiel.spaceball_radius + constSafeBorder;
