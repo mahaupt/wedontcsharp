@@ -45,7 +45,7 @@ function bes = beschleunigung(spiel, farbe)
     overrideBesCalculation = false;
     %Maximale Anzahl an Minen, bei der auf lockOnAttack geschaltet werden
     %kann wenn der Weg frei ist
-    constMaxLockonMineCount = 5;
+    constMaxLockonMineCount = 12;
     
     %DEBUG MODE
     %true: ermöglicht ausgabe von Text und Zeichnen von gizmos
@@ -200,6 +200,19 @@ function bes = beschleunigung(spiel, farbe)
         elseif (corridorColliding(me.pos, waypointList{1}, spiel.spaceball_radius))
             %%überprüfe, ob 1. Wegpunkt erreichbar ist - wenn nicht, lösche und
             %%berechne neu
+            
+            %Sonderfall, Spaceball selbst viel zu nah an mine:
+            if (spiel.n_mine > 0)
+                toMineVec = spiel.mine(getNearestMineId(me.pos)).pos - me.pos;
+                closeMineDist = norm(toMineVec);
+                if (closeMineDist < spiel.spaceball_radius + spiel.mine_radius + constSafeBorder)
+                    firstWp = me.pos - vecNorm(toMineVec)*constNavSecurity;
+                    waypointList = appendToArray({firstWp}, waypointList);
+                    return;
+                end
+            end
+            
+            %normalerweise reicht: wegpunkt löschen
             waypointList = [];
         end
     end
@@ -934,7 +947,19 @@ function bes = beschleunigung(spiel, farbe)
         waypointList{1} = endPosition;
     end
     
-
+    function erg = getNearestMineId(pos)
+        if (spiel.n_mine <= 0)
+            erg = 0;
+            return;
+        end
+        
+        erg = 1;
+        for i=1:spiel.n_mine
+            if (norm(spiel.mine(i).pos-pos) < norm(spiel.mine(erg).pos - pos))
+                erg = i;
+            end
+        end
+    end
 
 %% Tankenfindungs-System
     %Search for nearest Tanken and create Path between them
@@ -1081,7 +1106,7 @@ function bes = beschleunigung(spiel, farbe)
             end %if
             
             %only if tanke is about to get taken
-            if (tenemy > 0 && tenemy < 0.25 && ~enemyColliding)
+            if (tenemy > 0 && tenemy < 0.20 && ~enemyColliding)
                 if (i==1 && norm(tenemy- town) < constCompetitionModeThreshold && ~tankeCompetition && ~ownColliding ...
                         && tvown < 0.5)
                     debugDisp('checkTankPath: competition mode activated');
