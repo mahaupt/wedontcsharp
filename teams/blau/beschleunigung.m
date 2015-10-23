@@ -45,7 +45,7 @@ function bes = beschleunigung(spiel, farbe)
     overrideBesCalculation = false;
     %Maximale Anzahl an Minen, bei der auf lockOnAttack geschaltet werden
     %kann wenn der Weg frei ist
-    constMaxLockonMineCount = 5;
+    constMaxLockonMineCount = 12;
     
     %DEBUG MODE
     %true: ermöglicht ausgabe von Text und Zeichnen von gizmos
@@ -1081,7 +1081,7 @@ function bes = beschleunigung(spiel, farbe)
             end %if
             
             %only if tanke is about to get taken
-            if (tenemy > 0 && tenemy < 0.25 && ~enemyColliding)
+            if (tenemy > 0 && tenemy < 0.20 && ~enemyColliding)
                 if (i==1 && norm(tenemy- town) < constCompetitionModeThreshold && ~tankeCompetition && ~ownColliding ...
                         && tvown < 0.5)
                     debugDisp('checkTankPath: competition mode activated');
