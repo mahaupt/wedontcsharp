@@ -10,7 +10,7 @@ clc
     %r = round(rand(1)*1000000);
     %rng(r);
 
-Durchgaenge = 10; % Anzahl Durchgänge
+Durchgaenge = 100; % Anzahl Durchgänge
 Farbe = 'blau'; % Farbe des eigenen SpaceBalls eintragen: 'rot' oder 'blau'
 
 
@@ -26,9 +26,13 @@ data = cell(Durchgaenge,9);
         if strcmp(Farbe,'rot')
             me = spiel.rot;
             enemy = spiel.blau;
+            myName = spiel.rot.name;
+            enemyName = spiel.blau.name;
         else
             me = spiel.blau;
             enemy = spiel.rot;
+            myName = spiel.blau.name;
+            enemyName = spiel.rot.name;
         end
                     
         % aktueller Schritt in data Zeile i, Spalte 2 eintragen
@@ -80,7 +84,7 @@ data = cell(Durchgaenge,9);
         end
         
         % clear variables vgl. Spaceballs.m ausführen, Ausnahme: data und range
-        clearvars -except data Durchgaenge Farbe
+        clearvars -except data Durchgaenge Farbe myName enemyName
 
         
     end
@@ -126,7 +130,7 @@ medianTime = medianTime/sumWins;
 
 
 
-
+Gegner = horzcat(myName, ' VS  ', enemyName);
 Satz = horzcat('Von ', num2str(Durchgaenge), ' Spielen wurden ', num2str(sumWins), ' in durchschnittlich ', num2str(medianTime), ' Sekunden gewonnen.');
 Quote1 = horzcat('Gewonnen: ', num2str(sumWins/Durchgaenge*100),' %');
 Quote2 = horzcat('   davon den Gegner erwischt: ', num2str(gegErwischt/sumWins*100),' %');
@@ -139,6 +143,8 @@ Quote8 = horzcat('Error: ', num2str(sumERROR/Durchgaenge*100),' %');
 
 Statistische_Erhebung = data(:,2:6);
 clc;
+disp(Gegner);
+disp(' ');
 disp(Satz);
 disp(' ');
 disp(' ');
@@ -157,8 +163,5 @@ disp(Quote8);
 disp(' ');
 disp(' ');
 disp(Statistische_Erhebung);
-
-Quote = horzcat('Von ', num2str(Durchgaenge), ' Spielen wurde(n) ', num2str(sumWins), ' gewonnen! (', num2str(sumWins/Durchgaenge*100),'%)')
-Statistische_Erhebung = data
 
    

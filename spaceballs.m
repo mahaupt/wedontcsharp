@@ -5,8 +5,9 @@ close all
 clc
 
 rng shuffle
-r = round(rand(1)*1000000);
-rng(793541);
+r = round(rand(1)*1000000)
+rng(r);
+
 
 %% Konstanten definieren
 
@@ -60,7 +61,7 @@ if video.abspeichern
     
     video.writer = VideoWriter ('spaceballs.avi');
     
-    video.writer.Quality = 100;
+    video.writer.Quality = 25;
     
     video.writer.FrameRate = 25;
     
