@@ -1041,16 +1041,26 @@ function bes = beschleunigung(spiel, farbe)
           
 
             %Notbremse bei zu spätem Erreichen einer Tanke
-            if tankeCompetition && i==1
-                Distance = norm(ownPath)-calcBreakDistance(norm(me.ges),0);
-                if (Distance <= spiel.spaceball_radius * 2 && tenemy < town)
+            if (tankeCompetition && i==1 && tenemy < town)
+                vel = norm(me.ges);
+                acc = spiel.bes;
+                dist = norm(ownPath);
+                
+                tacc = (sqrt(vel^2+2*acc*dist)-vel)/acc; %t beim beschleunigen
+                tbrk = (-sqrt(vel^2-2*acc*dist)+vel)/acc; %t beim bremsen
+                deltat = tbrk-tacc; %differenz
+                
+                %distanz die Gegner in deltat zurück legen kann
+                Distance = deltat*norm(enemy.ges);
+                
+                if (Distance <= spiel.spaceball_radius * 2)
                     disp('checkTankPath: Notbremse, Tanke wird nicht vor Gegner erreicht');
                     safeDeleteWaypoints();
                     if isWalkable(waypointList{1} - 0.3 * enemy.ges, spiel.spaceball_radius)
                         waypointList{1} = waypointList{1} - 0.3 * enemy.ges;
                     end
                     ignoreTanke = tankeIndex;
-                    tankeCompetition == false;
+                    tankeCompetition = false;
                 end
             end
         end
