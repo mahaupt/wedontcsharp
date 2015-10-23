@@ -9,16 +9,18 @@ function bes = beschleunigung(spiel, farbe)
     %Auflösung des NodeGrids (Radius eines Nodes)
     constGridRadius = 0.003;
     %Korridorbreite für simplifyPath
-    constNavSecurity = 0.03;
+    constNavSecurity = 0.02;
     %Strafpunkte für Nodes - je dichter an Mine, desto höher
     %wichtig für den Pathfinder
-    constMineProxPenality = 0.0006;
+    constMineProxPenality = 0.00001; % 0.0006
     %0.3 je größer der Winkel zum nächsten Wegpunkt, desto höheres Bremsen. Faktor.
     constCornerBreaking = 0.26; 
     %Faktor für Seitwärtsbbeschleunigungen fürs Emergencybreaking
     constEmrBrkAccFac = 0.2; 
     %Faktor für Geschwindigkeit fürs Emergencybreaking
     constEmrBrkVelFac = 1.2; 
+    %simplifyPath umgehen
+    constSkipSimplifyPath = false;
     
     %TANKEN
     %Zeitdifferenz die der Gegner schneller bei der Tanke sein darf,
@@ -41,6 +43,9 @@ function bes = beschleunigung(spiel, farbe)
     %sinnvoll für präzise Manöver ohne Waypoints
     %ACHTUNG: jegliche Kollisionssicherung wird umgangen
     overrideBesCalculation = false;
+    %Maximale Anzahl an Minen, bei der auf lockOnAttack geschaltet werden
+    %kann wenn der Weg frei ist
+    constMaxLockonMineCount = 5;
     
     %DEBUG MODE
     %true: ermöglicht ausgabe von Text und Zeichnen von gizmos
@@ -354,7 +359,7 @@ function bes = beschleunigung(spiel, farbe)
                 %Je dichter an Mine, desto teurer!
                 for i=1:spiel.n_mine
                     if (norm(nodeGrid(x,y).worldPos-spiel.mine(i).pos)-spiel.mine_radius < 0.1)
-                        mineCost = mineCost + constMineProxPenality/(norm(nodeGrid(x,y).worldPos-spiel.mine(i).pos)-spiel.mine_radius);
+                        mineCost = mineCost + constMineProxPenality/(norm(nodeGrid(x,y).worldPos-spiel.mine(i).pos)-spiel.mine_radius)^2;
                     end
                 end
                 
@@ -620,6 +625,11 @@ function bes = beschleunigung(spiel, farbe)
 %% Den Pfad vereinfachen
     % simplify path
     function erg = simplifyPath(path)
+        if (constSkipSimplifyPath)
+            erg = path;
+            return;
+        end
+        
         checkIndex = 1;
         pathLength = numel(path);
         
@@ -1036,11 +1046,6 @@ function bes = beschleunigung(spiel, farbe)
 
     %Check if target tanke is still there
     function checkTankPath()
-        %avoid loop when ignoreTanke checked
-        if ignoreTanke
-            return;
-        end
-        
         %get Tanken on Waypoints
         tankenList = getHeadedTanken();
         
@@ -1061,6 +1066,19 @@ function bes = beschleunigung(spiel, farbe)
             %check mine between enemy and tanke
             enemyColliding = corridorColliding(enemy.pos, spiel.tanke(tankeIndex).pos, spiel.spaceball_radius);
             ownColliding = corridorColliding(me.pos, spiel.tanke(tankeIndex).pos, constNavSecurity);
+            
+            %check if ignoreTanke is still valid
+            if ignoreTanke
+                if tankeIndex == ignoreTanke
+                    if ~(tenemy > 0 && tenemy < 0.25 && ~enemyColliding  && tvenemy < 0.5)
+                        %uncheck ignoreTanke if above is false
+                        ignoreTanke = 0;
+                        debugDisp('checkTankPath: disabled ignoretanke');
+                    end
+                else
+                    continue;
+                end
+            end %if
             
             %only if tanke is about to get taken
             if (tenemy > 0 && tenemy < 0.25 && ~enemyColliding)
@@ -1118,7 +1136,52 @@ function bes = beschleunigung(spiel, farbe)
 %% Angriff
     %Angriff
     function attackEnemy()
-        if (spiel.n_mine > 0)
+        %lockon attack ist nur sicher, wenn sich zwischen Gegner und Mir
+        %keine Mine befindet
+        
+        
+        useLockonAttack = false;
+        if (spiel.n_mine < constMaxLockonMineCount)
+            useLockonAttack = true;
+            if (spiel.n_mine > 0)
+                % 0 - constMaxLockonMineCount mines, calculate
+                dangerRadius = spiel.spaceball_radius + spiel.mine_radius + constSafeBorder;
+                
+                dirToEnemy = vecNorm(enemy.pos-me.pos);
+                dirToAxis = [dirToEnemy(1)/norm(dirToEnemy(1)), 0]; % [-1, 0 ] or [1, 0] in enemy direction
+                angle = acos(dot(dirToEnemy, dirToAxis));
+
+                %negative angle if rotated clockwise
+                if (dirToAxis(1) < 0)
+                    if (dirToEnemy(2) < 0)
+                        angle = -angle;
+                    end
+                else
+                     if (dirToEnemy(2) > 0)
+                        angle = -angle;
+                     end
+                end
+
+                %calculate rotation matrices
+                rotMat1 = [cos(angle), -sin(angle); sin(angle), cos(angle)]; %rotate to enemy direction
+                ownPos = (rotMat1*me.pos')';
+                
+                %check every mine
+                for i=1:spiel.n_mine
+                    minePos = (rotMat1*spiel.mine(i).pos')';
+                    % größer null - gefahr!
+                    %kleiner null - mine hinter mir!
+                    checkPos = (minePos(1)-ownPos(1))*dirToAxis(1) + dangerRadius;  
+                    if (checkPos > 0)
+                        useLockonAttack = false;
+                        break;
+                    end
+                end
+            end
+        end
+        
+        %select attack mode
+        if (~useLockonAttack)
             directAttack();
         else
             lockonAttack();
