@@ -10,6 +10,19 @@ function bes = beschleunigung(spiel, farbe)
     constEmrBrkVelFac = 1.2; %betrachtet Geschwindigkeit fürs Emergencybreaking
     constCompetitionModeThreshold = 0.1;
     
+    %ATTACK
+    % Gegnerinterpolationsmethode 
+    % 0: s= v*t+ 0.5*a*t^2
+    % 1: s= v*t
+    constEnemyInterpMode = 0; 
+    %wenn true, dann wird immer interpoliert (ignoriert Konstante eins weiter unten)
+    constEnemyAlwaysInterpolate = true;
+    %Ab welcher Nähe (Zeitlich bis Treffer) interpoliert werden darf
+    constEnemyInterpolationDistance = 1; 
+    %bildet den Mittelwert aus den letzten x Beschleunigungswerten des
+    %Gegners - smoothed die Interpolations
+    constAccInterpolationSmoothing = 5;
+    
     %DEBUG MODE
     constDebugMode = true;
     
@@ -1084,7 +1097,7 @@ function bes = beschleunigung(spiel, farbe)
     function directAttack()
         
         %check if path to enemy is free
-        enemypos = calcEnemyHitPosition();
+        enemypos = calcEnemyHitPosition(constEnemyInterpMode, constEnemyAlwaysInterpolate);
         if (~corridorColliding(me.pos, enemy.pos, constNavSecurity))
             %delete all other waypoints
             if (numel(waypointList) > 1)
@@ -1100,16 +1113,20 @@ function bes = beschleunigung(spiel, farbe)
             waypointList{endIndex} = getAccPos(enemypos);
             debugDRAW();
         else
-            %calculate indirect path to enemy
+            pathResolution = clamp(norm(enemypos-me.pos)/2, 0.1, 0.5);
+            
+            %Prüfe, ob Pfad neu berechnet werden soll (Gegner liegt
+            %außerhalb von pathResolution vom letzten Wegpunkt)
             recalcPath = false;
             if numel(waypointList) >= 1
-                if norm(enemypos-waypointList{numel(waypointList)})>0.15
+                if norm(enemypos-waypointList{numel(waypointList)}) > pathResolution
                     recalcPath = true;
                 end
             else
                 recalcPath = true;
             end
             
+            %calculate indirect path to enemy
             if recalcPath
                 debugDisp('directAttack: finding Path to Enemy');
                 startPos = safeDeleteWaypoints();
@@ -1241,18 +1258,54 @@ function bes = beschleunigung(spiel, farbe)
         end
     end
 
-    function erg = calcEnemyHitPosition()
+    function erg = calcEnemyHitPosition(interpolationMode, alwaysInterpolate)
+        % SMOOTH ACCELERATION VALUES
+        persistent enemyAccSmooth;
+        persistent meAccSmooth;
+        if (isempty(enemyAccSmooth))
+            enemyAccSmooth = [0, 0];
+            meAccSmooth = [0, 0];
+        end
+        
+        % calculate own and enemy smoothed acceleration values
+        enemyAccSmooth = enemyAccSmooth*(constAccInterpolationSmoothing-1) + enemy.bes;
+        enemyAccSmooth = enemyAccSmooth/constAccInterpolationSmoothing;
+        meAccSmooth = meAccSmooth*(constAccInterpolationSmoothing-1) + me.bes;
+        meAccSmooth = meAccSmooth/constAccInterpolationSmoothing;
+        
+        %always interpolate
+        if (nargin <= 2)
+            alwaysInterpolate = false;
+        end
+        if (nargin <= 1)
+            interpolationMode = 0;
+        end
+        
+        enemyacc = enemyAccSmooth;
+        meacc = meAccSmooth;
+        
+        %disable acceleration if parameter is set
+        if (interpolationMode == 1)
+            enemyacc = 0;
+            meacc = 0;
+        end
+
         vel = norm(me.ges-enemy.ges);
-        acc = norm(me.bes-enemy.bes);
+        acc = norm(meacc-enemyacc);
         dist = norm(me.pos-enemy.pos);
         
+        %time to hit enemy
         thit = (sqrt(vel^2+2*acc*dist)-vel)/acc;
+        if (interpolationMode == 1)
+            thit = dist/vel;
+        end
         
         %vorher : (thit > 1) neu : (dist > 0.2)
-        if (thit > 1)
+        if (thit > constEnemyInterpolationDistance && ~alwaysInterpolate)
             erg = enemy.pos;
         else
-            erg = enemy.pos + enemy.ges*thit + 0.5*enemy.bes*thit^2;
+            %interpolate
+            erg = enemy.pos + enemy.ges*thit + 0.5*enemyacc*thit^2;
             
             %clamping erg
             safeSpaceballRadius = spiel.spaceball_radius + constSafeBorder;
