@@ -66,8 +66,12 @@ function bes = beschleunigung(spiel, farbe)
     
     %beim Verschwinden einer Tanke:
     if (NumberOfTank ~= spiel.n_tanke)
+        if (tankeCompetition)
+            safeDeleteWaypoints();
+            tankeCompetition = false;
+        end
+        
         NumberOfTank = spiel.n_tanke;
-        tankeCompetition = false;
         ignoreTanke = 0;
     end
 
@@ -1072,17 +1076,6 @@ function bes = beschleunigung(spiel, farbe)
         if (spiel.n_mine > 0)
             directAttack();
         else
-            %decide which axis to lock on
-            %ax1 = norm(enemy.pos(1)-me.pos(1));
-            %ax2 = norm(enemy.pos(2) - me.pos(2));
-            
-            %if (ax1 < ax2)
-            %    lockonAttackOld(2, 1);
-            %else
-            %    lockonAttackOld(1, 2);
-            %end
-            
-            
             lockonAttack();
         end
     end
@@ -1246,9 +1239,6 @@ function bes = beschleunigung(spiel, farbe)
                 transformationAngle = 0;
             end
         end
-        
-        
-        constEmrBrkVelFac = 1.1;
     end
 
     function erg = calcEnemyHitPosition()
