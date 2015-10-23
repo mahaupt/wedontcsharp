@@ -200,6 +200,19 @@ function bes = beschleunigung(spiel, farbe)
         elseif (corridorColliding(me.pos, waypointList{1}, spiel.spaceball_radius))
             %%überprüfe, ob 1. Wegpunkt erreichbar ist - wenn nicht, lösche und
             %%berechne neu
+            
+            %Sonderfall, Spaceball selbst viel zu nah an mine:
+            if (spiel.n_mine > 0)
+                toMineVec = spiel.mine(getNearestMineId(me.pos)).pos - me.pos;
+                closeMineDist = norm(toMineVec);
+                if (closeMineDist < spiel.spaceball_radius + spiel.mine_radius + constSafeBorder)
+                    firstWp = me.pos - vecNorm(toMineVec)*constNavSecurity;
+                    waypointList = appendToArray({firstWp}, waypointList);
+                    return;
+                end
+            end
+            
+            %normalerweise reicht: wegpunkt löschen
             waypointList = [];
         end
     end
@@ -934,7 +947,19 @@ function bes = beschleunigung(spiel, farbe)
         waypointList{1} = endPosition;
     end
     
-
+    function erg = getNearestMineId(pos)
+        if (spiel.n_mine <= 0)
+            erg = 0;
+            return;
+        end
+        
+        erg = 1;
+        for i=1:spiel.n_mine
+            if (norm(spiel.mine(i).pos-pos) < norm(spiel.mine(erg).pos - pos))
+                erg = i;
+            end
+        end
+    end
 
 %% Tankenfindungs-System
     %Search for nearest Tanken and create Path between them
