@@ -90,7 +90,11 @@ function bes = beschleunigung(spiel, farbe)
 %% Was soll der Spaceball tun?
     %Tanken oder Angreifen oder Verteidigen?
     function whatToDo()
-        if StartNumberOfTank*0.5 < me.getankt || (norm(me.pos-enemy.pos)<0.2 && me.getankt>enemy.getankt && ~corridorColliding(me.pos, enemy.pos, constNavSecurity))
+        vel = norm(me.ges-enemy.ges);
+        acc = norm(me.bes-enemy.bes);
+        dist = norm(me.pos-enemy.pos);
+        thit = (sqrt(vel^2+2*acc*dist)-vel)/acc;
+        if StartNumberOfTank*0.5 < me.getankt || (thit <= 0.5 && me.getankt>enemy.getankt && ~corridorColliding(me.pos, enemy.pos, constNavSecurity))
             
             %Wenn wir mehr als die Hälfte der Tanken haben oder nahe des Gegners sind und mehr getankt haben - Angriff!
             attackEnemy();
