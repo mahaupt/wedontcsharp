@@ -89,7 +89,7 @@ data = cell(Durchgaenge,9);
         
     end
 
-% Prozente berechnen und hübsch darstellen
+%% Prozente berechnen und hübsch darstellen
 sumWins = 0;
 sumLose = 0;
 sumAttack = 0;

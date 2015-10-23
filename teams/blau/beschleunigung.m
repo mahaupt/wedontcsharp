@@ -38,7 +38,7 @@ function bes = beschleunigung(spiel, farbe)
     constEnemyInterpolationDistance = 1; 
     %bildet den Mittelwert aus den letzten x Beschleunigungswerten des
     %Gegners - smoothed die Interpolations
-    constAccInterpolationSmoothing = 5;
+    constAccInterpolationSmoothing = 8;
     %TRUE: Beschleunigungsberechnung wird überbrückt,
     %sinnvoll für präzise Manöver ohne Waypoints
     %ACHTUNG: jegliche Kollisionssicherung wird umgangen
@@ -208,6 +208,7 @@ function bes = beschleunigung(spiel, farbe)
                 if (closeMineDist < spiel.spaceball_radius + spiel.mine_radius + constSafeBorder)
                     firstWp = me.pos - vecNorm(toMineVec)*constNavSecurity;
                     waypointList = appendToArray({firstWp}, waypointList);
+                    bes = -toMineVec;
                     return;
                 end
             end
@@ -252,12 +253,10 @@ function bes = beschleunigung(spiel, farbe)
         
 %         enemyPath = me.pos-enemy.pos;
               
-          if  (norm(me.pos-enemy.pos)) < (((norm(enemy.ges))^2)/(norm(enemy.bes)*2)+0.03);
-          erg = true;
-            
-          else 
+        if  (norm(me.pos-enemy.pos) < ((norm(enemy.ges))^2)/(norm(enemy.bes)*2)+0.03)
+            erg = true;
+        else 
             erg = false;
-        
         end
     end
 
@@ -1311,7 +1310,7 @@ function bes = beschleunigung(spiel, farbe)
         
         %ist t größer -> Beschleunigung und Geschwindigkeit angleichen, ist
         %t kleiner -> Position angleichen
-        t = clamp(3/(norm((rotEnemyPos(2)-rotMePos(2))/(rotEnemyGes(2)-rotMeGes(2)))), 0.5, 5);
+        t = 2;
         
         %wegpunktaxe berechnen
         axisPos = rotEnemyPos(2) + t*rotEnemyGes(2) + 0.5*t^2*rotEnemyBes(2);
@@ -1340,7 +1339,7 @@ function bes = beschleunigung(spiel, farbe)
         
         %position aligned - finetune position -> lock onto target
         if (freeToLock && norm(rotMePos(2)-rotEnemyPos(2)) < spiel.spaceball_radius*2 && ...
-                norm(rotMeGes(2)-rotEnemyGes(2)) < 0.1)
+                norm(rotMeGes(2)-rotEnemyGes(2)) < 0.04)
             if (lockAnnouncement == 0)
                 debugDisp('LockOnAttack: Aligned... Locking...');
                 lockAnnouncement = 1;
@@ -1355,7 +1354,7 @@ function bes = beschleunigung(spiel, farbe)
             ax2comp = rotEnemyBes(2);
             
             %y velocity and position correction
-            deltaA = ((rotEnemyGes(2)-rotMeGes(2)) + 0.2*(rotEnemyPos(2)-rotMePos(2)))/spiel.dt;
+            deltaA = ((rotEnemyGes(2)-rotMeGes(2)) + 0.1*(rotEnemyPos(2)-rotMePos(2)))/spiel.dt;
             ax2comp = clamp(ax2comp+deltaA, -spiel.bes, spiel.bes);
             
             %debug
@@ -1382,9 +1381,12 @@ function bes = beschleunigung(spiel, farbe)
         % SMOOTH ACCELERATION VALUES
         persistent enemyAccSmooth;
         persistent meAccSmooth;
+        persistent lastInterpEnemyPos;
+        
         if (isempty(enemyAccSmooth))
             enemyAccSmooth = [0, 0];
             meAccSmooth = [0, 0];
+            lastInterpEnemyPos = [0, 0];
         end
         
         % calculate own and enemy smoothed acceleration values
@@ -1423,6 +1425,7 @@ function bes = beschleunigung(spiel, farbe)
         %vorher : (thit > 1) neu : (dist > 0.2)
         if (thit > constEnemyInterpolationDistance && ~alwaysInterpolate)
             erg = enemy.pos;
+            lastInterpEnemyPos = erg;
         else
             %interpolate
             erg = enemy.pos + enemy.ges*thit + 0.5*enemyacc*thit^2;
@@ -1433,7 +1436,9 @@ function bes = beschleunigung(spiel, farbe)
             
             %point is not walkable -> set own point
             if (~isWalkable(erg, spiel.spaceball_radius + constSafeBorder))
-                erg = enemy.pos;
+                erg = lastInterpEnemyPos;
+            else
+                lastInterpEnemyPos = erg;
             end
         end
     end
