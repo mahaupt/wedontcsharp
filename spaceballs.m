@@ -1,6 +1,6 @@
 %% Initialisierung
 
-%clear variables
+clear variables
 close all
 clc
 
