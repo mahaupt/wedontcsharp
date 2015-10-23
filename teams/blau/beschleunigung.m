@@ -1277,7 +1277,7 @@ function bes = beschleunigung(spiel, farbe)
                         cornerNodes(i,3)=norm(cornerNodes(i,1:2)-me.pos-enemy.ges);
                     end
                 nextCorner = sortrows(cornerNodes, [3 2 1]);
-                %go to the second corner, since the first one is on ourcurrent position
+                %go to the second corner, since the first one is on our current position
                 waypointList = appendToArray(waypointList, findPath(me.pos, nextCorner(2,1:2)));
                 waitForEnemy = false;
             end
