@@ -16,7 +16,7 @@ spiel.t_end = 60;
 spiel.n_t = round (spiel.t_end/spiel.dt);
 spiel.i_t = 0;
 
-spiel.n_mine = 0; % Muss gerade sein! (Default: 12)
+spiel.n_mine = 12; % Muss gerade sein! (Default: 12)
 spiel.n_tanke = 9; % Muss ungerade sein! (Default: 9)
 
 spiel.kreis_radius = 0.075;
@@ -47,7 +47,7 @@ spiel.spur_anfangswert = 1*spiel.n_t;
 spiel.zeitlupe_anfangswert = 0;
 spiel.ges_checkbox_anfangswert = true;
 spiel.bes_checkbox_anfangswert = true;
-spiel.zeitraffer_checkbox_anfangswert = true;
+spiel.zeitraffer_checkbox_anfangswert = false;
 
 spiel.rot.spur(spiel.n_t, 2) = 0;
 spiel.blau.spur(spiel.n_t, 2) = 0;
