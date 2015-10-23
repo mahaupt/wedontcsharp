@@ -44,7 +44,7 @@ function bes = beschleunigung(spiel, farbe)
     
     %DEBUG MODE
     %true: ermöglicht ausgabe von Text und Zeichnen von gizmos
-    constDebugMode = true;
+    constDebugMode = false;
     
     
     
@@ -94,8 +94,8 @@ function bes = beschleunigung(spiel, farbe)
         acc = norm(me.bes-enemy.bes);
         dist = norm(me.pos-enemy.pos);
         thit = (sqrt(vel^2+2*acc*dist)-vel)/acc;
-        if StartNumberOfTank*0.5 < me.getankt || (thit <= 0.5 && me.getankt>enemy.getankt && ~corridorColliding(me.pos, enemy.pos, constNavSecurity))
-            
+        
+        if StartNumberOfTank*0.5 < me.getankt && me.getankt > enemy.getankt || (thit <= 0.5 && me.getankt>enemy.getankt && ~corridorColliding(me.pos, enemy.pos, constNavSecurity))        
             %Wenn wir mehr als die Hälfte der Tanken haben oder nahe des Gegners sind und mehr getankt haben - Angriff!
             attackEnemy();
         elseif enemy.getankt > StartNumberOfTank*0.5 || (norm(me.pos-enemy.pos)<0.2 && me.getankt<enemy.getankt)
@@ -1085,18 +1085,7 @@ function bes = beschleunigung(spiel, farbe)
                     return;
                 end
             end
-<<<<<<< HEAD
-            
-            if tankeCompetition == true
-                TimeToStop=norm(me.ges)/spiel.bes;
-                if TimeToStop * norm(enemy.ges) == 2 * spiel.spaceball_radius
-                    disp('Notbremse, Tanke wird nicht vor Gegner erreicht');
-                    waypointList = [];
-                    EMERGENCY = true;
-                    tankeCompetition == false;
-=======
           
-
             %Notbremse bei zu spätem Erreichen einer Tanke
             if (tankeCompetition && i==1 && tenemy < town)
                 vel = norm(me.ges);
@@ -1118,7 +1107,6 @@ function bes = beschleunigung(spiel, farbe)
                     end
                     ignoreTanke = tankeIndex;
                     tankeCompetition = false;
->>>>>>> master
                 end
             end
         end
