@@ -1,13 +1,28 @@
 function bes = beschleunigung(spiel, farbe)
 %% Konstanten & Variablen zu Beginn des Spiels festlegen
-    constSafeBorder = 0.001; %collision border around mines
+    
+    %NAVIGATION
+    %sicherheitsradius um Minen und Banden
+    constSafeBorder = 0.001;
+    %Standardradius zum Erreichen eines Wegpunktes
     constWayPointReachedRadius = 0.02;
+    %Auflösung des NodeGrids (Radius eines Nodes)
     constGridRadius = 0.003;
-    constNavSecurity = 0.03; %simplify path
-    constMineProxPenality = 0.0006; %Strafpunkte für Nodes - je dichter an Mine, desto höher
-    constCornerBreaking = 0.26; %0.03 je größer der Winkel zum nächsten Wegpunkt, desto höheres Bremsen. Faktor.
-    constEmrBrkAccFac = 0.2; %betrachtet Seitwärtsbbeschleunigungen fürs Emergencybreaking
-    constEmrBrkVelFac = 1.2; %betrachtet Geschwindigkeit fürs Emergencybreaking
+    %Korridorbreite für simplifyPath
+    constNavSecurity = 0.03;
+    %Strafpunkte für Nodes - je dichter an Mine, desto höher
+    %wichtig für den Pathfinder
+    constMineProxPenality = 0.0006;
+    %0.3 je größer der Winkel zum nächsten Wegpunkt, desto höheres Bremsen. Faktor.
+    constCornerBreaking = 0.26; 
+    %Faktor für Seitwärtsbbeschleunigungen fürs Emergencybreaking
+    constEmrBrkAccFac = 0.2; 
+    %Faktor für Geschwindigkeit fürs Emergencybreaking
+    constEmrBrkVelFac = 1.2; 
+    
+    %TANKEN
+    %Zeitdifferenz die der Gegner schneller bei der Tanke sein darf,
+    %wir es aber dennoch versuchen
     constCompetitionModeThreshold = 0.1;
     
     %ATTACK
@@ -22,9 +37,16 @@ function bes = beschleunigung(spiel, farbe)
     %bildet den Mittelwert aus den letzten x Beschleunigungswerten des
     %Gegners - smoothed die Interpolations
     constAccInterpolationSmoothing = 5;
+    %TRUE: Beschleunigungsberechnung wird überbrückt,
+    %sinnvoll für präzise Manöver ohne Waypoints
+    %ACHTUNG: jegliche Kollisionssicherung wird umgangen
+    overrideBesCalculation = false;
     
     %DEBUG MODE
+    %true: ermöglicht ausgabe von Text und Zeichnen von gizmos
     constDebugMode = true;
+    
+    
     
     %statische Variablen definieren
     persistent nodeGrid;
@@ -36,10 +58,6 @@ function bes = beschleunigung(spiel, farbe)
     persistent ignoreTanke; %number of tanke to be ignored by targetNextTanke
     persistent tankeCompetition;
     persistent waitForEnemy; %benötigt, um auf den Gegner warten zu können
-    
-    
-    %globale Variablen
-    overrideBesCalculation = false;
 
     
     %%Farbe prüfen und zuweisen
@@ -51,44 +69,16 @@ function bes = beschleunigung(spiel, farbe)
         enemy = spiel.rot;
     end
     
+    
     %wird einmal am Anfang ausgeführt
-    %setup node grid and empty persistent vars
     if spiel.i_t==1
-        nodeGrid = [];
-        drawHandles = [];
-        waypointList = [];
-        ignoreTanke = 0;
-        ArrayOfMines = spiel.mine;
-        StartNumberOfTank = spiel.n_tanke;
-        NumberOfTank = spiel.n_tanke;
-        tankeCompetition = false;
-        waitForEnemy = false;
-        setupNodeGrid();
+        initSpaceball();
     end
     
     
 %% Veränderungen des Spielfeldes bemerken und dementsprechend handeln
-    %Nodegrid beim Verschwinden einer Mine aktualisieren:
-    if numel(spiel.mine) < numel(ArrayOfMines)
-        debugDisp('beschleunigung: Updating NodeGrid');
-        NumberOfMine = customSetdiff(spiel.mine, ArrayOfMines);
-        updateNodeGrid(NumberOfMine.pos, spiel.mine_radius);
-        resimplifyWaypoints();
-        ArrayOfMines = spiel.mine;
-    end
-    
-    %beim Verschwinden einer Tanke:
-    if (NumberOfTank ~= spiel.n_tanke)
-        if (tankeCompetition)
-            safeDeleteWaypoints();
-            tankeCompetition = false;
-        end
-        
-        NumberOfTank = spiel.n_tanke;
-        ignoreTanke = 0;
-    end
+    gameChangeHandler()
 
-    
     
 %% Entscheidungen fällen und Beschleunigung berechnen
     %Entscheidung über Angriff/Verteidigung/Tanken
@@ -116,6 +106,44 @@ function bes = beschleunigung(spiel, farbe)
         end
     end
     
+
+    %wird einmal am Start aufgerufen
+    %initialisiert wichtige Variablen
+    function initSpaceball()
+        nodeGrid = [];
+        drawHandles = [];
+        waypointList = [];
+        ignoreTanke = 0;
+        ArrayOfMines = spiel.mine;
+        StartNumberOfTank = spiel.n_tanke;
+        NumberOfTank = spiel.n_tanke;
+        tankeCompetition = false;
+        waitForEnemy = false;
+        setupNodeGrid();
+    end
+
+    %registriert Änderungen im Spielfeld und Handelt entsprechend
+    function gameChangeHandler()
+        %Nodegrid beim Verschwinden einer Mine aktualisieren:
+        if numel(spiel.mine) < numel(ArrayOfMines)
+            debugDisp('beschleunigung: Updating NodeGrid');
+            NumberOfMine = customSetdiff(spiel.mine, ArrayOfMines);
+            updateNodeGrid(NumberOfMine.pos, spiel.mine_radius);
+            resimplifyWaypoints();
+            ArrayOfMines = spiel.mine;
+        end
+
+        %beim Verschwinden einer Tanke:
+        if (NumberOfTank ~= spiel.n_tanke)
+            if (tankeCompetition)
+                safeDeleteWaypoints();
+                tankeCompetition = false;
+            end
+
+            NumberOfTank = spiel.n_tanke;
+            ignoreTanke = 0;
+        end
+    end
 
 
 %% Beschleunigung berechnen
