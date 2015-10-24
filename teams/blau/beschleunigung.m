@@ -90,7 +90,7 @@ function bes = beschleunigung(spiel, farbe)
     whatToDo();
     
     %Beschleunigung berechnen:
-    bes=calculateBES();
+    calculateBES();
     
 %% Was soll der Spaceball tun?
     %Tanken oder Angreifen oder Verteidigen?
@@ -180,23 +180,22 @@ function bes = beschleunigung(spiel, farbe)
 
 
 %% Beschleunigung berechnen
-    function erg=calculateBES()
+    function calculateBES()
         if (overrideBesCalculation)
-            erg = bes;
             return;
         end
         
         
         %Ist kein Wegpunkt vorhanden, schnellstmöglich auf 0 abbremsen und stehen bleiben
         if (numel(waypointList) <= 0)
-            erg = -me.ges;
+            bes = -me.ges;
             return;
         end
         
         %acceleration
         dir = vecNorm(waypointList{1}-me.pos);
         corr = dir-vecNorm(me.ges);
-        erg = dir + corr*5;
+        bes = dir + corr*5;
         
         %calculate safe breaking endvelocity
         breakingEndVel = calcBreakingEndVel();
@@ -205,12 +204,12 @@ function bes = beschleunigung(spiel, farbe)
         distanceToWaypoint=norm(waypointList{1}-me.pos);
         breakDistance = calcBreakDistance(norm(me.ges), breakingEndVel);
         if (breakDistance > distanceToWaypoint || checkIfTooFast())
-            erg=-dir + corr*5;
+            bes=-dir + corr*5;
         end
         
         %emergencyBreaking
         if (emergencyBreaking())
-            erg = -me.ges;
+            bes = -me.ges;
         end
         
         
@@ -298,13 +297,13 @@ function bes = beschleunigung(spiel, farbe)
             customv = me.ges;
         end
         if nargin < 2
-            customa = me.bes;
+            customa = bes;
         end
         
         velocity = norm(customv);
         
         %%check if about to collide
-        safeSpaceballRadius = (spiel.spaceball_radius + constSafeBorder/2);
+        safeSpaceballRadius = (spiel.spaceball_radius + constSafeBorder);
 
         %new emergency breaking - is it better?
         breakTime = velocity / spiel.bes;
@@ -316,7 +315,7 @@ function bes = beschleunigung(spiel, farbe)
         
         %check if breaking corridors are free
         %check endpoints are free (includes barriers)
-        if (velocity >= 0.01 && (~isWalkable(checkPoint1, safeSpaceballRadius) || ... 
+        if ((~isWalkable(checkPoint1, safeSpaceballRadius) || ... 
                 ~isWalkable(checkPoint2, safeSpaceballRadius) || ...
             corridorColliding(me.pos, checkPoint1, safeSpaceballRadius) || ...
             corridorColliding(me.pos, checkPoint2, safeSpaceballRadius)))
@@ -1140,7 +1139,7 @@ function bes = beschleunigung(spiel, farbe)
             %check if ignoreTanke is still valid
             if ignoreTanke
                 if tankeIndex == ignoreTanke
-                    if ~(tenemy > 0 && tenemy < 0.25 && ~enemyColliding  && tvenemy < 0.5)
+                    if ~(tenemy > 0 && tenemy < 0.25 && ~enemyColliding  && (tvenemy < 0.5 || norm(enemyPath) < 0.03))
                         %uncheck ignoreTanke if above is false
                         ignoreTanke = 0;
                         debugDisp('checkTankPath: disabled ignoretanke');
@@ -1149,6 +1148,9 @@ function bes = beschleunigung(spiel, farbe)
                 continue;
             end %if
             
+            %norm(enemyPath)
+            %tenemy
+            %tvenemy
             
             %only if tanke is about to get taken
             if (tenemy > 0 && tenemy < 0.20 && ~enemyColliding)
@@ -1166,7 +1168,7 @@ function bes = beschleunigung(spiel, farbe)
                     debugDRAW();
                     return;
                     
-                elseif (tenemy+tvenemy < town+tvown && ~tankeCompetition && tvenemy < 0.5)
+                elseif (tenemy+tvenemy < town+tvown && ~tankeCompetition && (tvenemy < 0.5 || norm(enemyPath) < 0.03))
                     debugDisp('checkTankPath: enemy reaches tanke before us .. get new target tanke');
                     ignoreTanke = tankeIndex;
                     safeDeleteWaypoints();
@@ -1369,7 +1371,7 @@ function bes = beschleunigung(spiel, farbe)
                 transformationAngle = angle;
             end
         elseif (lockAnnouncement ~= 0)
-            debugDisp('LockOnAttack: WARNING! Lock failed!');
+            debugDisp('LockOnAttack: WARNING! Lock failed! Realigning...');
             lockAnnouncement = 0;
             transformationAngle = 0;
         end
@@ -1392,14 +1394,27 @@ function bes = beschleunigung(spiel, farbe)
         %manually
         overrideBesCalculation = true;
         bes = (rotMat2*[ax1comp, ax2comp]')';
+        
+         %minimal to enemy velocity
+        if (lockAnnouncement == 0 && norm(toEnemy(1)/rotMeGes(1)) > 10)
+            bes = dirToEnemy;
+        end
      
         % emergencybreaking
         if (lockAnnouncement == 0)
             if (emergencyBreaking())
                 bes = -me.ges;
+                
+                %stuck at the wall
+                if (norm(me.ges) < 0.001)
+                    bes = dirToEnemy;
+                end
             end
         elseif (lockAnnouncement == 1)
-            customv = rotMat2*[0; rotMeGes(2)];
+            %Geschwindigkeitskomponente die vom Gegner weg zeigt
+            cvx = vecNorm(toEnemy) * clamp(projectVectorNorm(rotMeGes, -toEnemy), 0, Inf);
+            
+            customv = rotMat2*[cvx(1); rotMeGes(2)];
             customa = rotMat2*[0; ax2comp];
             if (emergencyBreaking(customv', customa'))
                 bes = -me.ges;
