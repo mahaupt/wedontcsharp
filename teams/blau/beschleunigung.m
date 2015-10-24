@@ -95,19 +95,43 @@ function bes = beschleunigung(spiel, farbe)
 %% Was soll der Spaceball tun?
     %Tanken oder Angreifen oder Verteidigen?
     function whatToDo()
+        persistent dispWhatToDo;
+        if (spiel.i_t==1)
+            dispWhatToDo = -1;
+        end
+        
         vel = norm(me.ges-enemy.ges);
         acc = norm(me.bes-enemy.bes);
         dist = norm(me.pos-enemy.pos);
         thit = interpolateTime(dist, vel, acc);
         if StartNumberOfTank*0.5 < me.getankt || (thit <= 0.5 && me.getankt>enemy.getankt && ~corridorColliding(me.pos, enemy.pos, constNavSecurity))
+            if (dispWhatToDo ~= 1)
+                dispWhatToDo = 1;
+                debugDisp('whatToDo: Angriff');
+            end
             
             %Wenn wir mehr als die Hälfte der Tanken haben oder nahe des Gegners sind und mehr getankt haben - Angriff!
             attackEnemy();
         elseif enemy.getankt > StartNumberOfTank*0.5 || (norm(me.pos-enemy.pos)<0.2 && me.getankt<enemy.getankt)
+            if (dispWhatToDo ~= 2)
+                %vorher: tanken
+                if (dispWhatToDo == 3)
+                    safeDeleteWaypoints();
+                    debugDRAW();
+                end
+                
+                dispWhatToDo = 2;
+                debugDisp('whatToDo: Verteidigung');
+            end
             
             %%Erst wenn alle Tanken weg sind und wir weniger haben, als der Gegner - Fliehen!
             fleeEnemy();
         else
+            if (dispWhatToDo ~= 3)
+                dispWhatToDo = 3;
+                debugDisp('whatToDo: Tanke');
+            end
+            
             %wenn Wegpunktliste leer => Pfad zur besten Tankstelle setzen
             createPathToNextTanke()
             %Erreicht der Gegner die anvisierte Tankstelle vor uns? dann löschen
@@ -1111,6 +1135,7 @@ function bes = beschleunigung(spiel, farbe)
             %check mine between enemy and tanke
             enemyColliding = corridorColliding(enemy.pos, spiel.tanke(tankeIndex).pos, spiel.spaceball_radius);
             ownColliding = corridorColliding(me.pos, spiel.tanke(tankeIndex).pos, constNavSecurity);
+  
             
             %check if ignoreTanke is still valid
             if ignoreTanke
@@ -1120,10 +1145,10 @@ function bes = beschleunigung(spiel, farbe)
                         ignoreTanke = 0;
                         debugDisp('checkTankPath: disabled ignoretanke');
                     end
-                else
-                    continue;
                 end
+                continue;
             end %if
+            
             
             %only if tanke is about to get taken
             if (tenemy > 0 && tenemy < 0.20 && ~enemyColliding)
@@ -1529,8 +1554,14 @@ function bes = beschleunigung(spiel, farbe)
         end
         drawHandles = [];
         
+        %get color
+        dcolor = spiel.farbe.blau;
+        if strcmp (farbe, 'rot')
+            dcolor = spiel.farbe.rot;
+        end
+        
         for i = 1 : numel(waypointList)
-            drawHandles(i) = rectangle ('Parent', spiel.spielfeld_handle, 'Position', [waypointList{i}-0.0025, 0.005, 0.005], 'Curvature', [1 1], 'FaceColor', spiel.farbe.blau, 'EdgeColor', 'none');
+            drawHandles(i) = rectangle ('Parent', spiel.spielfeld_handle, 'Position', [waypointList{i}-0.0025, 0.005, 0.005], 'Curvature', [1 1], 'FaceColor', dcolor, 'EdgeColor', [0, 0, 0]);
         end
     end
 
