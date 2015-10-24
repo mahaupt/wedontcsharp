@@ -1135,11 +1135,18 @@ function bes = beschleunigung(spiel, farbe)
             enemyColliding = corridorColliding(enemy.pos, spiel.tanke(tankeIndex).pos, spiel.spaceball_radius);
             ownColliding = corridorColliding(me.pos, spiel.tanke(tankeIndex).pos, constNavSecurity);
   
+            %less then zero time - never arrive
+            if (tenemy < 0)
+                tenemy = inf;
+            end
+            if (town < 0)
+                town = inf;
+            end
             
             %check if ignoreTanke is still valid
             if ignoreTanke
                 if tankeIndex == ignoreTanke
-                    if ~(tenemy > 0 && tenemy < 0.25 && ~enemyColliding  && (tvenemy < 0.5 || norm(enemyPath) < 0.03))
+                    if ~(tenemy < 0.25 && ~enemyColliding  && (tvenemy < 0.5 || norm(enemyPath) < 0.03))
                         %uncheck ignoreTanke if above is false
                         ignoreTanke = 0;
                         debugDisp('checkTankPath: disabled ignoretanke');
@@ -1148,12 +1155,10 @@ function bes = beschleunigung(spiel, farbe)
                 continue;
             end %if
             
-            %norm(enemyPath)
-            %tenemy
-            %tvenemy
+            
             
             %only if tanke is about to get taken
-            if (tenemy > 0 && tenemy < 0.20 && ~enemyColliding)
+            if (tenemy < 0.20 && ~enemyColliding)
                 if (i==1 && norm(tenemy- town) < constCompetitionModeThreshold && ~tankeCompetition && ~ownColliding ...
                         && tvown < 0.5)
                     debugDisp('checkTankPath: competition mode activated');
