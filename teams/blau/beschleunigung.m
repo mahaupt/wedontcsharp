@@ -14,7 +14,7 @@ function bes = beschleunigung(spiel, farbe)
     %wichtig für den Pathfinder
     constMineProxPenality = 0.00001; % 0.0006
     %0.3 je größer der Winkel zum nächsten Wegpunkt, desto höheres Bremsen. Faktor.
-    constCornerBreaking = 0.26; 
+    constCornerBreaking = 0.45; 
     %Faktor für Seitwärtsbbeschleunigungen fürs Emergencybreaking
     constEmrBrkAccFac = 0.2; 
     %Faktor für Geschwindigkeit fürs Emergencybreaking
@@ -192,7 +192,75 @@ function bes = beschleunigung(spiel, farbe)
             return;
         end
         
-        calcLineBes();
+%         %check if me and next waypoint is close to mine
+%         mineID1 = getNearestMineId(me.pos);
+%         mineID2 = getNearestMineId(waypointList{1});
+%         toMine1 = norm(spiel.mine(mineID1).pos - me.pos);
+%         toMine2 = norm(spiel.mine(mineID2).pos - waypointList{1});
+%         mineDriveRadius = spiel.mine_radius + spiel.spaceball_radius + 2*constNavSecurity;
+%         
+%         if (toMine1 < mineDriveRadius && toMine2 < mineDriveRadius)
+%             calcMineBes();
+%         else
+            calcLineBes();
+%         end
+    end
+
+
+    %calculate bes around mines
+    function calcMineBes()
+        mineDriveRadius = spiel.mine_radius + spiel.spaceball_radius + 2*constSafeBorder;
+        
+        
+        %collecting waypoints
+        if norm(me.pos-waypointList{1}) < 2*constNavSecurity
+            waypointList(1) = [];
+            debugDRAW();
+        end
+        
+        %calculate mine and mine distances
+        mineID = getNearestMineId(me.pos);
+        toMine = spiel.mine(mineID).pos - me.pos;
+        maxVelSq = spiel.bes*mineDriveRadius;
+        
+        %zentripetal acceleration
+        %zpetAcc = norm(me.ges)/mineDriveRadius^2;
+        
+        %skip centipetal acceleration
+        skipZentpAcc = false;
+        
+        %emergencybreaking
+        if (norm(me.ges)^2 > maxVelSq)
+           bes = -me.ges;
+           skipZentpAcc = true;
+        else
+           bes = me.ges;
+        end
+        
+        
+        %mine radius intercepting
+        if (mineDriveRadius < norm(toMine))
+            lpdist = distanceLinePoint(me.pos, me.pos+me.ges, spiel.mine(mineID).pos);
+            if (lpdist <= mineDriveRadius)
+                skipZentpAcc = true;
+            end
+        elseif (mineDriveRadius > norm(toMine))
+            skipZentpAcc = true;
+        end
+        
+        %calculate centripetal acceleration
+        if (~skipZentpAcc)
+            %get acceleration vector
+            toGes = vecNorm(getPerpend(toMine));
+            if (dot(toGes, me.ges) < 0)
+                toGes = -toGes;
+            end
+
+            bes = vecNorm(toMine);
+            if (norm(me.ges)^2 < maxVelSq)
+                bes = bes + toGes*0.1;
+            end
+        end
     end
 
     %calculate line acceleration
@@ -953,18 +1021,24 @@ function bes = beschleunigung(spiel, farbe)
     end
 
     function erg = getTimeToAlignVelocity(vel1, vec)
-        length = norm(vel1);
-        vec = vecNorm(vec) * length;
+        dotp = dot(vecNorm(vel1), vecNorm(vec));
+        angle = acos(dotp);
+        if dotp < 0
+            angle = angle + pi/2;
+        end
         
-        deltaV = vec - vel1;
-        erg = norm(deltaV)/spiel.bes;
+        deltaV = angle*norm(vel1);
+        erg = deltaV/spiel.bes;
     end
 
     function erg = getMaxVelocityToAlignInTime(vec1, vec2, time)
-        vec1 = vecNorm(vec1);
-        vec2 = vecNorm(vec2);
-        deltaVec = vec2-vec1;
-        erg = time*spiel.bes/norm(deltaVec);
+        dotp = dot(vecNorm(vec1), vecNorm(vec2));
+        angle = acos(dotp);
+        if dotp < 0
+            angle = angle + pi/2;
+        end
+        
+        erg = time*spiel.bes/angle;
     end
 
     function endPosition = safeDeleteWaypoints()
