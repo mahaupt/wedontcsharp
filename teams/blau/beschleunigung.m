@@ -206,7 +206,7 @@ function bes = beschleunigung(spiel, farbe)
                 toMineVec = spiel.mine(getNearestMineId(me.pos)).pos - me.pos;
                 closeMineDist = norm(toMineVec);
                 if (closeMineDist < spiel.spaceball_radius + spiel.mine_radius + constSafeBorder)
-                    firstWp = me.pos - vecNorm(toMineVec)*constNavSecurity;
+                    firstWp = me.pos - vecNorm(toMineVec)*constNavSecurity*2;
                     waypointList = appendToArray({firstWp}, waypointList);
                     bes = -toMineVec;
                     return;
@@ -1310,10 +1310,10 @@ function bes = beschleunigung(spiel, farbe)
         
         %ist t größer -> Beschleunigung und Geschwindigkeit angleichen, ist
         %t kleiner -> Position angleichen
-        t = 2;
+        t = 5;
         
         %wegpunktaxe berechnen
-        axisPos = rotEnemyPos(2) + t*rotEnemyGes(2) + 0.5*t^2*rotEnemyBes(2);
+        axisPos = rotEnemyPos(2) + t*rotEnemyGes(2);% + 0.5*t^2*rotEnemyBes(2);
         axisPos = clamp(axisPos, secureSpaceballRadus, 1-secureSpaceballRadus);
         axisLen = clamp(norm(axisPos - rotMePos(2)), 0.04, 10);
         
@@ -1339,7 +1339,7 @@ function bes = beschleunigung(spiel, farbe)
         
         %position aligned - finetune position -> lock onto target
         if (freeToLock && norm(rotMePos(2)-rotEnemyPos(2)) < spiel.spaceball_radius*2 && ...
-                norm(rotMeGes(2)-rotEnemyGes(2)) < 0.04)
+                norm(rotMeGes(2)-rotEnemyGes(2)) < 0.02)
             if (lockAnnouncement == 0)
                 debugDisp('LockOnAttack: Aligned... Locking...');
                 lockAnnouncement = 1;
