@@ -192,6 +192,11 @@ function bes = beschleunigung(spiel, farbe)
             return;
         end
         
+        calcLineBes();
+    end
+
+    %calculate line acceleration
+    function calcLineBes()
         %acceleration
         dir = vecNorm(waypointList{1}-me.pos);
         corr = dir-vecNorm(me.ges);
