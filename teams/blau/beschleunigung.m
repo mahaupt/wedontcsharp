@@ -192,6 +192,11 @@ function bes = beschleunigung(spiel, farbe)
             return;
         end
         
+        calcLineBes();
+    end
+
+    %calculate line acceleration
+    function calcLineBes()
         %acceleration
         dir = vecNorm(waypointList{1}-me.pos);
         corr = dir-vecNorm(me.ges);
@@ -220,25 +225,24 @@ function bes = beschleunigung(spiel, farbe)
             waypointList(1) = [];
             debugDRAW();
             
-        elseif (corridorColliding(me.pos, waypointList{1}, spiel.spaceball_radius))
+        else
             %%überprüfe, ob 1. Wegpunkt erreichbar ist - wenn nicht, lösche und
             %%berechne neu
             
             %Sonderfall, Spaceball selbst viel zu nah an mine:
-            if (spiel.n_mine > 0)
+            if (spiel.n_mine > 0 && norm(me.ges) < 0.001)
                 toMineVec = spiel.mine(getNearestMineId(me.pos)).pos - me.pos;
                 closeMineDist = norm(toMineVec);
-                if (closeMineDist < spiel.spaceball_radius + spiel.mine_radius + constSafeBorder)
-                    firstWp = me.pos - vecNorm(toMineVec)*constNavSecurity*2;
+                if (closeMineDist < spiel.spaceball_radius + spiel.mine_radius + constSafeBorder*2)
+                    firstWp = me.pos - vecNorm(toMineVec)*constNavSecurity*1.2;
                     waypointList = appendToArray({firstWp}, waypointList);
                     debugDRAW();
                     bes = -toMineVec;
-                    debugDisp('calculateBES: Stuck... recalculating');
                     return;
                 end
-            else
-                %wenn keine Mine da ist:
-                waypointList = [];
+            elseif (corridorColliding(me.pos, waypointList{1}, spiel.spaceball_radius))
+                %sonst
+                waypointList = appendToArray(findPath(me.pos, waypointList{1}), waypointList(2:end));
                 debugDRAW();
                 debugDisp('calculateBES: Stuck... recalculating');
             end
@@ -1135,11 +1139,18 @@ function bes = beschleunigung(spiel, farbe)
             enemyColliding = corridorColliding(enemy.pos, spiel.tanke(tankeIndex).pos, spiel.spaceball_radius);
             ownColliding = corridorColliding(me.pos, spiel.tanke(tankeIndex).pos, constNavSecurity);
   
+            %less then zero time - never arrive
+            if (tenemy < 0)
+                tenemy = inf;
+            end
+            if (town < 0)
+                town = inf;
+            end
             
             %check if ignoreTanke is still valid
             if ignoreTanke
                 if tankeIndex == ignoreTanke
-                    if ~(tenemy > 0 && tenemy < 0.25 && ~enemyColliding  && (tvenemy < 0.5 || norm(enemyPath) < 0.03))
+                    if ~(tenemy < 0.25 && ~enemyColliding  && (tvenemy < 0.5 || norm(enemyPath) < 0.03))
                         %uncheck ignoreTanke if above is false
                         ignoreTanke = 0;
                         debugDisp('checkTankPath: disabled ignoretanke');
@@ -1148,12 +1159,10 @@ function bes = beschleunigung(spiel, farbe)
                 continue;
             end %if
             
-            %norm(enemyPath)
-            %tenemy
-            %tvenemy
+            
             
             %only if tanke is about to get taken
-            if (tenemy > 0 && tenemy < 0.20 && ~enemyColliding)
+            if (tenemy < 0.20 && ~enemyColliding)
                 if (i==1 && norm(tenemy- town) < constCompetitionModeThreshold && ~tankeCompetition && ~ownColliding ...
                         && tvown < 0.5)
                     debugDisp('checkTankPath: competition mode activated');
@@ -1271,7 +1280,7 @@ function bes = beschleunigung(spiel, farbe)
         
         %check if path to enemy is free
         enemypos = calcEnemyHitPosition(constEnemyInterpMode, constEnemyAlwaysInterpolate);
-        if (~corridorColliding(me.pos, enemy.pos, constNavSecurity))
+        if (~corridorColliding(me.pos, enemypos, constNavSecurity))
             %delete all other waypoints
             if (numel(waypointList) > 1)
                 safeDeleteWaypoints();
