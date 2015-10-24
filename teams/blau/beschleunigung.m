@@ -98,7 +98,7 @@ function bes = beschleunigung(spiel, farbe)
         vel = norm(me.ges-enemy.ges);
         acc = norm(me.bes-enemy.bes);
         dist = norm(me.pos-enemy.pos);
-        thit = (sqrt(vel^2+2*acc*dist)-vel)/acc;
+        thit = interpolateTime(dist, vel, acc);
         if StartNumberOfTank*0.5 < me.getankt || (thit <= 0.5 && me.getankt>enemy.getankt && ~corridorColliding(me.pos, enemy.pos, constNavSecurity))
             
             %Wenn wir mehr als die Hälfte der Tanken haben oder nahe des Gegners sind und mehr getankt haben - Angriff!
@@ -208,13 +208,17 @@ function bes = beschleunigung(spiel, farbe)
                 if (closeMineDist < spiel.spaceball_radius + spiel.mine_radius + constSafeBorder)
                     firstWp = me.pos - vecNorm(toMineVec)*constNavSecurity*2;
                     waypointList = appendToArray({firstWp}, waypointList);
+                    debugDRAW();
                     bes = -toMineVec;
+                    debugDisp('calculateBES: Stuck... recalculating');
                     return;
                 end
+            else
+                %wenn keine Mine da ist:
+                waypointList = [];
+                debugDRAW();
+                debugDisp('calculateBES: Stuck... recalculating');
             end
-            
-            %normalerweise reicht: wegpunkt löschen
-            waypointList = [];
         end
     end
 
@@ -262,10 +266,18 @@ function bes = beschleunigung(spiel, farbe)
 
 
     %emergency breaking
-    function erg = emergencyBreaking()
+    function erg = emergencyBreaking(customv, customa)
         erg = false;
         
-        velocity = norm(me.ges);
+        %custom settings
+        if nargin < 1
+            customv = me.ges;
+        end
+        if nargin < 2
+            customa = me.bes;
+        end
+        
+        velocity = norm(customv);
         
         %%check if about to collide
         safeSpaceballRadius = (spiel.spaceball_radius + constSafeBorder/2);
@@ -273,10 +285,10 @@ function bes = beschleunigung(spiel, farbe)
         %new emergency breaking - is it better?
         breakTime = velocity / spiel.bes;
         %only get the direction changing acceleration (90° from v)
-        gesPerpend = vecNorm(getPerpend(me.ges)); %vector 90° from v
-        besPerpend = gesPerpend*projectVectorNorm(me.bes, gesPerpend);
-        checkPoint1 = me.pos + 0.5*me.ges*breakTime*constEmrBrkVelFac + 0.5*besPerpend*constEmrBrkAccFac*breakTime^2;
-        checkPoint2 = me.pos + 0.5*me.ges*breakTime*constEmrBrkVelFac; %without acceleration
+        gesPerpend = vecNorm(getPerpend(customv)); %vector 90° from v
+        besPerpend = gesPerpend*projectVectorNorm(customa, gesPerpend);
+        checkPoint1 = me.pos + 0.5*customv*breakTime*constEmrBrkVelFac + 0.5*besPerpend*constEmrBrkAccFac*breakTime^2;
+        checkPoint2 = me.pos + 0.5*customv*breakTime*constEmrBrkVelFac; %without acceleration
         
         %check if breaking corridors are free
         %check endpoints are free (includes barriers)
@@ -960,6 +972,15 @@ function bes = beschleunigung(spiel, farbe)
         end
     end
 
+
+    function erg = interpolateTime(s, v, a)
+        if (norm(a) > 0.0001)
+            erg = (sqrt(v^2+2*a*s)-v)/a;
+        else
+            erg = s/v;
+        end
+    end
+
 %% Tankenfindungs-System
     %Search for nearest Tanken and create Path between them
     function createPathToNextTanke()
@@ -1143,7 +1164,7 @@ function bes = beschleunigung(spiel, farbe)
                 Distance = deltat*norm(enemy.ges);
                 
                 if (Distance <= spiel.spaceball_radius * 2)
-                    disp('checkTankPath: Notbremse, Tanke wird nicht vor Gegner erreicht');
+                    debugDisp('checkTankPath: Notbremse, Tanke wird nicht vor Gegner erreicht');
                     safeDeleteWaypoints();
                     if isWalkable(waypointList{1} - 0.3 * enemy.ges, spiel.spaceball_radius)
                         waypointList{1} = waypointList{1} - 0.3 * enemy.ges;
@@ -1163,45 +1184,51 @@ function bes = beschleunigung(spiel, farbe)
         %lockon attack ist nur sicher, wenn sich zwischen Gegner und Mir
         %keine Mine befindet
         
-        
+        %bitte stehen lassen! ich weiß noch nicht ob die untere einfache
+        %Methode, sicher ist!
+%         useLockonAttack = false;
+%         if (spiel.n_mine < constMaxLockonMineCount)
+%             useLockonAttack = true;
+%             if (spiel.n_mine > 0)
+%                 % 0 - constMaxLockonMineCount mines, calculate
+%                 dangerRadius = spiel.spaceball_radius + spiel.mine_radius + constSafeBorder;
+%                 
+%                 dirToEnemy = vecNorm(enemy.pos-me.pos);
+%                 dirToAxis = [dirToEnemy(1)/norm(dirToEnemy(1)), 0]; % [-1, 0 ] or [1, 0] in enemy direction
+%                 angle = acos(dot(dirToEnemy, dirToAxis));
+% 
+%                 %negative angle if rotated clockwise
+%                 if (dirToAxis(1) < 0)
+%                     if (dirToEnemy(2) < 0)
+%                         angle = -angle;
+%                     end
+%                 else
+%                      if (dirToEnemy(2) > 0)
+%                         angle = -angle;
+%                      end
+%                 end
+% 
+%                 %calculate rotation matrices
+%                 rotMat1 = [cos(angle), -sin(angle); sin(angle), cos(angle)]; %rotate to enemy direction
+%                 ownPos = (rotMat1*me.pos')';
+%                 
+%                 %check every mine
+%                 for i=1:spiel.n_mine
+%                     minePos = (rotMat1*spiel.mine(i).pos')';
+%                     % größer null - gefahr!
+%                     %kleiner null - mine hinter mir!
+%                     checkPos = (minePos(1)-ownPos(1))*dirToAxis(1) + dangerRadius;  
+%                     if (checkPos > 0)
+%                         useLockonAttack = false;
+%                         break;
+%                     end
+%                 end
+%             end
+%         end
+
         useLockonAttack = false;
-        if (spiel.n_mine < constMaxLockonMineCount)
+        if (~corridorColliding(me.pos, enemy.pos, spiel.mine_radius*2))
             useLockonAttack = true;
-            if (spiel.n_mine > 0)
-                % 0 - constMaxLockonMineCount mines, calculate
-                dangerRadius = spiel.spaceball_radius + spiel.mine_radius + constSafeBorder;
-                
-                dirToEnemy = vecNorm(enemy.pos-me.pos);
-                dirToAxis = [dirToEnemy(1)/norm(dirToEnemy(1)), 0]; % [-1, 0 ] or [1, 0] in enemy direction
-                angle = acos(dot(dirToEnemy, dirToAxis));
-
-                %negative angle if rotated clockwise
-                if (dirToAxis(1) < 0)
-                    if (dirToEnemy(2) < 0)
-                        angle = -angle;
-                    end
-                else
-                     if (dirToEnemy(2) > 0)
-                        angle = -angle;
-                     end
-                end
-
-                %calculate rotation matrices
-                rotMat1 = [cos(angle), -sin(angle); sin(angle), cos(angle)]; %rotate to enemy direction
-                ownPos = (rotMat1*me.pos')';
-                
-                %check every mine
-                for i=1:spiel.n_mine
-                    minePos = (rotMat1*spiel.mine(i).pos')';
-                    % größer null - gefahr!
-                    %kleiner null - mine hinter mir!
-                    checkPos = (minePos(1)-ownPos(1))*dirToAxis(1) + dangerRadius;  
-                    if (checkPos > 0)
-                        useLockonAttack = false;
-                        break;
-                    end
-                end
-            end
         end
         
         %select attack mode
@@ -1267,9 +1294,8 @@ function bes = beschleunigung(spiel, farbe)
         %delete waypointlist
         if (numel(waypointList) > 1)
             waypointList = {};
+            debugDRAW();
         end
-        
-        secureSpaceballRadus = spiel.spaceball_radius + constSafeBorder/2;
         
         %rotate coordinates
         dirToEnemy = vecNorm(enemy.pos-me.pos);
@@ -1288,7 +1314,7 @@ function bes = beschleunigung(spiel, farbe)
         end
         
         %keep angle when locked
-        if (lockAnnouncement == 2)
+        if (lockAnnouncement == 1)
             angle = transformationAngle;
         end
         
@@ -1305,74 +1331,53 @@ function bes = beschleunigung(spiel, farbe)
         rotEnemyPos = (rotMat1*enemy.pos')';
         rotEnemyGes = (rotMat1*enemy.ges')';
         rotEnemyBes = (rotMat1*enemy.bes')';
-        
-        
-        
-        %ist t größer -> Beschleunigung und Geschwindigkeit angleichen, ist
-        %t kleiner -> Position angleichen
-        t = 5;
-        
-        %wegpunktaxe berechnen
-        axisPos = rotEnemyPos(2) + t*rotEnemyGes(2);% + 0.5*t^2*rotEnemyBes(2);
-        axisPos = clamp(axisPos, secureSpaceballRadus, 1-secureSpaceballRadus);
-        axisLen = clamp(norm(axisPos - rotMePos(2)), 0.04, 10);
+
         
         %set waypoint pos to enemy
         toEnemy = vecNorm(rotEnemyPos - rotMePos);
-        otherAxisPos = rotMePos(1) + toEnemy(1)*axisLen * 0.6;
-        
-        %set waypoint
-        waypointList{1} = clamp((rotMat2*[otherAxisPos, axisPos]')', secureSpaceballRadus, 1-secureSpaceballRadus);
-        debugDRAW();
-        
-        %security feature: check if i am in a corner and the enemy is free
-        freeToLock = true;
-        if (dirToAxis(1) > 0)
-           if (rotMePos(1) < 0.5)
-               freeToLock = false;
-           end
-        else
-           if (rotMePos(1) > 0.5)
-               freeToLock = false;
-           end
-        end
         
         %position aligned - finetune position -> lock onto target
-        if (freeToLock && norm(rotMePos(2)-rotEnemyPos(2)) < spiel.spaceball_radius*2 && ...
-                norm(rotMeGes(2)-rotEnemyGes(2)) < 0.02)
-            if (lockAnnouncement == 0)
-                debugDisp('LockOnAttack: Aligned... Locking...');
-                lockAnnouncement = 1;
-            elseif (lockAnnouncement ~= 2 && norm(rotMeGes(2)-rotEnemyGes(2)) < 0.001 && ...
-                    norm(rotMePos(2)-rotEnemyPos(2)) < spiel.spaceball_radius)
+        if (norm(rotMeGes(2)-rotEnemyGes(2)) < 0.001 && norm(rotMePos(2)-rotEnemyPos(2)) < spiel.spaceball_radius)
+            if (lockAnnouncement ~= 1)
                 debugDisp('LockOnAttack: Target Locked!');
-                lockAnnouncement = 2;
+                lockAnnouncement = 1;
                 transformationAngle = angle;
             end
-            
-            %copy enemy acceleration
-            ax2comp = rotEnemyBes(2);
-            
-            %y velocity and position correction
-            deltaA = ((rotEnemyGes(2)-rotMeGes(2)) + 0.1*(rotEnemyPos(2)-rotMePos(2)))/spiel.dt;
-            ax2comp = clamp(ax2comp+deltaA, -spiel.bes, spiel.bes);
-            
-            %debug
-            %str1 = sprintf('LockOnAttack: deltaV: %d   deltaS: %d', norm(enemy.ges(ax2)-me.ges(ax2)), norm(enemy.pos(ax2)-me.pos(ax2)));
-            %debugDisp(str1);
-            
-            %valid x component to enemy
-            ax1comp = sqrt(spiel.bes^2 - ax2comp^2) * toEnemy(1)/norm(toEnemy(1));
-            
-            %set to override acceleration calculation and set acceleration
-            %manually
-            overrideBesCalculation = true;
-            bes = (rotMat2*[ax1comp, ax2comp]')';
-        else
-            if (lockAnnouncement ~= 0)
-                debugDisp('LockOnAttack: Locking failed, realigning ...');
-                lockAnnouncement = 0;
-                transformationAngle = 0;
+        elseif (lockAnnouncement ~= 0)
+            debugDisp('LockOnAttack: WARNING! Lock failed!');
+            lockAnnouncement = 0;
+            transformationAngle = 0;
+        end
+
+        %copy enemy acceleration
+        ax2comp = rotEnemyBes(2);
+
+        %y velocity and position correction
+        deltaA = ((rotEnemyGes(2)-rotMeGes(2)) + 0.1*(rotEnemyPos(2)-rotMePos(2)))/spiel.dt;
+        ax2comp = clamp(ax2comp+deltaA, -spiel.bes, spiel.bes);
+
+        %debug
+        %str1 = sprintf('LockOnAttack: deltaV: %d   deltaS: %d', norm(enemy.ges(ax2)-me.ges(ax2)), norm(enemy.pos(ax2)-me.pos(ax2)));
+        %debugDisp(str1);
+
+        %valid x component to enemy
+        ax1comp = sqrt(spiel.bes^2 - ax2comp^2) * toEnemy(1)/norm(toEnemy(1));
+
+        %set to override acceleration calculation and set acceleration
+        %manually
+        overrideBesCalculation = true;
+        bes = (rotMat2*[ax1comp, ax2comp]')';
+     
+        % emergencybreaking
+        if (lockAnnouncement == 0)
+            if (emergencyBreaking())
+                bes = -me.ges;
+            end
+        elseif (lockAnnouncement == 1)
+            customv = rotMat2*[0; rotMeGes(2)];
+            customa = rotMat2*[0; ax2comp];
+            if (emergencyBreaking(customv', customa'))
+                bes = -me.ges;
             end
         end
     end
@@ -1417,7 +1422,7 @@ function bes = beschleunigung(spiel, farbe)
         dist = norm(me.pos-enemy.pos);
         
         %time to hit enemy
-        thit = (sqrt(vel^2+2*acc*dist)-vel)/acc;
+        thit = interpolateTime(dist, vel, acc);
         if (interpolationMode == 1)
             thit = dist/vel;
         end
