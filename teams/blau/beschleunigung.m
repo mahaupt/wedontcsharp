@@ -220,25 +220,24 @@ function bes = beschleunigung(spiel, farbe)
             waypointList(1) = [];
             debugDRAW();
             
-        elseif (corridorColliding(me.pos, waypointList{1}, spiel.spaceball_radius))
+        else
             %%überprüfe, ob 1. Wegpunkt erreichbar ist - wenn nicht, lösche und
             %%berechne neu
             
             %Sonderfall, Spaceball selbst viel zu nah an mine:
-            if (spiel.n_mine > 0)
+            if (spiel.n_mine > 0 && norm(me.ges) < 0.001)
                 toMineVec = spiel.mine(getNearestMineId(me.pos)).pos - me.pos;
                 closeMineDist = norm(toMineVec);
-                if (closeMineDist < spiel.spaceball_radius + spiel.mine_radius + constSafeBorder)
-                    firstWp = me.pos - vecNorm(toMineVec)*constNavSecurity*2;
+                if (closeMineDist < spiel.spaceball_radius + spiel.mine_radius + constSafeBorder*2)
+                    firstWp = me.pos - vecNorm(toMineVec)*constNavSecurity*1.2;
                     waypointList = appendToArray({firstWp}, waypointList);
                     debugDRAW();
                     bes = -toMineVec;
-                    debugDisp('calculateBES: Stuck... recalculating');
                     return;
                 end
-            else
-                %wenn keine Mine da ist:
-                waypointList = [];
+            elseif (corridorColliding(me.pos, waypointList{1}, spiel.spaceball_radius))
+                %sonst
+                waypointList = appendToArray(findPath(me.pos, waypointList{1}), waypointList(2:end));
                 debugDRAW();
                 debugDisp('calculateBES: Stuck... recalculating');
             end
@@ -1276,7 +1275,7 @@ function bes = beschleunigung(spiel, farbe)
         
         %check if path to enemy is free
         enemypos = calcEnemyHitPosition(constEnemyInterpMode, constEnemyAlwaysInterpolate);
-        if (~corridorColliding(me.pos, enemy.pos, constNavSecurity))
+        if (~corridorColliding(me.pos, enemypos, constNavSecurity))
             %delete all other waypoints
             if (numel(waypointList) > 1)
                 safeDeleteWaypoints();
