@@ -241,6 +241,7 @@ function bes = beschleunigung(spiel, farbe)
     %calculate bes around mines
     function calcMineBes()
         minimumMineDist = spiel.mine_radius+spiel.spaceball_radius+constSafeBorder*2;
+        secureSpaceballRadius = spiel.spaceball_radius + constSafeBorder;
         
         %Distanzen und Richtungen
         mineID = getNearestMineId(me.pos);
@@ -281,6 +282,20 @@ function bes = beschleunigung(spiel, farbe)
         %Radius darf nicht zu klein werden sonst kommt es zur kollision
         mineDriveRadius = clamp(mineDriveRadius, minimumMineDist, inf);
         
+        %ragt Radius über das spielfeld hinaus?
+        if (minePos(1) + mineDriveRadius > 1-secureSpaceballRadius)
+            mineDriveRadius = (1-minePos(1)+spiel.mine_radius)/2;
+        end
+        if (minePos(2) + mineDriveRadius > 1-secureSpaceballRadius)
+            mineDriveRadius = (1-minePos(2)+spiel.mine_radius)/2;
+        end
+        if (minePos(1) - mineDriveRadius < secureSpaceballRadius)
+            mineDriveRadius = (minePos(1)+spiel.mine_radius)/2;
+        end
+        if (minePos(2) - mineDriveRadius < secureSpaceballRadius)
+            mineDriveRadius = (minePos(2)+spiel.mine_radius)/2;
+        end
+        
         %maximal radial velocity
         maxVelSq = spiel.bes*mineDriveRadius;
 
@@ -305,7 +320,7 @@ function bes = beschleunigung(spiel, farbe)
         bes = zentp * vecNorm(toMine) + forward*toGes;
         
         %no velocity
-        if (norm(me.ges) < 0.001)
+        if (norm(me.ges) < 0.003)
             bes = toGes;
         end
         
