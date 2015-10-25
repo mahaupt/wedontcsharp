@@ -406,6 +406,16 @@ function bes = beschleunigung(spiel, farbe)
                 debugDRAW();
                 debugDisp('calculateBES: Stuck... recalculating');
             end
+            
+            %sonderfall - sehr dicht an der Bande
+            if (norm(me.ges) < 0.001)
+               spaceballRadius = spiel.spaceball_radius + constSafeBorder;
+               if (me.pos(1) > 1-spaceballRadius || me.pos(1) < spaceballRadius  || ...
+                       me.pos(2) > 1-spaceballRadius || me.pos(2) < spaceballRadius)
+                   %beschleunigung zur Mitte
+                   bes = ([0.5, 0.5] - me.pos);
+               end
+            end
         end
     end
 
@@ -1144,7 +1154,7 @@ function bes = beschleunigung(spiel, farbe)
         
         %break distance and direction to next waypoint
         breakDistance = calcBreakDistance(norm(me.ges), 0)*0.8;
-        dir = vecNorm(waypointList{1}-me.pos);
+        dir = vecNorm(me.ges);
         
         %end position = full break distance
         endPosition = me.pos + dir*breakDistance;
