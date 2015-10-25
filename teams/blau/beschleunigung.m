@@ -89,15 +89,15 @@ function bes = beschleunigung(spiel, farbe)
             
             %Wenn wir mehr als die Hälfte der Tanken haben oder nahe des Gegners sind und mehr getankt haben - Angriff!
             attackEnemy();
-        elseif enemy.getankt > StartNumberOfTank*0.5 || (norm(me.pos-enemy.pos)<0.2 && me.getankt<enemy.getankt)
+        else enemy.getankt > StartNumberOfTank*0.5 || (norm(me.pos-enemy.pos)<0.5 && me.getankt<enemy.getankt)
             
             %%Erst wenn alle Tanken weg sind und wir weniger haben, als der Gegner - Fliehen!
             fleeEnemy();
-        else
-            %wenn Wegpunktliste leer => Pfad zur besten Tankstelle setzen
-            createPathToNextTanke()
-            %Erreicht der Gegner die anvisierte Tankstelle vor uns? dann löschen
-            checkTankPath()
+%         else
+%             %wenn Wegpunktliste leer => Pfad zur besten Tankstelle setzen
+%             createPathToNextTanke()
+%             %Erreicht der Gegner die anvisierte Tankstelle vor uns? dann löschen
+%             checkTankPath()
         end
     end
     
@@ -1254,23 +1254,79 @@ function bes = beschleunigung(spiel, farbe)
             end
         %waiting for the enemy
         elseif waitForEnemy == true
-
-
-
-            
-            if checkIfTooFastE () == true %|| tenemy < 0.0001
+            if checkIfTooFastE () == true || norm(me.pos-enemy.pos) <= 0.15 
                 debugDisp('cornerTricking: Pt2');
                     %sort all corners based on the direction the enemy is coming from and their distance to us
                     for i=1:4
                         cornerNodes(i,3)=norm(cornerNodes(i,1:2)-me.pos-enemy.ges);
                     end
-                nextCorner = sortrows(cornerNodes, [3 2 1]);
-                %go to the second corner, since the first one is on ourcurrent position
-                waypointList = appendToArray(waypointList, findPath(me.pos, nextCorner(2,1:2)));
-                waitForEnemy = false;
-            end
-        end
-    end
+                       nextCorner = sortrows(cornerNodes, [3 2 1]);
+                           
+                               
+%                         if enemy.getankt > StartNumberOfTank*0.5
+                          
+                            waypointList = appendToArray(waypointList, findPath(me.pos, nextCorner(2,1:2)));
+                            waitForEnemy = false;
+                         
+%                         else
+%               
+%                             eva = createTankEvaluation(me.pos);
+%                         
+%                                            
+%                             if numel(eva) == 0
+%                         
+%                                 waypointList = appendToArray(waypointList, findPath(me.pos, nextCorner(2,1:2)));
+%                                 waitForEnemy = false;
+%                     
+%                             else  
+%                         
+%                                 for i=1:numel(eva)
+%                                     eva(2) = 1/eva(2);
+%                                     eva(4) = eva(2) - eva(3);
+%                                 end
+%                                 
+%                                 bestTanke = sort(eva(4));
+%                                 
+%                                 if bestTanke(1) >= 0
+%                            
+%                                     waypointList = appendToArray(waypointList, findPath(me.pos, nextCorner(2,1:2)));
+%                                     waitForEnemy = false;
+%                          
+%                                 else
+%                                     
+%                                     createPathToNextTanke
+%                       
+%                                 end
+%                             end
+%                         end
+                      
+                        
+                         %go to the second corner, since the first one is on ourcurrent position
+%                          waypointList = appendToArray(waypointList, findPath(me.pos, nextCorner(2,1:2)));
+%                          waitForEnemy = false;
+%                         
+%                             bestTanke = sort(eva(4));
+%                 
+%                       if norm(bestTanke(1)) >= 0
+%                           
+%                           return;
+%                          
+%                       else
+%                           safeDeleteWaypoints();
+%                           bestTanke(1) = waypointList
+%                       
+%                       end
+%                 
+%                  end
+%                       end
+                      
+                                  
+               
+              
+            
+         end
+     end
+end
 
 
 
