@@ -40,7 +40,7 @@ function bes = beschleunigung(spiel, farbe)
     constEnemyInterpolationDistance = 1; 
     %bildet den Mittelwert aus den letzten x Beschleunigungswerten des
     %Gegners - smoothed die Interpolations
-    constAccInterpolationSmoothing = 8;
+    constAccInterpolationSmoothing = 10;
     %TRUE: Beschleunigungsberechnung wird überbrückt,
     %sinnvoll für präzise Manöver ohne Waypoints
     %ACHTUNG: jegliche Kollisionssicherung wird umgangen
@@ -102,10 +102,8 @@ function bes = beschleunigung(spiel, farbe)
             dispWhatToDo = -1;
         end
         
-        vel = norm(me.ges-enemy.ges);
-        acc = norm(me.bes-enemy.bes);
-        dist = norm(me.pos-enemy.pos);
-        thit = interpolateTime(dist, vel, acc);
+       
+        thit = calculateSmoothHitTime(true);
         if StartNumberOfTank*0.5 < me.getankt || (thit <= 0.5 && me.getankt>enemy.getankt && ~corridorColliding(me.pos, enemy.pos, constNavSecurity))
             if (dispWhatToDo ~= 1)
                 dispWhatToDo = 1;
@@ -290,7 +288,11 @@ function bes = beschleunigung(spiel, farbe)
         %Tangieren
         corr = norm(gesToMine)-mineDriveRadius;
         if (dot(me.ges, toMine) < 0)
-            corr = -corr;
+            if (norm(toMine) < mineDriveRadius)
+                corr = -corr;
+            else
+                corr = 1;
+            end
         end
         if (norm(toMine) < minimumMineDist)
             corr = -1;
@@ -308,7 +310,7 @@ function bes = beschleunigung(spiel, farbe)
         end
         
         %emergencybreaking
-        if (norm(me.ges)^2 > maxVelSq) % || emergencyBreaking()
+        if (norm(me.ges)^2 > maxVelSq)% || emergencyBreaking())
            bes = -me.ges;
         end
         
@@ -322,8 +324,8 @@ function bes = beschleunigung(spiel, farbe)
         towp = vecNorm(waypointList{1}-me.pos);
         wpdist = norm(waypointList{1} - minePos);
         if (wpdist > constMineProxRadius)
-            vel1 = vecNorm(me.ges-vecNorm(bes)*spiel.bes/10000);
-            vel2 = vecNorm(me.ges+vecNorm(bes)*spiel.bes/10000);
+            vel1 = vecNorm(me.ges);
+            vel2 = vecNorm(vecNorm(me.ges)+vecNorm(toMine)/1000);
             
             if (dot(vel1, towp) > dot(vel2, towp))
                 calculateBES(true);
@@ -1149,15 +1151,6 @@ function bes = beschleunigung(spiel, farbe)
         end
     end
 
-
-    function erg = interpolateTime(s, v, a)
-        if (norm(a) > 0.0001)
-            erg = (sqrt(v^2+2*a*s)-v)/a;
-        else
-            erg = s/v;
-        end
-    end
-
 %% Tankenfindungs-System
     %Search for nearest Tanken and create Path between them
     function createPathToNextTanke()
@@ -1413,7 +1406,7 @@ function bes = beschleunigung(spiel, farbe)
 %         end
 
         useLockonAttack = false;
-        if (~corridorColliding(me.pos, enemy.pos, spiel.mine_radius*2))
+        if (~corridorColliding(me.pos, enemy.pos, spiel.mine_radius*3))
             useLockonAttack = true;
         end
         
@@ -1430,7 +1423,7 @@ function bes = beschleunigung(spiel, farbe)
         
         %check if path to enemy is free
         enemypos = calcEnemyHitPosition(constEnemyInterpMode, constEnemyAlwaysInterpolate);
-        if (~corridorColliding(me.pos, enemypos, constNavSecurity))
+        if (~corridorColliding(me.pos, enemypos, constNavSecurity) || norm(me.pos-enemypos) < constWayPointReachedRadius+2*constGridRadius)
             %delete all other waypoints
             if (numel(waypointList) > 1)
                 safeDeleteWaypoints();
@@ -1583,21 +1576,12 @@ function bes = beschleunigung(spiel, farbe)
 
     function erg = calcEnemyHitPosition(interpolationMode, alwaysInterpolate)
         % SMOOTH ACCELERATION VALUES
-        persistent enemyAccSmooth;
-        persistent meAccSmooth;
         persistent lastInterpEnemyPos;
         
-        if (isempty(enemyAccSmooth))
-            enemyAccSmooth = [0, 0];
-            meAccSmooth = [0, 0];
+        if (isempty(lastInterpEnemyPos))
             lastInterpEnemyPos = [0, 0];
         end
         
-        % calculate own and enemy smoothed acceleration values
-        enemyAccSmooth = enemyAccSmooth*(constAccInterpolationSmoothing-1) + enemy.bes;
-        enemyAccSmooth = enemyAccSmooth/constAccInterpolationSmoothing;
-        meAccSmooth = meAccSmooth*(constAccInterpolationSmoothing-1) + me.bes;
-        meAccSmooth = meAccSmooth/constAccInterpolationSmoothing;
         
         %always interpolate
         if (nargin <= 2)
@@ -1607,23 +1591,13 @@ function bes = beschleunigung(spiel, farbe)
             interpolationMode = 0;
         end
         
-        enemyacc = enemyAccSmooth;
-        meacc = meAccSmooth;
+        %calculate hit time
+        thit = calculateSmoothHitTime(interpolationMode==0);
+        ergs = getSmoothedAccelerationValues();
+        enemyacc = ergs(2);
         
-        %disable acceleration if parameter is set
         if (interpolationMode == 1)
             enemyacc = 0;
-            meacc = 0;
-        end
-
-        vel = norm(me.ges-enemy.ges);
-        acc = norm(meacc-enemyacc);
-        dist = norm(me.pos-enemy.pos);
-        
-        %time to hit enemy
-        thit = interpolateTime(dist, vel, acc);
-        if (interpolationMode == 1)
-            thit = dist/vel;
         end
         
         %vorher : (thit > 1) neu : (dist > 0.2)
@@ -1660,6 +1634,67 @@ function bes = beschleunigung(spiel, farbe)
             erg = erg+dir*stepsize;
             length = length + stepsize;
         end
+    end
+
+    function [meacc, enemyacc] = getSmoothedAccelerationValues()
+        % SMOOTH ACCELERATION VALUES
+        persistent enemyAccSmooth;
+        persistent meAccSmooth;
+        persistent lastTimeCalculated;
+        
+        %set vars on startup
+        if (isempty(enemyAccSmooth))
+            enemyAccSmooth = [0, 0];
+            meAccSmooth = [0, 0];
+            lastTimeCalculated = -1;
+        end
+        
+        %if values are not created yet, calculate
+        if (lastTimeCalculated ~= spiel.i_t)
+            enemyAccSmooth = enemyAccSmooth*(constAccInterpolationSmoothing-1) + enemy.bes;
+            enemyAccSmooth = enemyAccSmooth/constAccInterpolationSmoothing;
+            meAccSmooth = meAccSmooth*(constAccInterpolationSmoothing-1) + me.bes;
+            meAccSmooth = meAccSmooth/constAccInterpolationSmoothing;
+            lastTimeCalculated = spiel.i_t;
+        end
+        
+        %output values
+        meacc = meAccSmooth;
+        enemyacc = enemyAccSmooth;
+    end
+
+    function time=calculateSmoothHitTime(includeAcceleration)
+        persistent lastTimeCalculated;
+        persistent lastCalculatedValue;
+        
+        %set vars on startup
+        if (isempty(lastTimeCalculated))
+            lastTimeCalculated = -1;
+            lastCalculatedValue = 0;
+        end
+        
+        %cet smoothed acceleration values
+        enemyAccSmooth = 0;
+        meAccSmooth = 0;
+        if (includeAcceleration)
+            [enemyAccSmooth, meAccSmooth] = getSmoothedAccelerationValues();
+        end
+        
+        %calculate time only if necessary
+        if (lastTimeCalculated ~= spiel.i_t)
+            a = norm(enemyAccSmooth-meAccSmooth);
+            v = norm(me.ges - enemy.ges);
+            s = norm(me.pos - enemy.pos);
+
+            if (a > 0.0001)
+                lastCalculatedValue = (sqrt(v^2+2*a*s)-v)/a;
+            else
+                lastCalculatedValue = s/v;
+            end
+            lastTimeCalculated = spiel.i_t;
+        end
+        
+        time = lastCalculatedValue;
     end
 
 
