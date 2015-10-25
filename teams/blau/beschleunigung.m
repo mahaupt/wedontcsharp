@@ -51,7 +51,7 @@ function bes = beschleunigung(spiel, farbe)
     
     %DEBUG MODE
     %true: ermöglicht ausgabe von Text und Zeichnen von gizmos
-    constDebugMode = false;
+    constDebugMode = true;
     
     
     
@@ -113,7 +113,7 @@ function bes = beschleunigung(spiel, farbe)
 
             %Wenn wir mehr als die Hälfte der Tanken haben oder nahe des Gegners sind und mehr getankt haben - Angriff!
             attackEnemy();
-        elseif enemy.getankt > StartNumberOfTank*0.5 || (norm(me.pos-enemy.pos)<0.2 && me.getankt<enemy.getankt)
+        elseif enemy.getankt > StartNumberOfTank*0.5 || (thit <= 0.5 && me.getankt<enemy.getankt && ~corridorColliding(me.pos, enemy.pos, constNavSecurity))
             if (dispWhatToDo ~= 2)
                 %vorher: tanken
                 if (dispWhatToDo == 3)
@@ -1321,7 +1321,7 @@ function bes = beschleunigung(spiel, farbe)
             
             
             %only if tanke is about to get taken
-            if (tenemy < 0.20 && ~enemyColliding)
+            if (tenemy < 0.3 && ~enemyColliding)
                 if (i==1 && norm(tenemy- town) < constCompetitionModeThreshold && ~tankeCompetition && ~ownColliding ...
                         && tvown < 0.5)
                     debugDisp('checkTankPath: competition mode activated');
