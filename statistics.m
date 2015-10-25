@@ -10,7 +10,7 @@ clc
     %r = round(rand(1)*1000000);
     %rng(r);
 
-Durchgaenge = 100; % Anzahl Durchgänge
+Durchgaenge = 10; % Anzahl Durchgänge
 Farbe = 'blau'; % Farbe des eigenen SpaceBalls eintragen: 'rot' oder 'blau'
 
 

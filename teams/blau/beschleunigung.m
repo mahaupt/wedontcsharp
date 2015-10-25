@@ -14,13 +14,15 @@ function bes = beschleunigung(spiel, farbe)
     %wichtig für den Pathfinder
     constMineProxPenality = 0.00001; % 0.0006
     %0.3 je größer der Winkel zum nächsten Wegpunkt, desto höheres Bremsen. Faktor.
-    constCornerBreaking = 0.26; 
+    constCornerBreaking = 0.40; 
     %Faktor für Seitwärtsbbeschleunigungen fürs Emergencybreaking
     constEmrBrkAccFac = 0.2; 
     %Faktor für Geschwindigkeit fürs Emergencybreaking
     constEmrBrkVelFac = 1.2; 
     %simplifyPath umgehen
     constSkipSimplifyPath = false;
+    %Mine proximity radius
+    constMineProxRadius = spiel.mine_radius + spiel.spaceball_radius + 1.5*constNavSecurity;
     
     %TANKEN
     %Zeitdifferenz die der Gegner schneller bei der Tanke sein darf,
@@ -45,7 +47,7 @@ function bes = beschleunigung(spiel, farbe)
     overrideBesCalculation = false;
     %Maximale Anzahl an Minen, bei der auf lockOnAttack geschaltet werden
     %kann wenn der Weg frei ist
-    constMaxLockonMineCount = 12;
+    %constMaxLockonMineCount = 12;
     
     %DEBUG MODE
     %true: ermöglicht ausgabe von Text und Zeichnen von gizmos
@@ -180,9 +182,25 @@ function bes = beschleunigung(spiel, farbe)
 
 
 %% Beschleunigung berechnen
-    function calculateBES()
+    function calculateBES(disableMineMode)
+        persistent besCalculationMode; %0: classic - 1: circle mode
+        persistent besMineID;
+        
         if (overrideBesCalculation)
             return;
+        end
+        if (isempty(besCalculationMode))
+            besCalculationMode = 0;
+            besMineID = 0;
+        end
+        if (nargin > 0 || ((spiel.n_mine <= 0 || spiel.n_mine < besMineID) && besCalculationMode == 1))
+            besCalculationMode = 0;
+            besMineID = 0;
+            debugDisp('calculateBES: Mine Mode disabled!');
+            
+            if (nargin > 0)
+                return;
+            end
         end
         
         
@@ -192,7 +210,131 @@ function bes = beschleunigung(spiel, farbe)
             return;
         end
         
-        calcLineBes();
+        %check if me and next waypoint is close to mine
+        if (spiel.n_mine > 0 && besCalculationMode == 0)
+            checkMineID = getNearestMineId(me.pos);
+            mineID = getNearestMineId(waypointList{1});
+            toMine1 = norm(spiel.mine(mineID).pos - me.pos);
+            toMine2 = norm(spiel.mine(mineID).pos - waypointList{1});
+            
+            if (toMine1 < constMineProxRadius && toMine2 < constMineProxRadius && checkMineID == mineID)
+                besCalculationMode = 1;
+                besMineID = mineID;
+                debugDisp('calculateBES: Mine Mode activated!');
+            end
+        elseif (spiel.n_mine > 0 && besCalculationMode == 1)
+            toMine = norm(spiel.mine(besMineID).pos - me.pos);
+            if (toMine > constMineProxRadius*1.1)
+                besCalculationMode = 0;
+                besMineID = 0;
+                debugDisp('calculateBES: Mine Mode disabled!');
+            end
+        end
+        
+        if (besCalculationMode == 1)
+            calcMineBes();
+        else
+            calcLineBes();
+            debugDrawCircle([0,0], -1);
+        end
+    end
+
+
+    %calculate bes around mines
+    function calcMineBes()
+        minimumMineDist = spiel.mine_radius+spiel.spaceball_radius+constSafeBorder*2;
+        
+        %Distanzen und Richtungen
+        mineID = getNearestMineId(me.pos);
+        minePos = spiel.mine(mineID).pos;
+        toMine = minePos - me.pos;
+        
+        %Vektor in Richtung der Kreistangente
+        toGes = vecNorm(getPerpend(toMine));
+        if (dot(toGes, waypointList{1}-me.pos) < 0)
+            toGes = -toGes;
+        end
+        %Vektor im Rechten Winkel zur Gschwindigkeit, der zur Mine zeigt.
+        gesToMine = vecNorm(getPerpend(me.ges));
+        gesToMine = gesToMine*distanceLinePoint(me.pos-vecNorm(me.ges), me.pos+vecNorm(me.ges), minePos);
+        if (dot(gesToMine, toMine) < 0)
+            gesToMine = -gesToMine;
+        end
+        
+        %startwert = mein Abstand zur Mine
+        mineDriveRadius = norm(toMine);
+        
+        %Suche nach kleinstem Radius in Wegpunkten und mache ihn zum 
+        %Orbitradius
+        for i=1:numel(waypointList)
+            if (i > 5)
+                break;
+            end
+            
+            dist = norm(minePos-waypointList{i});
+            if (dist > constMineProxRadius)
+                break;
+            end
+            if (dist < mineDriveRadius)
+                mineDriveRadius = dist;
+            end
+        end
+        
+        %Radius darf nicht zu klein werden sonst kommt es zur kollision
+        mineDriveRadius = clamp(mineDriveRadius, minimumMineDist, inf);
+        
+        %maximal radial velocity
+        maxVelSq = spiel.bes*mineDriveRadius;
+
+        %velocity correction Geschwindigkeitsvektor muss den Kreis
+        %Tangieren
+        corr = norm(gesToMine)-mineDriveRadius;
+        if (dot(me.ges, toMine) < 0)
+            corr = -corr;
+        end
+        if (norm(toMine) < minimumMineDist)
+            corr = -1;
+        end
+        
+        %berechne Zentripetalbeschleunigung und addiere darin die
+        %Korrektur
+        zentp = clamp(norm(me.ges)^2/mineDriveRadius + 20*corr, -spiel.bes, spiel.bes);
+        forward = sqrt(spiel.bes^2-zentp^2);
+        bes = zentp * vecNorm(toMine) + forward*toGes;
+        
+        %no velocity
+        if (norm(me.ges) < 0.001)
+            bes = toGes;
+        end
+        
+        %emergencybreaking
+        if (norm(me.ges)^2 > maxVelSq) % || emergencyBreaking()
+           bes = -me.ges;
+        end
+        
+        %debug drawing
+        debugDrawCircle(minePos, mineDriveRadius);
+        
+        %exit circle mode
+        %Springe aus diesem Beschleunigungsmodus, wenn der nächste Wegpunkt
+        %außerhalb des Orbitradiusses liegt und unser Beschleunigungsvektor
+        %auf den nächsten Wegpunkt zeigt
+        towp = vecNorm(waypointList{1}-me.pos);
+        wpdist = norm(waypointList{1} - minePos);
+        if (wpdist > constMineProxRadius)
+            vel1 = vecNorm(me.ges-vecNorm(bes)*spiel.bes/10000);
+            vel2 = vecNorm(me.ges+vecNorm(bes)*spiel.bes/10000);
+            
+            if (dot(vel1, towp) > dot(vel2, towp))
+                calculateBES(true);
+            end
+        end
+        
+        %Wegpunkte einsammeln
+        if norm(me.pos-waypointList{1}) < constNavSecurity*1.5
+            waypointList(1) = [];
+            debugDRAW();
+        end
     end
 
     %calculate line acceleration
@@ -252,7 +394,7 @@ function bes = beschleunigung(spiel, farbe)
     %check if overshooting next waypoint
     function erg = checkIfTooFast()
         erg = false;
-        
+
         %nothing to do
         if (numel(waypointList) <= 0)
             return;
@@ -271,9 +413,10 @@ function bes = beschleunigung(spiel, farbe)
         %distace of overshooting
         correctDist = norm(turnPos - waypointList{1});
         
-        accCorrection = 0.5*spiel.bes * turnTime^2 * 0.9;
+        accCorrection = 0.5*spiel.bes * turnTime^2;
         if (accCorrection < correctDist && norm(towp) > constWayPointReachedRadius*2 && velocity >= 0.01)
             erg = true;
+            %debugDisp('TooFast: breaking!');
             return;
         end
         
@@ -324,6 +467,7 @@ function bes = beschleunigung(spiel, farbe)
             corridorColliding(me.pos, checkPoint1, safeSpaceballRadius) || ...
             corridorColliding(me.pos, checkPoint2, safeSpaceballRadius)))
 
+            %debugDisp('Emergency Breaking: breaking!');
             erg = true;
             return
         end
@@ -953,18 +1097,24 @@ function bes = beschleunigung(spiel, farbe)
     end
 
     function erg = getTimeToAlignVelocity(vel1, vec)
-        length = norm(vel1);
-        vec = vecNorm(vec) * length;
+        dotp = dot(vecNorm(vel1), vecNorm(vec));
+        angle = acos(dotp);
+        if dotp < 0
+            angle = angle + pi/2;
+        end
         
-        deltaV = vec - vel1;
-        erg = norm(deltaV)/spiel.bes;
+        deltaV = angle*norm(vel1);
+        erg = deltaV/spiel.bes;
     end
 
     function erg = getMaxVelocityToAlignInTime(vec1, vec2, time)
-        vec1 = vecNorm(vec1);
-        vec2 = vecNorm(vec2);
-        deltaVec = vec2-vec1;
-        erg = time*spiel.bes/norm(deltaVec);
+        dotp = dot(vecNorm(vec1), vecNorm(vec2));
+        angle = acos(dotp);
+        if dotp < 0
+            angle = angle + pi/2;
+        end
+        
+        erg = time*spiel.bes/angle;
     end
 
     function endPosition = safeDeleteWaypoints()
@@ -1586,6 +1736,29 @@ function bes = beschleunigung(spiel, farbe)
         
         for i = 1 : numel(waypointList)
             drawHandles(i) = rectangle ('Parent', spiel.spielfeld_handle, 'Position', [waypointList{i}-0.0025, 0.005, 0.005], 'Curvature', [1 1], 'FaceColor', dcolor, 'EdgeColor', [0, 0, 0]);
+        end
+    end
+
+
+    function debugDrawCircle(pos, rad)
+        persistent mineDraw;
+        
+        if (~constDebugMode)
+            return;
+        end
+        
+        %get color
+        dcolor = spiel.farbe.blau;
+        if strcmp (farbe, 'rot')
+            dcolor = spiel.farbe.rot;
+        end
+        
+        if ~isempty(mineDraw)
+            delete(mineDraw);
+        end
+        
+        if (rad > 0)
+            mineDraw = rectangle ('Parent', spiel.spielfeld_handle, 'Position', [pos-rad, rad*2, rad*2], 'Curvature', [1 1], 'FaceColor', 'none', 'EdgeColor', dcolor);
         end
     end
 
