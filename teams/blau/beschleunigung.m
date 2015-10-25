@@ -1321,11 +1321,7 @@ function bes = beschleunigung(spiel, farbe)
             
             
             %only if tanke is about to get taken
-<<<<<<< HEAD
-            if (tenemy < 0.20 && ~enemyColliding)
-=======
             if (tenemy < 0.3 && ~enemyColliding)
->>>>>>> ChrisTest
                 if (i==1 && norm(tenemy- town) < constCompetitionModeThreshold && ~tankeCompetition && ~ownColliding ...
                         && tvown < 0.5)
                     debugDisp('checkTankPath: competition mode activated');
