@@ -21,6 +21,8 @@ function bes = beschleunigung(spiel, farbe)
     constEmrBrkVelFac = 1.2; 
     %simplifyPath umgehen
     constSkipSimplifyPath = false;
+    %Mine proximity radius
+    constMineProxRadius = spiel.mine_radius + spiel.spaceball_radius + 2*constNavSecurity;
     
     %TANKEN
     %Zeitdifferenz die der Gegner schneller bei der Tanke sein darf,
@@ -45,7 +47,7 @@ function bes = beschleunigung(spiel, farbe)
     overrideBesCalculation = false;
     %Maximale Anzahl an Minen, bei der auf lockOnAttack geschaltet werden
     %kann wenn der Weg frei ist
-    constMaxLockonMineCount = 12;
+    %constMaxLockonMineCount = 12;
     
     %DEBUG MODE
     %true: ermöglicht ausgabe von Text und Zeichnen von gizmos
@@ -192,75 +194,93 @@ function bes = beschleunigung(spiel, farbe)
             return;
         end
         
-%         %check if me and next waypoint is close to mine
-%         mineID1 = getNearestMineId(me.pos);
-%         mineID2 = getNearestMineId(waypointList{1});
-%         toMine1 = norm(spiel.mine(mineID1).pos - me.pos);
-%         toMine2 = norm(spiel.mine(mineID2).pos - waypointList{1});
-%         mineDriveRadius = spiel.mine_radius + spiel.spaceball_radius + 2*constNavSecurity;
-%         
-%         if (toMine1 < mineDriveRadius && toMine2 < mineDriveRadius)
-%             calcMineBes();
-%         else
+        %check if me and next waypoint is close to mine
+        useMineCalculation = false;
+        if (spiel.n_mine > 0)
+            checkMineID = getNearestMineId(me.pos);
+            mineID = getNearestMineId(waypointList{1});
+            toMine1 = norm(spiel.mine(mineID).pos - me.pos);
+            toMine2 = norm(spiel.mine(mineID).pos - waypointList{1});
+            
+            if (toMine1 < constMineProxRadius && toMine2 < constMineProxRadius && checkMineID == mineID)
+                useMineCalculation = true;
+            end
+        end
+        
+        if (useMineCalculation)
+            calcMineBes();
+        else
             calcLineBes();
-%         end
+            debugDrawCircle([0,0], -1);
+        end
     end
 
 
     %calculate bes around mines
     function calcMineBes()
-        mineDriveRadius = spiel.mine_radius + spiel.spaceball_radius + 2*constSafeBorder;
+        %calculate mine and mine distances
+        mineID = getNearestMineId(me.pos);
+        minePos = spiel.mine(mineID).pos;
+        toMine = minePos - me.pos;
         
+        %get acceleration vector
+        toGes = vecNorm(getPerpend(toMine));
+        if (dot(toGes, waypointList{1}-me.pos) < 0)
+            toGes = -toGes;
+        end
+        %get perpend vector from ges to mine
+        gesToMine = vecNorm(getPerpend(me.ges));
+        gesToMine = gesToMine*distanceLinePoint(me.pos-vecNorm(me.ges), me.pos+vecNorm(me.ges), minePos);
+        if (dot(gesToMine, toMine) < 0)
+            gesToMine = -gesToMine;
+        end
+        
+        
+        mineDriveRadius = norm(toMine);
+        
+        %get average of
+        for i=1:numel(waypointList)
+            if (i > 5)
+                break;
+            end
+            
+            dist = norm(minePos-waypointList{i});
+            if (dist > constMineProxRadius)
+                break;
+            end
+            
+            if (dist < mineDriveRadius)
+                mineDriveRadius = dist;
+            end
+        end
+        
+        mineDriveRadius = clamp(mineDriveRadius, spiel.mine_radius+spiel.spaceball_radius+constSafeBorder*2, inf);
+        
+        %maximal radial velocity
+        maxVelSq = spiel.bes*mineDriveRadius;
         
         %collecting waypoints
         if norm(me.pos-waypointList{1}) < 2*constNavSecurity
             waypointList(1) = [];
             debugDRAW();
         end
+
+        %velocity correction
+        corr = norm(gesToMine)-mineDriveRadius;
+        if (dot(me.ges, toMine) < 0)
+            corr = -corr;
+        end
         
-        %calculate mine and mine distances
-        mineID = getNearestMineId(me.pos);
-        toMine = spiel.mine(mineID).pos - me.pos;
-        maxVelSq = spiel.bes*mineDriveRadius;
-        
-        %zentripetal acceleration
-        %zpetAcc = norm(me.ges)/mineDriveRadius^2;
-        
-        %skip centipetal acceleration
-        skipZentpAcc = false;
+        zentp = clamp(norm(me.ges)^2/mineDriveRadius + 20*corr, 0, spiel.bes);
+        forward = sqrt(spiel.bes^2-zentp^2);
+        bes = zentp * vecNorm(toMine) + forward*toGes;
         
         %emergencybreaking
-        if (norm(me.ges)^2 > maxVelSq)
+        if (norm(me.ges)^2 > maxVelSq) % || emergencyBreaking()
            bes = -me.ges;
-           skipZentpAcc = true;
-        else
-           bes = me.ges;
         end
         
-        
-        %mine radius intercepting
-        if (mineDriveRadius < norm(toMine))
-            lpdist = distanceLinePoint(me.pos, me.pos+me.ges, spiel.mine(mineID).pos);
-            if (lpdist <= mineDriveRadius)
-                skipZentpAcc = true;
-            end
-        elseif (mineDriveRadius > norm(toMine))
-            skipZentpAcc = true;
-        end
-        
-        %calculate centripetal acceleration
-        if (~skipZentpAcc)
-            %get acceleration vector
-            toGes = vecNorm(getPerpend(toMine));
-            if (dot(toGes, me.ges) < 0)
-                toGes = -toGes;
-            end
-
-            bes = vecNorm(toMine);
-            if (norm(me.ges)^2 < maxVelSq)
-                bes = bes + toGes*0.1;
-            end
-        end
+        debugDrawCircle(minePos, mineDriveRadius);
     end
 
     %calculate line acceleration
@@ -1660,6 +1680,29 @@ function bes = beschleunigung(spiel, farbe)
         
         for i = 1 : numel(waypointList)
             drawHandles(i) = rectangle ('Parent', spiel.spielfeld_handle, 'Position', [waypointList{i}-0.0025, 0.005, 0.005], 'Curvature', [1 1], 'FaceColor', dcolor, 'EdgeColor', [0, 0, 0]);
+        end
+    end
+
+
+    function debugDrawCircle(pos, rad)
+        persistent mineDraw;
+        
+        if (~constDebugMode)
+            return;
+        end
+        
+        %get color
+        dcolor = spiel.farbe.blau;
+        if strcmp (farbe, 'rot')
+            dcolor = spiel.farbe.rot;
+        end
+        
+        if ~isempty(mineDraw)
+            delete(mineDraw);
+        end
+        
+        if (rad > 0)
+            mineDraw = rectangle ('Parent', spiel.spielfeld_handle, 'Position', [pos-rad, rad*2, rad*2], 'Curvature', [1 1], 'FaceColor', 'none', 'EdgeColor', dcolor);
         end
     end
 
