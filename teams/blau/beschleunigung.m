@@ -138,12 +138,12 @@ function bes = beschleunigung(spiel, farbe)
             end
             
             %wenn Wegpunktliste leer => Pfad zur besten Tankstelle setzen
-            %createPathToNextTanke()
+            createPathToNextTanke()
             
             %Erreicht der Gegner die anvisierte Tankstelle vor uns? dann löschen
-            %checkTankPath()
+            checkTankPath()
             
-            followTankList();
+            %followTankList();
         end
     end
 
