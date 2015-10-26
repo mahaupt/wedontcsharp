@@ -1264,47 +1264,50 @@ function bes = beschleunigung(spiel, farbe)
                            
                                
 %                         if enemy.getankt > StartNumberOfTank*0.5
-                          
-                            waypointList = appendToArray(waypointList, findPath(me.pos, nextCorner(2,1:2)));
-                            waitForEnemy = false;
-                         
-%                         else
-%               
-%                             eva = createTankEvaluation(me.pos);
-%                         
-%                                            
-%                             if numel(eva) == 0
-%                         
-%                                 waypointList = appendToArray(waypointList, findPath(me.pos, nextCorner(2,1:2)));
-%                                 waitForEnemy = false;
-%                     
-%                             else  
-%                         
-%                                 for i=1:numel(eva)
-%                                     eva(2) = 1/eva(2);
-%                                     eva(4) = eva(2) - eva(3);
-%                                 end
-%                                 
-%                                 bestTanke = sort(eva(4));
-%                                 
-%                                 if bestTanke(1) >= 0
-%                            
-%                                     waypointList = appendToArray(waypointList, findPath(me.pos, nextCorner(2,1:2)));
-%                                     waitForEnemy = false;
+%                           
+%                             waypointList = appendToArray(waypointList, findPath(me.pos, nextCorner(2,1:2)));
+%                             waitForEnemy = false; 
 %                          
-%                                 else
-%                                     
-%                                     createPathToNextTanke
-%                       
-%                                 end
-%                             end
-%                         end
-                      
+%                         else
+              
+                            eva = createTankEvaluation(me.pos);
                         
-                         %go to the second corner, since the first one is on ourcurrent position
+                                           
+                            if numel(eva) == 0
+                        
+                                waypointList = appendToArray(waypointList, findPath(me.pos, nextCorner(2,1:2)));
+                                waitForEnemy = false;  
+                    
+                            else  
+                        
+                                for i=1:numel(eva)
+                                    eva(2) = 1/eva(2);
+                                    eva(4) = eva(2) - eva(3);
+                                end
+                                
+                                bestTanke = sort(eva(4));
+                                
+                                if bestTanke(1) >= 0
+                           
+                                    waypointList = appendToArray(waypointList, findPath(me.pos, nextCorner(2,1:2)));
+                                    waitForEnemy = false;  
+                         
+                                else
+                                    
+                                    createPathToNextTanke
+                                    
+                                    waypointList = appendToArray(waypointList, findPath(me.pos, nextCorner(2,1:2)));
+                                    waitForEnemy = false;  
+                      
+                                end
+                            end
+                        end
+                      
+%                         
+% %                          go to the second corner, since the first one is on ourcurrent position
 %                          waypointList = appendToArray(waypointList, findPath(me.pos, nextCorner(2,1:2)));
 %                          waitForEnemy = false;
-%                         
+                        
 %                             bestTanke = sort(eva(4));
 %                 
 %                       if norm(bestTanke(1)) >= 0
@@ -1326,7 +1329,7 @@ function bes = beschleunigung(spiel, farbe)
             
          end
      end
-end
+% end
 
 
 
