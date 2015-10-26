@@ -54,7 +54,6 @@ function bes = beschleunigung(spiel, farbe)
     constDebugMode = true;
     
     
-    
     %statische Variablen definieren
     persistent nodeGrid;
     persistent waypointList;
@@ -65,6 +64,7 @@ function bes = beschleunigung(spiel, farbe)
     persistent ignoreTanke; %number of tanke to be ignored by targetNextTanke
     persistent tankeCompetition;
     persistent waitForEnemy; %benötigt, um auf den Gegner warten zu können
+    persistent tanke;
 
     
     %%Farbe prüfen und zuweisen
@@ -82,6 +82,10 @@ function bes = beschleunigung(spiel, farbe)
         initSpaceball();
     end
     
+    %zum debuggen (einfach nen Breakpoint bei "return" setzen)
+    %if spiel.i_t==60
+    %    return;
+    %end
     
 %% Veränderungen des Spielfeldes bemerken und dementsprechend handeln
     gameChangeHandler()
@@ -102,8 +106,8 @@ function bes = beschleunigung(spiel, farbe)
             dispWhatToDo = -1;
         end
         
-       
         thit = calculateSmoothHitTime(true);
+        
         if StartNumberOfTank*0.5 < me.getankt || (thit <= 0.5 && me.getankt>enemy.getankt && ~corridorColliding(me.pos, enemy.pos, constNavSecurity))
             if (dispWhatToDo ~= 1)
                 dispWhatToDo = 1;
@@ -135,11 +139,13 @@ function bes = beschleunigung(spiel, farbe)
             
             %wenn Wegpunktliste leer => Pfad zur besten Tankstelle setzen
             createPathToNextTanke()
+            
             %Erreicht der Gegner die anvisierte Tankstelle vor uns? dann löschen
             checkTankPath()
+            
+            %followTankList();
         end
     end
-    
 
     %wird einmal am Start aufgerufen
     %initialisiert wichtige Variablen
@@ -154,6 +160,7 @@ function bes = beschleunigung(spiel, farbe)
         tankeCompetition = false;
         waitForEnemy = false;
         setupNodeGrid();
+        createTankList();
     end
 
     %registriert Änderungen im Spielfeld und Handelt entsprechend
@@ -176,6 +183,7 @@ function bes = beschleunigung(spiel, farbe)
 
             NumberOfTank = spiel.n_tanke;
             ignoreTanke = 0;
+            createTankList();
         end
     end
 
@@ -237,7 +245,6 @@ function bes = beschleunigung(spiel, farbe)
             debugDrawCircle([0,0], -1);
         end
     end
-
 
     %calculate bes around mines
     function calcMineBes()
@@ -462,7 +469,6 @@ function bes = beschleunigung(spiel, farbe)
         end
     end
 
-
     %emergency breaking
     function erg = emergencyBreaking(customv, customa)
         erg = false;
@@ -539,8 +545,6 @@ function bes = beschleunigung(spiel, farbe)
     function erg = calcBreakDistance(vel, endvel)
         erg = ((vel)^2 - (endvel)^2)/(2*spiel.bes);
     end
-
-
 
     function erg = calcWaypointReachedRadius(endvel)
         erg = constWayPointReachedRadius; %0.01
@@ -1377,6 +1381,40 @@ function bes = beschleunigung(spiel, farbe)
                     tankeCompetition = false;
                 end
             end
+        end
+    end
+
+
+
+%% NEUE Tankenfindung
+
+    function createTankList()
+        tanke = [];
+        for i=1:numel(spiel.tanke)
+            tanke(i).pos = spiel.tanke(i).pos; %For Debugging
+            tanke(i).num = i;
+            tanke(i).dist = norm(spiel.tanke(i).pos-me.pos);
+            tanke(i).mineInWay = corridorColliding(me.pos, spiel.tanke(i).pos, constNavSecurity);
+            
+            for j=1:numel(spiel.tanke)
+                if j == i
+                    continue;
+                else
+                    tanke2(j).dist = norm(spiel.tanke(j).pos-spiel.tanke(i).pos);
+                    tanke2(j).num = j;
+                    [minValue,index] = min([tanke2.dist]);
+                    tanke(i).dist = tanke(i).dist + minValue;
+                    tanke(i).secNum = index;
+                end
+            end
+        end
+    end
+
+    function followTankList()
+        if numel(waypointList) == 0
+            wayPointList = [];
+            [minValue,index] = min([tanke.dist]);
+            waypointList = findPath(me.pos, spiel.tanke(index).pos);
         end
     end
 
