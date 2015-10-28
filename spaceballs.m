@@ -6,9 +6,9 @@ clc
 
 
 % rng shuffle
-rng (335426)
+rng (349891)
 r = round(rand(1)*1000000)
-rng(r); %335426
+rng(r); %335426 349891
 
 
 %% Konstanten definieren
@@ -57,7 +57,7 @@ spiel.blau.spur(spiel.n_t, 2) = 0;
 
 %% Video abspeichern?
 
-video.abspeichern = false;
+video.abspeichern = true;
 
 if video.abspeichern
     

@@ -65,6 +65,7 @@ function bes = beschleunigung(spiel, farbe)
     persistent ignoreTanke; %number of tanke to be ignored by targetNextTanke
     persistent tankeCompetition;
     persistent waitForEnemy; %benötigt, um auf den Gegner warten zu können
+    persistent Verteidigung;
 
     
     %%Farbe prüfen und zuweisen
@@ -112,6 +113,7 @@ function bes = beschleunigung(spiel, farbe)
             
 
             %Wenn wir mehr als die Hälfte der Tanken haben oder nahe des Gegners sind und mehr getankt haben - Angriff!
+            Verteidigung = false;
             attackEnemy();
 
         elseif enemy.getankt > StartNumberOfTank*0.5 || (thit <= 0.5 && me.getankt<enemy.getankt && ~corridorColliding(me.pos, enemy.pos, constNavSecurity))
@@ -129,12 +131,14 @@ function bes = beschleunigung(spiel, farbe)
             
             %%Erst wenn alle Tanken weg sind und wir weniger haben, als der Gegner - Fliehen!
             fleeEnemy();
-%         else
+            Verteidigung = true;
+%         else 
 %             if (dispWhatToDo ~= 3)
 %                 dispWhatToDo = 3;
 %                 debugDisp('whatToDo: Tanke');
 %             end
 %             
+%             Verteidigung = false;
 %             %wenn Wegpunktliste leer => Pfad zur besten Tankstelle setzen
 %             createPathToNextTanke()
 %             %Erreicht der Gegner die anvisierte Tankstelle vor uns? dann löschen
@@ -155,6 +159,7 @@ function bes = beschleunigung(spiel, farbe)
         NumberOfTank = spiel.n_tanke;
         tankeCompetition = false;
         waitForEnemy = false;
+        Verteidigung = false;
         setupNodeGrid();
     end
 
@@ -218,7 +223,7 @@ function bes = beschleunigung(spiel, farbe)
             toMine1 = norm(spiel.mine(mineID).pos - me.pos);
             toMine2 = norm(spiel.mine(mineID).pos - waypointList{1});
             
-            if (toMine1 < constMineProxRadius && toMine2 < constMineProxRadius && checkMineID == mineID)
+            if (toMine1 < constMineProxRadius && toMine2 < constMineProxRadius && checkMineID == mineID) && ~Verteidigung  
                 besCalculationMode = 1;
                 besMineID = mineID;
                 debugDisp('calculateBES: Mine Mode activated!');
@@ -402,7 +407,7 @@ function bes = beschleunigung(spiel, farbe)
                     bes = -toMineVec;
                     return;
                 end
-            elseif (corridorColliding(me.pos, waypointList{1}, spiel.spaceball_radius))
+            elseif (corridorColliding(me.pos, waypointList{1}, spiel.spaceball_radius)) && ~Verteidigung
                 %sonst
                 waypointList = appendToArray(findPath(me.pos, waypointList{1}), waypointList(2:end));
                 debugDRAW();
@@ -1172,13 +1177,11 @@ function bes = beschleunigung(spiel, farbe)
             erg = 0;
             return;
         end
-        
-        erg = 1;
         for i=1:spiel.n_mine
-            if (norm(spiel.mine(i).pos-pos) < norm(spiel.mine(erg).pos - pos))
-                erg = i;
-            end
+            mineList(i).dist = norm(pos - spiel.mine(i).pos);
         end
+        [minValue,index] = min([mineList.dist]);
+        erg=index;
     end
 
 %% Tankenfindungs-System
@@ -1732,6 +1735,7 @@ function bes = beschleunigung(spiel, farbe)
     %Verteidigung
     function fleeEnemy()
         if numel(waypointList) == 0
+%             mineTricking();
             cornerTricking();
         end
     end
@@ -1739,22 +1743,20 @@ function bes = beschleunigung(spiel, farbe)
     function cornerTricking()
         
         %define a Matrix that contains all corner positions
-        cornerNodes = [0.01,0.99,0;0.99,0.99,0;0.01,0.01,0;0.99,0.01,0];
+        cornerNodes = [0.015,0.985,0;0.985,0.985,0;0.015,0.015,0;0.985,0.015,0];
         if waitForEnemy == false
             debugDisp('cornerTricking: Pt1');
             %get nearest corner, go there and wait
-            if waitForEnemy == false
-                for i=1:4 % checking every corner
-                    % calculating distance to each corner
-                    cornerNodes(i,3)=norm(cornerNodes(i,1:2)-me.pos-enemy.ges);   
-                end
-                nearestCorner = sortrows(cornerNodes, [3 2 1]); % finding the best corner 
-                % add nodes of nearest corner to wplist 
-                waypointList = appendToArray(waypointList, findPath(me.pos, nearestCorner(1,1:2))); 
-                waitForEnemy = true; 
+            for i=1:4 % checking every corner
+                % calculating distance to each corner
+                cornerNodes(i,3)=norm(cornerNodes(i,1:2)-me.pos-enemy.ges);   
             end
-        %waiting for the enemy
-        elseif waitForEnemy == true
+            nearestCorner = sortrows(cornerNodes, [3 2 1]); % finding the best corner 
+            % add nodes of nearest corner to wplist 
+            waypointList = appendToArray(waypointList, findPath(me.pos, nearestCorner(1,1:2))); 
+            waitForEnemy = true; 
+            %waiting for the enemy
+        else
             if checkIfTooFastE () == true || norm(me.pos-enemy.pos) <= 0.15 
                 debugDisp('cornerTricking: Pt2');
                     %sort all corners based on the direction the enemy is coming from and their distance to us
@@ -1762,54 +1764,56 @@ function bes = beschleunigung(spiel, farbe)
                         cornerNodes(i,3)=norm(cornerNodes(i,1:2)-me.pos-enemy.ges);
                     end
                     
-                       nextCorner = sortrows(cornerNodes, [3 2 1]);
+                    nextCorner = sortrows(cornerNodes, [3 2 1]);
                            
                                
-                        if enemy.getankt > StartNumberOfTank*0.5
-                          
+                       % if enemy.getankt > StartNumberOfTank*0.5
+                            waypointList = [];
                             waypointList{1} = nextCorner(2,1:2);
-                              
-                            waitForEnemy = false; 
+                          
                          
-                       else
-              
-                            eva = createTankEvaluation(me.pos);
-                        
-                                           
-                            if numel(eva) == 0
-                        
-                                waypointList{1} = nextCorner(2,1:2);
-                                
-                                waitForEnemy = false;  
-                    
-                            else  
-                        
-                                for i=1:numel(eva)
-                                    eva(2) = 1/eva(2);
-                                    eva(4) = eva(2) - eva(3);
-                                end
-                                
-                                bestTanke = sort(eva(4));
-                                
-                                if bestTanke(1) >= 0
-                           
-                                    waypointList{1} = nextCorner(2,1:2);
-                                    waitForEnemy = false;  
-                         
-                                else
-                                    
-                                    createPathToNextTanke
-                                    
-                                    waypointList = appendToArray(waypointList, findPath(me.pos, nextCorner(2,1:2)));
-                                    waitForEnemy = false;  
-                      
-                                end
-                            end
-                        end
+%                        else
+%               
+%                             eva = createTankEvaluation(me.pos);
+%                         
+%                             for i=1:numel(eva)
+%                                 eva(2) = 1/eva(2);
+%                                 eva(4) = eva(2) - eva(3);
+%                             end
+% 
+%                             bestTanke = sort(eva(4));
+% 
+%                             if bestTanke(1) >= 0
+% 
+%                                 waypointList = [];
+%                                 waypointList{1} = nextCorner(2,1:2);  
+% 
+%                             else
+% 
+%                                 createPathToNextTanke();
+% 
+%                                 waypointList = [];
+%                                 waypointList{1} = nextCorner(2,1:2); 
+% 
+%                             end
+%                         end
                     end
                 end
-            end
+    end
 
+    function mineTricking()
+        ClosestMine = getNearestMineId(me.pos);
+        dreh_trafo = [0 -1; 1 0];
+        if numel(waypointList) <= 0
+            if norm((spiel.mine(ClosestMine).pos - spiel.spaceball_radius - spiel.mine_radius) - me.pos) < 0.05 
+                waypointList{1} = spiel.mine(ClosestMine).pos + (spiel.spaceball_radius + spiel.mine_radius);
+            else
+                waypointList{1} = spiel.mine(ClosestMine).pos - (spiel.spaceball_radius + spiel.mine_radius);
+            end
+        end
+        debugDRAW();
+    end
+        
 
 
 %% Debugging
