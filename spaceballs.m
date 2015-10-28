@@ -1,14 +1,12 @@
 %% Initialisierung
 
-% clear variables
+clear variables
 close all
 clc
 
 rng shuffle
-%rng (9474);
-r = round(rand(1)*1000000);
+r = round(rand(1)*1000000)
 rng(r);
-
 
 %% Konstanten definieren
 
@@ -62,7 +60,7 @@ if video.abspeichern
     
     video.writer = VideoWriter ('spaceballs.avi');
     
-    video.writer.Quality = 100;
+    video.writer.Quality = 25;
     
     video.writer.FrameRate = 25;
     

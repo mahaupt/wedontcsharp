@@ -1,22 +1,21 @@
-% ACHTUNG:
-% clear variables in spaceballs.m muss auskommentiert sein!
-% Zeitraffer-Funktion in spaceballs.m sollte aktiviert sein!
-
 clear all
 close all
 clc
 
 % Wichtig:
-% clear variables in spaceballs.m muss auskommentiert sein!
-% in spaceballs spiel.zeitraffer_checkbox_anfangswert true setzen!
-% shuffle mode on
+% In spaceballs.m "clear variables" auskommentieren!
+% In spaceballs.m "spiel.zeitraffer_checkbox_anfangswert" auf true setzen!
+% In spaceballs.m "rng shuffle" durch folgendes ersetzen:
+    %rng shuffle
+    %r = round(rand(1)*1000000);
+    %rng(r);
 
-Durchgaenge = 1; % Anzahl Durchgänge
+Durchgaenge = 100; % Anzahl Durchgänge
 Farbe = 'blau'; % Farbe des eigenen SpaceBalls eintragen: 'rot' oder 'blau'
 
 
 
-
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 data = cell(Durchgaenge,9);
 
@@ -27,9 +26,13 @@ data = cell(Durchgaenge,9);
         if strcmp(Farbe,'rot')
             me = spiel.rot;
             enemy = spiel.blau;
+            myName = spiel.rot.name;
+            enemyName = spiel.blau.name;
         else
             me = spiel.blau;
             enemy = spiel.rot;
+            myName = spiel.blau.name;
+            enemyName = spiel.rot.name;
         end
                     
         % aktueller Schritt in data Zeile i, Spalte 2 eintragen
@@ -81,12 +84,12 @@ data = cell(Durchgaenge,9);
         end
         
         % clear variables vgl. Spaceballs.m ausführen, Ausnahme: data und range
-        clearvars -except data Durchgaenge Farbe
+        clearvars -except data Durchgaenge Farbe myName enemyName
 
         
     end
 
-% Prozente berechnen und hübsch darstellen
+%% Prozente berechnen und hübsch darstellen
 sumWins = 0;
 sumLose = 0;
 sumAttack = 0;
@@ -127,7 +130,7 @@ medianTime = medianTime/sumWins;
 
 
 
-
+Gegner = horzcat(myName, ' VS  ', enemyName);
 Satz = horzcat('Von ', num2str(Durchgaenge), ' Spielen wurden ', num2str(sumWins), ' in durchschnittlich ', num2str(medianTime), ' Sekunden gewonnen.');
 Quote1 = horzcat('Gewonnen: ', num2str(sumWins/Durchgaenge*100),' %');
 Quote2 = horzcat('   davon den Gegner erwischt: ', num2str(gegErwischt/sumWins*100),' %');
@@ -140,6 +143,8 @@ Quote8 = horzcat('Error: ', num2str(sumERROR/Durchgaenge*100),' %');
 
 Statistische_Erhebung = data(:,2:6);
 clc;
+disp(Gegner);
+disp(' ');
 disp(Satz);
 disp(' ');
 disp(' ');
@@ -158,8 +163,5 @@ disp(Quote8);
 disp(' ');
 disp(' ');
 disp(Statistische_Erhebung);
-
-Quote = horzcat('Von ', num2str(Durchgaenge), ' Spielen wurde(n) ', num2str(sumWins), ' gewonnen! (', num2str(sumWins/Durchgaenge*100),'%)')
-Statistische_Erhebung = data
 
    

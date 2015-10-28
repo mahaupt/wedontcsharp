@@ -1,14 +1,58 @@
 function bes = beschleunigung(spiel, farbe)
 %% Konstanten & Variablen zu Beginn des Spiels festlegen
-    constSafeBorder = 0.001; %collision border around mines
+    
+    %NAVIGATION
+    %sicherheitsradius um Minen und Banden
+    constSafeBorder = 0.001;
+    %Standardradius zum Erreichen eines Wegpunktes
+    constWayPointReachedRadius = 0.02;
+    %Auflösung des NodeGrids (Radius eines Nodes)
     constGridRadius = 0.003;
-    constNavSecurity = 0.03; %simplify path
-    constWayPointReachedRadius = 0.02; %0.01
-    constMineProxPenality = 0.0006; %Strafpunkte für Nodes - je dichter an Mine, desto höher
-    constCornerBreaking = 0.25; %0.03 je größer der Winkel zum nächsten Wegpunkt, desto höheres Bremsen. Faktor.
-    constEmrBrkAccFac = 0.2; %betrachtet Seitwärtsbbeschleunigungen fürs Emergencybreaking
-    constEmrBrkVelFac = 1.2; %betrachtet Geschwindigkeit fürs Emergencybreaking
+    %Korridorbreite für simplifyPath
+    constNavSecurity = 0.02;
+    %Strafpunkte für Nodes - je dichter an Mine, desto höher
+    %wichtig für den Pathfinder
+    constMineProxPenality = 0.00001; % 0.0006
+    %0.3 je größer der Winkel zum nächsten Wegpunkt, desto höheres Bremsen. Faktor.
+    constCornerBreaking = 0.40; 
+    %Faktor für Seitwärtsbbeschleunigungen fürs Emergencybreaking
+    constEmrBrkAccFac = 0.2; 
+    %Faktor für Geschwindigkeit fürs Emergencybreaking
+    constEmrBrkVelFac = 1.2; 
+    %simplifyPath umgehen
+    constSkipSimplifyPath = false;
+    %Mine proximity radius
+    constMineProxRadius = spiel.mine_radius + spiel.spaceball_radius + 1.5*constNavSecurity;
+    
+    %TANKEN
+    %Zeitdifferenz die der Gegner schneller bei der Tanke sein darf,
+    %wir es aber dennoch versuchen
     constCompetitionModeThreshold = 0.1;
+    
+    %ATTACK
+    % Gegnerinterpolationsmethode 
+    % 0: s= v*t+ 0.5*a*t^2
+    % 1: s= v*t
+    constEnemyInterpMode = 0; 
+    %wenn true, dann wird immer interpoliert (ignoriert Konstante eins weiter unten)
+    constEnemyAlwaysInterpolate = true;
+    %Ab welcher Nähe (Zeitlich bis Treffer) interpoliert werden darf
+    constEnemyInterpolationDistance = 1; 
+    %bildet den Mittelwert aus den letzten x Beschleunigungswerten des
+    %Gegners - smoothed die Interpolations
+    constAccInterpolationSmoothing = 10;
+    %TRUE: Beschleunigungsberechnung wird überbrückt,
+    %sinnvoll für präzise Manöver ohne Waypoints
+    %ACHTUNG: jegliche Kollisionssicherung wird umgangen
+    overrideBesCalculation = false;
+    %Maximale Anzahl an Minen, bei der auf lockOnAttack geschaltet werden
+    %kann wenn der Weg frei ist
+    %constMaxLockonMineCount = 12;
+    
+    %DEBUG MODE
+    %true: ermöglicht ausgabe von Text und Zeichnen von gizmos
+    constDebugMode = true;
+    
     
     %statische Variablen definieren
     persistent nodeGrid;
@@ -20,6 +64,8 @@ function bes = beschleunigung(spiel, farbe)
     persistent ignoreTanke; %number of tanke to be ignored by targetNextTanke
     persistent tankeCompetition;
     persistent waitForEnemy; %benötigt, um auf den Gegner warten zu können
+    persistent tanke;
+
     
     %%Farbe prüfen und zuweisen
     if strcmp (farbe, 'rot')
@@ -30,9 +76,80 @@ function bes = beschleunigung(spiel, farbe)
         enemy = spiel.rot;
     end
     
+    
     %wird einmal am Anfang ausgeführt
-    %setup node grid and empty persistent vars
     if spiel.i_t==1
+        initSpaceball();
+    end
+    
+    %zum debuggen (einfach nen Breakpoint bei "return" setzen)
+    %if spiel.i_t==60
+    %    return;
+    %end
+    
+%% Veränderungen des Spielfeldes bemerken und dementsprechend handeln
+    gameChangeHandler()
+
+    
+%% Entscheidungen fällen und Beschleunigung berechnen
+    %Entscheidung über Angriff/Verteidigung/Tanken
+    whatToDo();
+    
+    %Beschleunigung berechnen:
+    calculateBES();
+    
+%% Was soll der Spaceball tun?
+    %Tanken oder Angreifen oder Verteidigen?
+    function whatToDo()
+        persistent dispWhatToDo;
+        if (spiel.i_t==1)
+            dispWhatToDo = -1;
+        end
+        
+        thit = calculateSmoothHitTime(true);
+        
+        if StartNumberOfTank*0.5 < me.getankt || (thit <= 0.5 && me.getankt>enemy.getankt && ~corridorColliding(me.pos, enemy.pos, constNavSecurity))
+            if (dispWhatToDo ~= 1)
+                dispWhatToDo = 1;
+                debugDisp('whatToDo: Angriff');
+            end
+            
+
+            %Wenn wir mehr als die Hälfte der Tanken haben oder nahe des Gegners sind und mehr getankt haben - Angriff!
+            attackEnemy();
+        elseif enemy.getankt > StartNumberOfTank*0.5 || (thit <= 0.5 && me.getankt<enemy.getankt && ~corridorColliding(me.pos, enemy.pos, constNavSecurity))
+            if (dispWhatToDo ~= 2)
+                %vorher: tanken
+                if (dispWhatToDo == 3)
+                    safeDeleteWaypoints();
+                    debugDRAW();
+                end
+                
+                dispWhatToDo = 2;
+                debugDisp('whatToDo: Verteidigung');
+            end
+            
+            %%Erst wenn alle Tanken weg sind und wir weniger haben, als der Gegner - Fliehen!
+            fleeEnemy();
+        else
+            if (dispWhatToDo ~= 3)
+                dispWhatToDo = 3;
+                debugDisp('whatToDo: Tanke');
+            end
+            
+            %wenn Wegpunktliste leer => Pfad zur besten Tankstelle setzen
+            createPathToNextTanke()
+            
+            %Erreicht der Gegner die anvisierte Tankstelle vor uns? dann löschen
+            checkTankPath()
+            
+            %followTankList();
+        end
+    end
+
+    %wird einmal am Start aufgerufen
+    %initialisiert wichtige Variablen
+    function initSpaceball()
         nodeGrid = [];
         drawHandles = [];
         waypointList = [];
@@ -43,75 +160,214 @@ function bes = beschleunigung(spiel, farbe)
         tankeCompetition = false;
         waitForEnemy = false;
         setupNodeGrid();
-    end
-    
-    %if enemy.getankt == 4
-    %    constCompetitionModeThreshold = 0.2;
-    %else
-    %    constCompetitionModeThreshold = 0.1;
-    %end
-    
-%% Veränderungen des Spielfeldes bemerken und dementsprechend handeln
-    %Nodegrid beim Verschwinden einer Mine aktualisieren:
-    if numel(spiel.mine) < numel(ArrayOfMines)
-        disp('Updating NodeGrid');
-        NumberOfMine = customSetdiff(spiel.mine, ArrayOfMines);
-        updateNodeGrid(NumberOfMine.pos, spiel.mine_radius);
-        waypointList = simplifyPath(waypointList);
-        ArrayOfMines = spiel.mine;
-    end
-    
-    %beim Verschwinden einer Tanke:
-    if (NumberOfTank ~= spiel.n_tanke)
-        NumberOfTank = spiel.n_tanke;
-        tankeCompetition = false;
-        ignoreTanke = 0;
+        %createTankList();
     end
 
-    
-    
-%% Entscheidungen fällen und Beschleunigung berechnen
-    %Entscheidung über Angriff/Verteidigung/Tanken
-    whatToDo();
-    
-    %Beschleunigung berechnen:
-    bes=calculateBES();
+    %registriert Änderungen im Spielfeld und Handelt entsprechend
+    function gameChangeHandler()
+        %Nodegrid beim Verschwinden einer Mine aktualisieren:
+        if numel(spiel.mine) < numel(ArrayOfMines)
+            debugDisp('beschleunigung: Updating NodeGrid');
+            NumberOfMine = customSetdiff(spiel.mine, ArrayOfMines);
+            updateNodeGrid(NumberOfMine.pos, spiel.mine_radius);
+            resimplifyWaypoints();
+            ArrayOfMines = spiel.mine;
+        end
 
-    
-    
-%% Was soll der Spaceball tun?
-    %Tanken oder Angreifen oder Verteidigen?
-    function whatToDo()
-        if StartNumberOfTank*0.5 < me.getankt || (norm(me.pos-enemy.pos)<0.2 && me.getankt>enemy.getankt)
-            
-            %Wenn wir mehr als die Hälfte der Tanken haben oder nahe des Gegners sind und mehr getankt haben - Angriff!
-            attackEnemy();
-        elseif enemy.getankt > StartNumberOfTank*0.5 || (norm(me.pos-enemy.pos)<0.2 && me.getankt<enemy.getankt)
-            
-            %%Erst wenn alle Tanken weg sind und wir weniger haben, als der Gegner - Fliehen!
-            fleeEnemy();
-        else
-            %Erreicht der Gegner die anvisierte Tankstelle vor uns? dann löschen
-            checkTankPath()
-            %wenn Wegpunktliste leer => Pfad zur besten Tankstelle setzen
-            createPathToNextTanke()
+        %beim Verschwinden einer Tanke:
+        if (NumberOfTank ~= spiel.n_tanke)
+            if (tankeCompetition)
+                safeDeleteWaypoints();
+                tankeCompetition = false;
+            end
+
+            NumberOfTank = spiel.n_tanke;
+            ignoreTanke = 0;
+            %createTankList();
         end
     end
-    
 
 
 %% Beschleunigung berechnen
-    function erg=calculateBES()
+    function calculateBES(disableMineMode)
+        persistent besCalculationMode; %0: classic - 1: circle mode
+        persistent besMineID;
+        
+        if (overrideBesCalculation)
+            return;
+        end
+        if (isempty(besCalculationMode))
+            besCalculationMode = 0;
+            besMineID = 0;
+        end
+        if (nargin > 0 || ((spiel.n_mine <= 0 || spiel.n_mine < besMineID) && besCalculationMode == 1))
+            besCalculationMode = 0;
+            besMineID = 0;
+            debugDisp('calculateBES: Mine Mode disabled!');
+            
+            if (nargin > 0)
+                return;
+            end
+        end
+        
+        
         %Ist kein Wegpunkt vorhanden, schnellstmöglich auf 0 abbremsen und stehen bleiben
         if (numel(waypointList) <= 0)
-            erg = -me.ges;
+            bes = -me.ges;
             return;
         end
         
+        %check if me and next waypoint is close to mine
+        if (spiel.n_mine > 0 && besCalculationMode == 0)
+            checkMineID = getNearestMineId(me.pos);
+            mineID = getNearestMineId(waypointList{1});
+            toMine1 = norm(spiel.mine(mineID).pos - me.pos);
+            toMine2 = norm(spiel.mine(mineID).pos - waypointList{1});
+            
+            if (toMine1 < constMineProxRadius && toMine2 < constMineProxRadius && checkMineID == mineID)
+                besCalculationMode = 1;
+                besMineID = mineID;
+                debugDisp('calculateBES: Mine Mode activated!');
+            end
+        elseif (spiel.n_mine > 0 && besCalculationMode == 1)
+            toMine = norm(spiel.mine(besMineID).pos - me.pos);
+            if (toMine > constMineProxRadius*1.1)
+                besCalculationMode = 0;
+                besMineID = 0;
+                debugDisp('calculateBES: Mine Mode disabled!');
+            end
+        end
+        
+        if (besCalculationMode == 1)
+            calcMineBes();
+        else
+            calcLineBes();
+            debugDrawCircle([0,0], -1);
+        end
+    end
+
+    %calculate bes around mines
+    function calcMineBes()
+        minimumMineDist = spiel.mine_radius+spiel.spaceball_radius+constSafeBorder*2;
+        secureSpaceballRadius = spiel.spaceball_radius + constSafeBorder;
+        
+        %Distanzen und Richtungen
+        mineID = getNearestMineId(me.pos);
+        minePos = spiel.mine(mineID).pos;
+        toMine = minePos - me.pos;
+        
+        %Vektor in Richtung der Kreistangente
+        toGes = vecNorm(getPerpend(toMine));
+        if (dot(toGes, waypointList{1}-me.pos) < 0)
+            toGes = -toGes;
+        end
+        %Vektor im Rechten Winkel zur Gschwindigkeit, der zur Mine zeigt.
+        gesToMine = vecNorm(getPerpend(me.ges));
+        gesToMine = gesToMine*distanceLinePoint(me.pos-vecNorm(me.ges), me.pos+vecNorm(me.ges), minePos);
+        if (dot(gesToMine, toMine) < 0)
+            gesToMine = -gesToMine;
+        end
+        
+        %startwert = mein Abstand zur Mine
+        mineDriveRadius = norm(toMine);
+        
+        %Suche nach kleinstem Radius in Wegpunkten und mache ihn zum 
+        %Orbitradius
+        for i=1:numel(waypointList)
+            if (i > 5)
+                break;
+            end
+            
+            dist = norm(minePos-waypointList{i});
+            if (dist > constMineProxRadius)
+                break;
+            end
+            if (dist < mineDriveRadius)
+                mineDriveRadius = dist;
+            end
+        end
+        
+        %Radius darf nicht zu klein werden sonst kommt es zur kollision
+        mineDriveRadius = clamp(mineDriveRadius, minimumMineDist, inf);
+        
+        %ragt Radius über das spielfeld hinaus?
+        if (minePos(1) + mineDriveRadius > 1-secureSpaceballRadius)
+            mineDriveRadius = (1-minePos(1)+spiel.mine_radius)/2;
+        end
+        if (minePos(2) + mineDriveRadius > 1-secureSpaceballRadius)
+            mineDriveRadius = (1-minePos(2)+spiel.mine_radius)/2;
+        end
+        if (minePos(1) - mineDriveRadius < secureSpaceballRadius)
+            mineDriveRadius = (minePos(1)+spiel.mine_radius)/2;
+        end
+        if (minePos(2) - mineDriveRadius < secureSpaceballRadius)
+            mineDriveRadius = (minePos(2)+spiel.mine_radius)/2;
+        end
+        
+        %maximal radial velocity
+        maxVelSq = spiel.bes*mineDriveRadius;
+
+        %velocity correction Geschwindigkeitsvektor muss den Kreis
+        %Tangieren
+        corr = norm(gesToMine)-mineDriveRadius;
+        if (dot(me.ges, toMine) < 0)
+            if (norm(toMine) < mineDriveRadius)
+                corr = -corr;
+            else
+                corr = 1;
+            end
+        end
+        if (norm(toMine) < minimumMineDist)
+            corr = -1;
+        end
+        
+        %berechne Zentripetalbeschleunigung und addiere darin die
+        %Korrektur
+        zentp = clamp(norm(me.ges)^2/mineDriveRadius + 20*corr, -spiel.bes, spiel.bes);
+        forward = sqrt(spiel.bes^2-zentp^2);
+        bes = zentp * vecNorm(toMine) + forward*toGes;
+        
+        %no velocity
+        if (norm(me.ges) < 0.003)
+            bes = toGes;
+        end
+        
+        %emergencybreaking
+        if (norm(me.ges)^2 > maxVelSq)% || emergencyBreaking())
+           bes = -me.ges;
+        end
+        
+        %debug drawing
+        debugDrawCircle(minePos, mineDriveRadius);
+        
+        %exit circle mode
+        %Springe aus diesem Beschleunigungsmodus, wenn der nächste Wegpunkt
+        %außerhalb des Orbitradiusses liegt und unser Beschleunigungsvektor
+        %auf den nächsten Wegpunkt zeigt
+        towp = vecNorm(waypointList{1}-me.pos);
+        wpdist = norm(waypointList{1} - minePos);
+        if (wpdist > constMineProxRadius)
+            vel1 = vecNorm(me.ges);
+            vel2 = vecNorm(vecNorm(me.ges)+vecNorm(toMine)/1000);
+            
+            if (dot(vel1, towp) > dot(vel2, towp))
+                calculateBES(true);
+            end
+        end
+        
+        %Wegpunkte einsammeln
+        if norm(me.pos-waypointList{1}) < constNavSecurity*1.5
+            waypointList(1) = [];
+            debugDRAW();
+        end
+    end
+
+    %calculate line acceleration
+    function calcLineBes()
         %acceleration
         dir = vecNorm(waypointList{1}-me.pos);
         corr = dir-vecNorm(me.ges);
-        erg = dir + corr*5;
+        bes = dir + corr*5;
         
         %calculate safe breaking endvelocity
         breakingEndVel = calcBreakingEndVel();
@@ -120,30 +376,60 @@ function bes = beschleunigung(spiel, farbe)
         distanceToWaypoint=norm(waypointList{1}-me.pos);
         breakDistance = calcBreakDistance(norm(me.ges), breakingEndVel);
         if (breakDistance > distanceToWaypoint || checkIfTooFast())
-            erg=-dir + corr*5;
+            bes=-dir + corr*5;
         end
         
         %emergencyBreaking
         if (emergencyBreaking())
-            erg = -me.ges;
+            bes = -me.ges;
         end
         
+        
+        wpReachedDist = calcWaypointReachedRadius(breakingEndVel);
+        
         %%Überprüfen, ob Wegpunkt erreicht wurde, dann 1. Punkt löschen
-        if norm(me.pos-waypointList{1}) < constWayPointReachedRadius
+        if norm(me.pos-waypointList{1}) < wpReachedDist
             waypointList(1) = [];
             debugDRAW();
             
-        elseif (corridorColliding(me.pos, waypointList{1}, spiel.spaceball_radius))
+        else
             %%überprüfe, ob 1. Wegpunkt erreichbar ist - wenn nicht, lösche und
             %%berechne neu
-            waypointList = [];
+            
+            %Sonderfall, Spaceball selbst viel zu nah an mine:
+            if (spiel.n_mine > 0 && norm(me.ges) < 0.001)
+                toMineVec = spiel.mine(getNearestMineId(me.pos)).pos - me.pos;
+                closeMineDist = norm(toMineVec);
+                if (closeMineDist < spiel.spaceball_radius + spiel.mine_radius + constSafeBorder*2)
+                    firstWp = me.pos - vecNorm(toMineVec)*constNavSecurity*1.2;
+                    waypointList = appendToArray({firstWp}, waypointList);
+                    debugDRAW();
+                    bes = -toMineVec;
+                    return;
+                end
+            elseif (corridorColliding(me.pos, waypointList{1}, spiel.spaceball_radius))
+                %sonst
+                waypointList = appendToArray(findPath(me.pos, waypointList{1}), waypointList(2:end));
+                debugDRAW();
+                debugDisp('calculateBES: Stuck... recalculating');
+            end
+            
+            %sonderfall - sehr dicht an der Bande
+            if (norm(me.ges) < 0.001)
+               spaceballRadius = spiel.spaceball_radius + constSafeBorder;
+               if (me.pos(1) > 1-spaceballRadius || me.pos(1) < spaceballRadius  || ...
+                       me.pos(2) > 1-spaceballRadius || me.pos(2) < spaceballRadius)
+                   %beschleunigung zur Mitte
+                   bes = ([0.5, 0.5] - me.pos);
+               end
+            end
         end
     end
 
     %check if overshooting next waypoint
     function erg = checkIfTooFast()
         erg = false;
-        
+
         %nothing to do
         if (numel(waypointList) <= 0)
             return;
@@ -162,9 +448,10 @@ function bes = beschleunigung(spiel, farbe)
         %distace of overshooting
         correctDist = norm(turnPos - waypointList{1});
         
-        accCorrection = 0.5*spiel.bes * turnTime^2 * 0.9;
+        accCorrection = 0.5*spiel.bes * turnTime^2;
         if (accCorrection < correctDist && norm(towp) > constWayPointReachedRadius*2 && velocity >= 0.01)
             erg = true;
+            %debugDisp('TooFast: breaking!');
             return;
         end
         
@@ -175,40 +462,46 @@ function bes = beschleunigung(spiel, farbe)
         
 %         enemyPath = me.pos-enemy.pos;
               
-          if  (norm(me.pos-enemy.pos)) < (((norm(enemy.ges))^2)/(norm(enemy.bes)*2)+0.03);
+        if  (norm(me.pos-enemy.pos) < ((norm(enemy.ges))^2)/(norm(enemy.bes)*2)+0.03)
             erg = true;
-            
-          else 
-              erg = false 
-        
+        else 
+            erg = false;
         end
     end
 
-
     %emergency breaking
-    function erg = emergencyBreaking()
+    function erg = emergencyBreaking(customv, customa)
         erg = false;
         
-        velocity = norm(me.ges);
+        %custom settings
+        if nargin < 1
+            customv = me.ges;
+        end
+        if nargin < 2
+            customa = bes;
+        end
+        
+        velocity = norm(customv);
         
         %%check if about to collide
-        safeSpaceballRadius = (spiel.spaceball_radius + constSafeBorder/2);
+        safeSpaceballRadius = (spiel.spaceball_radius + constSafeBorder);
 
         %new emergency breaking - is it better?
         breakTime = velocity / spiel.bes;
         %only get the direction changing acceleration (90° from v)
-        gesPerpend = vecNorm(getPerpend(me.ges)); %vector 90° from v
-        besPerpend = gesPerpend*projectVectorNorm(me.bes, gesPerpend);
-        checkPoint1 = me.pos + 0.5*me.ges*breakTime*constEmrBrkVelFac + 0.5*besPerpend*constEmrBrkAccFac*breakTime^2;
-        checkPoint2 = me.pos + 0.5*me.ges*breakTime*constEmrBrkVelFac; %without acceleration
+        gesPerpend = vecNorm(getPerpend(customv)); %vector 90° from v
+        besPerpend = gesPerpend*projectVectorNorm(customa, gesPerpend);
+        checkPoint1 = me.pos + 0.5*customv*breakTime*constEmrBrkVelFac + 0.5*besPerpend*constEmrBrkAccFac*breakTime^2;
+        checkPoint2 = me.pos + 0.5*customv*breakTime*constEmrBrkVelFac; %without acceleration
         
         %check if breaking corridors are free
         %check endpoints are free (includes barriers)
-        if (velocity >= 0.01 && (~isWalkable(checkPoint1, safeSpaceballRadius) || ... 
+        if ((~isWalkable(checkPoint1, safeSpaceballRadius) || ... 
                 ~isWalkable(checkPoint2, safeSpaceballRadius) || ...
             corridorColliding(me.pos, checkPoint1, safeSpaceballRadius) || ...
             corridorColliding(me.pos, checkPoint2, safeSpaceballRadius)))
 
+            %debugDisp('Emergency Breaking: breaking!');
             erg = true;
             return
         end
@@ -252,6 +545,21 @@ function bes = beschleunigung(spiel, farbe)
     function erg = calcBreakDistance(vel, endvel)
         erg = ((vel)^2 - (endvel)^2)/(2*spiel.bes);
     end
+
+    function erg = calcWaypointReachedRadius(endvel)
+        erg = constWayPointReachedRadius; %0.01
+        if (numel(waypointList) < 2)
+            return;
+        end
+        
+        %direction to next wp
+        dir1 = vecNorm(waypointList{1} - me.pos);
+        dir2 = vecNorm(waypointList{2} - waypointList{1});
+        
+        %get time to align waypoints
+        time = getTimeToAlignVelocity(endvel*dir1, dir2);
+        erg = clamp(time/2 * norm(me.ges), constWayPointReachedRadius, 0.1);
+    end
      
 
 
@@ -278,7 +586,7 @@ function bes = beschleunigung(spiel, farbe)
                 %Je dichter an Mine, desto teurer!
                 for i=1:spiel.n_mine
                     if (norm(nodeGrid(x,y).worldPos-spiel.mine(i).pos)-spiel.mine_radius < 0.1)
-                        mineCost = mineCost + constMineProxPenality/(norm(nodeGrid(x,y).worldPos-spiel.mine(i).pos)-spiel.mine_radius);
+                        mineCost = mineCost + constMineProxPenality/(norm(nodeGrid(x,y).worldPos-spiel.mine(i).pos)-spiel.mine_radius)^2;
                     end
                 end
                 
@@ -369,7 +677,7 @@ function bes = beschleunigung(spiel, farbe)
         
         %debug purposes
         if (equalsVec(startPos, endPos))
-            disp('Pathfinder: stard equals end, return zero waypoints');
+            debugDisp('findPath: stard equals end, return zero waypoints');
         end
         
         openSet = {};
@@ -383,7 +691,7 @@ function bes = beschleunigung(spiel, farbe)
         %if start and end node is invalid - abort
         if (~startNode.isWalkable || ~endNode.isWalkable)
             waypoints = [];
-            disp('findPath: invalid start or end position');
+            debugDisp('findPath: invalid start or end position');
             return;
         end
         
@@ -489,7 +797,7 @@ function bes = beschleunigung(spiel, farbe)
            if (value(i) > max)
                value(i) = max;
            end
-           if (value(i) < min)
+           if (value(i) < min || isnan(value(i)))
                value(i) = min;
            end
        end
@@ -544,6 +852,11 @@ function bes = beschleunigung(spiel, farbe)
 %% Den Pfad vereinfachen
     % simplify path
     function erg = simplifyPath(path)
+        if (constSkipSimplifyPath)
+            erg = path;
+            return;
+        end
+        
         checkIndex = 1;
         pathLength = numel(path);
         
@@ -556,8 +869,8 @@ function bes = beschleunigung(spiel, farbe)
         ergInsertIndex = 1;
         
         %add first waypoint
-        erg{ergInsertIndex} = path{1};
-        ergInsertIndex = ergInsertIndex+1;
+        %erg{ergInsertIndex} = path{1};
+        %ergInsertIndex = ergInsertIndex+1;
         
         while(checkIndex < pathLength)
             isCollided = false;
@@ -583,6 +896,12 @@ function bes = beschleunigung(spiel, farbe)
         erg{ergInsertIndex} = path{pathLength};
     end
 
+
+    %bestehende Waypoints erneut vereinfachen
+    function resimplifyWaypoints()
+        waypointList = appendToArray({me.pos}, waypointList);
+        waypointList = simplifyPath(waypointList);
+    end
 
 
 %% Heap-System
@@ -810,18 +1129,24 @@ function bes = beschleunigung(spiel, farbe)
     end
 
     function erg = getTimeToAlignVelocity(vel1, vec)
-        length = norm(vel1);
-        vec = vecNorm(vec) * length;
+        dotp = dot(vecNorm(vel1), vecNorm(vec));
+        angle = acos(dotp);
+        if dotp < 0
+            angle = angle + pi/2;
+        end
         
-        deltaV = vec - vel1;
-        erg = norm(deltaV)/spiel.bes;
+        deltaV = angle*norm(vel1);
+        erg = deltaV/spiel.bes;
     end
 
     function erg = getMaxVelocityToAlignInTime(vec1, vec2, time)
-        vec1 = vecNorm(vec1);
-        vec2 = vecNorm(vec2);
-        deltaVec = vec2-vec1;
-        erg = time*spiel.bes/norm(deltaVec);
+        dotp = dot(vecNorm(vec1), vecNorm(vec2));
+        angle = acos(dotp);
+        if dotp < 0
+            angle = angle + pi/2;
+        end
+        
+        erg = time*spiel.bes/angle;
     end
 
     function endPosition = safeDeleteWaypoints()
@@ -833,7 +1158,7 @@ function bes = beschleunigung(spiel, farbe)
         
         %break distance and direction to next waypoint
         breakDistance = calcBreakDistance(norm(me.ges), 0)*0.8;
-        dir = vecNorm(waypointList{1}-me.pos);
+        dir = vecNorm(me.ges);
         
         %end position = full break distance
         endPosition = me.pos + dir*breakDistance;
@@ -842,7 +1167,19 @@ function bes = beschleunigung(spiel, farbe)
         waypointList{1} = endPosition;
     end
     
-
+    function erg = getNearestMineId(pos)
+        if (spiel.n_mine <= 0)
+            erg = 0;
+            return;
+        end
+        
+        erg = 1;
+        for i=1:spiel.n_mine
+            if (norm(spiel.mine(i).pos-pos) < norm(spiel.mine(erg).pos - pos))
+                erg = i;
+            end
+        end
+    end
 
 %% Tankenfindungs-System
     %Search for nearest Tanken and create Path between them
@@ -871,7 +1208,7 @@ function bes = beschleunigung(spiel, farbe)
                 return;
             end
             
-            disp('finding Path to next Tanke');
+            debugDisp('createPathToNextTanke: finding Path to next Tanke');
             
             next_tanke = tankdistance(1,1);
             waypointList = appendToArray(waypointList, findPath(lastWaypoint, spiel.tanke(next_tanke).pos));
@@ -894,8 +1231,9 @@ function bes = beschleunigung(spiel, farbe)
                 end
             end
             
+            
             %avoid setting tanke as new wp before collecting it
-            if (norm(me.pos - spiel.tanke(i).pos) < 2*constWayPointReachedRadius)
+            if (norm(me.pos - spiel.tanke(i).pos) < 3*constWayPointReachedRadius)
                 ignoreThisTanke = true;
             end
             
@@ -953,11 +1291,6 @@ function bes = beschleunigung(spiel, farbe)
 
     %Check if target tanke is still there
     function checkTankPath()
-        %avoid loop when ignoreTanke checked
-        if ignoreTanke
-            return;
-        end
-        
         %get Tanken on Waypoints
         tankenList = getHeadedTanken();
         
@@ -978,12 +1311,34 @@ function bes = beschleunigung(spiel, farbe)
             %check mine between enemy and tanke
             enemyColliding = corridorColliding(enemy.pos, spiel.tanke(tankeIndex).pos, spiel.spaceball_radius);
             ownColliding = corridorColliding(me.pos, spiel.tanke(tankeIndex).pos, constNavSecurity);
+  
+            %less then zero time - never arrive
+            if (tenemy < 0)
+                tenemy = inf;
+            end
+            if (town < 0)
+                town = inf;
+            end
+            
+            %check if ignoreTanke is still valid
+            if ignoreTanke
+                if tankeIndex == ignoreTanke
+                    if ~(tenemy < 0.25 && ~enemyColliding  && (tvenemy < 0.5 || norm(enemyPath) < 0.03))
+                        %uncheck ignoreTanke if above is false
+                        ignoreTanke = 0;
+                        debugDisp('checkTankPath: disabled ignoretanke');
+                    end
+                end
+                continue;
+            end %if
+            
+            
             
             %only if tanke is about to get taken
-            if (tenemy > 0 && tenemy < 0.25 && ~enemyColliding)
+            if (tenemy < 0.3 && ~enemyColliding)
                 if (i==1 && norm(tenemy- town) < constCompetitionModeThreshold && ~tankeCompetition && ~ownColliding ...
                         && tvown < 0.5)
-                    disp('competition mode activated');
+                    debugDisp('checkTankPath: competition mode activated');
                     tankeCompetition = true;
                     
                     %competition mode activated
@@ -995,13 +1350,71 @@ function bes = beschleunigung(spiel, farbe)
                     debugDRAW();
                     return;
                     
-                elseif (tenemy+tvenemy < town+tvown && ~tankeCompetition)
-                    disp('enemy reaches tanke before us .. get new target tanke');
+                elseif (tenemy+tvenemy < town+tvown && ~tankeCompetition && (tvenemy < 0.5 || norm(enemyPath) < 0.03))
+                    debugDisp('checkTankPath: enemy reaches tanke before us .. get new target tanke');
                     ignoreTanke = tankeIndex;
                     safeDeleteWaypoints();
                     return;
                 end
             end
+          
+            %Notbremse bei zu spätem Erreichen einer Tanke
+            if (tankeCompetition && i==1 && tenemy < town)
+                vel = norm(me.ges);
+                acc = spiel.bes;
+                dist = norm(ownPath);
+                
+                tacc = (sqrt(vel^2+2*acc*dist)-vel)/acc; %t beim beschleunigen
+                tbrk = (-sqrt(vel^2-2*acc*dist)+vel)/acc; %t beim bremsen
+                deltat = tbrk-tacc; %differenz
+                
+                %distanz die Gegner in deltat zurück legen kann
+                Distance = deltat*norm(enemy.ges);
+                
+                if (Distance <= spiel.spaceball_radius * 2)
+                    debugDisp('checkTankPath: Notbremse, Tanke wird nicht vor Gegner erreicht');
+                    safeDeleteWaypoints();
+                    if isWalkable(waypointList{1} - 0.3 * enemy.ges, spiel.spaceball_radius)
+                        waypointList{1} = waypointList{1} - 0.3 * enemy.ges;
+                    end
+                    ignoreTanke = tankeIndex;
+                    tankeCompetition = false;
+                end
+            end
+        end
+    end
+
+
+
+%% NEUE Tankenfindung
+
+    function createTankList()
+        tanke = [];
+        for i=1:numel(spiel.tanke)
+            tanke(i).pos = spiel.tanke(i).pos; %For Debugging
+            tanke(i).num = i;
+            tanke(i).dist = norm(spiel.tanke(i).pos-me.pos);
+            tanke(i).mineInWay = corridorColliding(me.pos, spiel.tanke(i).pos, constNavSecurity);
+            
+            for j=1:numel(spiel.tanke)
+                if j == i
+                    continue;
+                else
+                    tanke2(j).dist = norm(spiel.tanke(j).pos-spiel.tanke(i).pos);
+                    tanke2(j).num = j;
+                    [minValue,index] = min([tanke2.dist]);
+                    tanke(i).dist = tanke(i).dist + minValue;
+                    tanke(i).secNum = index;
+                end
+            end
+        end
+    end
+
+    function followTankList()
+        if numel(waypointList) == 0
+            wayPointList = [];
+            [minValue,index] = min([tanke.dist]);
+            waypointList = findPath(me.pos, spiel.tanke(index).pos);
         end
     end
 
@@ -1010,10 +1423,70 @@ function bes = beschleunigung(spiel, farbe)
 %% Angriff
     %Angriff
     function attackEnemy()
+        %lockon attack ist nur sicher, wenn sich zwischen Gegner und Mir
+        %keine Mine befindet
+        
+        %bitte stehen lassen! ich weiß noch nicht ob die untere einfache
+        %Methode, sicher ist!
+%         useLockonAttack = false;
+%         if (spiel.n_mine < constMaxLockonMineCount)
+%             useLockonAttack = true;
+%             if (spiel.n_mine > 0)
+%                 % 0 - constMaxLockonMineCount mines, calculate
+%                 dangerRadius = spiel.spaceball_radius + spiel.mine_radius + constSafeBorder;
+%                 
+%                 dirToEnemy = vecNorm(enemy.pos-me.pos);
+%                 dirToAxis = [dirToEnemy(1)/norm(dirToEnemy(1)), 0]; % [-1, 0 ] or [1, 0] in enemy direction
+%                 angle = acos(dot(dirToEnemy, dirToAxis));
+% 
+%                 %negative angle if rotated clockwise
+%                 if (dirToAxis(1) < 0)
+%                     if (dirToEnemy(2) < 0)
+%                         angle = -angle;
+%                     end
+%                 else
+%                      if (dirToEnemy(2) > 0)
+%                         angle = -angle;
+%                      end
+%                 end
+% 
+%                 %calculate rotation matrices
+%                 rotMat1 = [cos(angle), -sin(angle); sin(angle), cos(angle)]; %rotate to enemy direction
+%                 ownPos = (rotMat1*me.pos')';
+%                 
+%                 %check every mine
+%                 for i=1:spiel.n_mine
+%                     minePos = (rotMat1*spiel.mine(i).pos')';
+%                     % größer null - gefahr!
+%                     %kleiner null - mine hinter mir!
+%                     checkPos = (minePos(1)-ownPos(1))*dirToAxis(1) + dangerRadius;  
+%                     if (checkPos > 0)
+%                         useLockonAttack = false;
+%                         break;
+%                     end
+%                 end
+%             end
+%         end
+
+        useLockonAttack = false;
+        if (~corridorColliding(me.pos, enemy.pos, spiel.mine_radius*3))
+            useLockonAttack = true;
+        end
+        
+        %select attack mode
+        if (~useLockonAttack)
+            directAttack();
+        else
+            lockonAttack();
+        end
+    end
+
+    
+    function directAttack()
         
         %check if path to enemy is free
-        enemypos = calcEnemyHitPosition();
-        if (~corridorColliding(me.pos, enemy.pos, constNavSecurity))
+        enemypos = calcEnemyHitPosition(constEnemyInterpMode, constEnemyAlwaysInterpolate);
+        if (~corridorColliding(me.pos, enemypos, constNavSecurity) || norm(me.pos-enemypos) < constWayPointReachedRadius+2*constGridRadius)
             %delete all other waypoints
             if (numel(waypointList) > 1)
                 safeDeleteWaypoints();
@@ -1028,18 +1501,22 @@ function bes = beschleunigung(spiel, farbe)
             waypointList{endIndex} = getAccPos(enemypos);
             debugDRAW();
         else
-            %calculate indirect path to enemy
+            pathResolution = clamp(norm(enemypos-me.pos)/2, 0.1, 0.5);
+            
+            %Prüfe, ob Pfad neu berechnet werden soll (Gegner liegt
+            %außerhalb von pathResolution vom letzten Wegpunkt)
             recalcPath = false;
             if numel(waypointList) >= 1
-                if norm(enemypos-waypointList{numel(waypointList)})>0.15
+                if norm(enemypos-waypointList{numel(waypointList)}) > pathResolution
                     recalcPath = true;
                 end
             else
                 recalcPath = true;
             end
             
+            %calculate indirect path to enemy
             if recalcPath
-                disp('finding Path to Enemy');
+                debugDisp('directAttack: finding Path to Enemy');
                 startPos = safeDeleteWaypoints();
                 waypointList = appendToArray(waypointList, findPath(startPos,enemypos));
 
@@ -1048,18 +1525,151 @@ function bes = beschleunigung(spiel, farbe)
         end
     end
 
-    function erg = calcEnemyHitPosition()
-        vel = norm(me.ges-enemy.ges);
-        acc = norm(me.bes-enemy.bes);
-        dist = norm(me.pos-enemy.pos);
+
+    function lockonAttack()
+        persistent lockAnnouncement;
+        persistent transformationAngle;
+        if (isempty(lockAnnouncement))
+            lockAnnouncement = 0;
+        end
         
-        thit = (sqrt(vel^2+2*acc*dist)-vel)/acc;
+        %delete waypointlist
+        if (numel(waypointList) > 1)
+            waypointList = {};
+            debugDRAW();
+        end
+        
+        %rotate coordinates
+        dirToEnemy = vecNorm(enemy.pos-me.pos);
+        dirToAxis = [dirToEnemy(1)/norm(dirToEnemy(1)), 0]; % [-1, 0 ] or [1, 0] in enemy direction
+        angle = acos(dot(dirToEnemy, dirToAxis));
+        
+        %negative angle if rotated clockwise
+        if (dirToAxis(1) < 0)
+            if (dirToEnemy(2) < 0)
+                angle = -angle;
+            end
+        else
+             if (dirToEnemy(2) > 0)
+                angle = -angle;
+             end
+        end
+        
+        %keep angle when locked
+        if (lockAnnouncement == 1)
+            angle = transformationAngle;
+        end
+        
+        
+        
+        %calculate rotation matrices
+        rotMat1 = [cos(angle), -sin(angle); sin(angle), cos(angle)]; %rotate to enemy direction
+        rotMat2 = [cos(angle), sin(angle); -sin(angle), cos(angle)]; %rotate back
+        
+        %calculate rotated positions
+        rotMePos = (rotMat1*me.pos')';
+        rotMeGes = (rotMat1*me.ges')';
+        
+        rotEnemyPos = (rotMat1*enemy.pos')';
+        rotEnemyGes = (rotMat1*enemy.ges')';
+        rotEnemyBes = (rotMat1*enemy.bes')';
+
+        
+        %set waypoint pos to enemy
+        toEnemy = vecNorm(rotEnemyPos - rotMePos);
+        
+        %position aligned - finetune position -> lock onto target
+        if (norm(rotMeGes(2)-rotEnemyGes(2)) < 0.001 && norm(rotMePos(2)-rotEnemyPos(2)) < spiel.spaceball_radius)
+            if (lockAnnouncement ~= 1)
+                debugDisp('LockOnAttack: Target Locked!');
+                lockAnnouncement = 1;
+                transformationAngle = angle;
+            end
+        elseif (lockAnnouncement ~= 0)
+            debugDisp('LockOnAttack: WARNING! Lock failed! Realigning...');
+            lockAnnouncement = 0;
+            transformationAngle = 0;
+        end
+
+        %copy enemy acceleration
+        ax2comp = rotEnemyBes(2);
+
+        %y velocity and position correction
+        deltaA = ((rotEnemyGes(2)-rotMeGes(2)) + 0.1*(rotEnemyPos(2)-rotMePos(2)))/spiel.dt;
+        ax2comp = clamp(ax2comp+deltaA, -spiel.bes, spiel.bes);
+
+        %debug
+        %str1 = sprintf('LockOnAttack: deltaV: %d   deltaS: %d', norm(enemy.ges(ax2)-me.ges(ax2)), norm(enemy.pos(ax2)-me.pos(ax2)));
+        %debugDisp(str1);
+
+        %valid x component to enemy
+        ax1comp = sqrt(spiel.bes^2 - ax2comp^2) * toEnemy(1)/norm(toEnemy(1));
+
+        %set to override acceleration calculation and set acceleration
+        %manually
+        overrideBesCalculation = true;
+        bes = (rotMat2*[ax1comp, ax2comp]')';
+        
+         %minimal to enemy velocity
+        if (lockAnnouncement == 0 && norm(toEnemy(1)/rotMeGes(1)) > 10)
+            bes = dirToEnemy;
+        end
+     
+        % emergencybreaking
+        if (lockAnnouncement == 0)
+            if (emergencyBreaking())
+                bes = -me.ges;
+                
+                %stuck at the wall
+                if (norm(me.ges) < 0.001)
+                    bes = dirToEnemy;
+                end
+            end
+        elseif (lockAnnouncement == 1)
+            %Geschwindigkeitskomponente die vom Gegner weg zeigt
+            cvx = vecNorm(toEnemy) * clamp(projectVectorNorm(rotMeGes, -toEnemy), 0, Inf);
+            
+            customv = rotMat2*[cvx(1); rotMeGes(2)];
+            customa = rotMat2*[0; ax2comp];
+            if (emergencyBreaking(customv', customa'))
+                bes = -me.ges;
+            end
+        end
+    end
+
+    function erg = calcEnemyHitPosition(interpolationMode, alwaysInterpolate)
+        % SMOOTH ACCELERATION VALUES
+        persistent lastInterpEnemyPos;
+        
+        if (isempty(lastInterpEnemyPos))
+            lastInterpEnemyPos = [0, 0];
+        end
+        
+        
+        %always interpolate
+        if (nargin <= 2)
+            alwaysInterpolate = false;
+        end
+        if (nargin <= 1)
+            interpolationMode = 0;
+        end
+        
+        %calculate hit time
+        thit = calculateSmoothHitTime(interpolationMode==0);
+        ergs = getSmoothedAccelerationValues();
+        enemyacc = ergs(2);
+        
+        if (interpolationMode == 1)
+            enemyacc = 0;
+        end
         
         %vorher : (thit > 1) neu : (dist > 0.2)
-        if (thit > 1)
+        if (thit > constEnemyInterpolationDistance && ~alwaysInterpolate)
             erg = enemy.pos;
+            lastInterpEnemyPos = erg;
         else
-            erg = enemy.pos + enemy.ges*thit + 0.5*enemy.bes*thit^2;
+            %interpolate
+            erg = enemy.pos + enemy.ges*thit + 0.5*enemyacc*thit^2;
             
             %clamping erg
             safeSpaceballRadius = spiel.spaceball_radius + constSafeBorder;
@@ -1067,7 +1677,9 @@ function bes = beschleunigung(spiel, farbe)
             
             %point is not walkable -> set own point
             if (~isWalkable(erg, spiel.spaceball_radius + constSafeBorder))
-                erg = enemy.pos;
+                erg = lastInterpEnemyPos;
+            else
+                lastInterpEnemyPos = erg;
             end
         end
     end
@@ -1087,6 +1699,67 @@ function bes = beschleunigung(spiel, farbe)
         end
     end
 
+    function [meacc, enemyacc] = getSmoothedAccelerationValues()
+        % SMOOTH ACCELERATION VALUES
+        persistent enemyAccSmooth;
+        persistent meAccSmooth;
+        persistent lastTimeCalculated;
+        
+        %set vars on startup
+        if (isempty(enemyAccSmooth))
+            enemyAccSmooth = [0, 0];
+            meAccSmooth = [0, 0];
+            lastTimeCalculated = -1;
+        end
+        
+        %if values are not created yet, calculate
+        if (lastTimeCalculated ~= spiel.i_t)
+            enemyAccSmooth = enemyAccSmooth*(constAccInterpolationSmoothing-1) + enemy.bes;
+            enemyAccSmooth = enemyAccSmooth/constAccInterpolationSmoothing;
+            meAccSmooth = meAccSmooth*(constAccInterpolationSmoothing-1) + me.bes;
+            meAccSmooth = meAccSmooth/constAccInterpolationSmoothing;
+            lastTimeCalculated = spiel.i_t;
+        end
+        
+        %output values
+        meacc = meAccSmooth;
+        enemyacc = enemyAccSmooth;
+    end
+
+    function time=calculateSmoothHitTime(includeAcceleration)
+        persistent lastTimeCalculated;
+        persistent lastCalculatedValue;
+        
+        %set vars on startup
+        if (isempty(lastTimeCalculated))
+            lastTimeCalculated = -1;
+            lastCalculatedValue = 0;
+        end
+        
+        %cet smoothed acceleration values
+        enemyAccSmooth = 0;
+        meAccSmooth = 0;
+        if (includeAcceleration)
+            [enemyAccSmooth, meAccSmooth] = getSmoothedAccelerationValues();
+        end
+        
+        %calculate time only if necessary
+        if (lastTimeCalculated ~= spiel.i_t)
+            a = norm(enemyAccSmooth-meAccSmooth);
+            v = norm(me.ges - enemy.ges);
+            s = norm(me.pos - enemy.pos);
+
+            if (a > 0.0001)
+                lastCalculatedValue = (sqrt(v^2+2*a*s)-v)/a;
+            else
+                lastCalculatedValue = s/v;
+            end
+            lastTimeCalculated = spiel.i_t;
+        end
+        
+        time = lastCalculatedValue;
+    end
+
 
 
 %% Verteidigung
@@ -1102,7 +1775,7 @@ function bes = beschleunigung(spiel, farbe)
         %define a Matrix that contains all corner positions
         cornerNodes = [0.01,0.99,0;0.99,0.99,0;0.01,0.01,0;0.99,0.01,0];
         if waitForEnemy == false
-            disp('cornerTricking Pt1');
+            debugDisp('cornerTricking: Pt1');
 %             get nearest corner, go there and wait
             if waitForEnemy == false
                 for i=1:4
@@ -1115,21 +1788,21 @@ function bes = beschleunigung(spiel, farbe)
         %waiting for the enemy
         elseif waitForEnemy == true
             %calculate vector between us and enemy
-            enemyPath = me.pos-enemy.pos;
+            %enemyPath = me.pos-enemy.pos;
             %the time, enemy needs to get to our position
-            tenemy  = norm(enemyPath)/projectVectorNorm(enemy.ges, enemyPath);
+            %tenemy  = norm(enemyPath)/projectVectorNorm(enemy.ges, enemyPath);
             %check if there is a mine on the enemy's path towards us
-            enemyColliding = corridorColliding(enemy.pos, me.pos, spiel.spaceball_radius);
+            %enemyColliding = corridorColliding(enemy.pos, me.pos, spiel.spaceball_radius);
 
             
             if checkIfTooFastE () == true %|| tenemy < 0.0001
-                disp('cornerTricking Pt2');
+                debugDisp('cornerTricking: Pt2');
                     %sort all corners based on the direction the enemy is coming from and their distance to us
                     for i=1:4
                         cornerNodes(i,3)=norm(cornerNodes(i,1:2)-me.pos-enemy.ges);
                     end
                 nextCorner = sortrows(cornerNodes, [3 2 1]);
-                %go to the second corner, since the first one is on ourcurrent position
+                %go to the second corner, since the first one is on our current position
                 waypointList = appendToArray(waypointList, findPath(me.pos, nextCorner(2,1:2)));
                 waitForEnemy = false;
             end
@@ -1141,6 +1814,10 @@ function bes = beschleunigung(spiel, farbe)
 %% Debugging
     %Wegpunkte einzeichnen
     function debugDRAW()
+        if (~constDebugMode)
+            return;
+        end
+        
         %delete all draw handles
         for i = 1 : numel(drawHandles)
             if (~isempty(drawHandles(i)))
@@ -1149,8 +1826,45 @@ function bes = beschleunigung(spiel, farbe)
         end
         drawHandles = [];
         
-        for i = 1 : numel(waypointList)
-            drawHandles(i) = rectangle ('Parent', spiel.spielfeld_handle, 'Position', [waypointList{i}-0.0025, 0.005, 0.005], 'Curvature', [1 1], 'FaceColor', spiel.farbe.rot, 'EdgeColor', 'none');
+        %get color
+        dcolor = spiel.farbe.blau;
+        if strcmp (farbe, 'rot')
+            dcolor = spiel.farbe.rot;
         end
+        
+        for i = 1 : numel(waypointList)
+            drawHandles(i) = rectangle ('Parent', spiel.spielfeld_handle, 'Position', [waypointList{i}-0.0025, 0.005, 0.005], 'Curvature', [1 1], 'FaceColor', dcolor, 'EdgeColor', [0, 0, 0]);
+        end
+    end
+
+
+    function debugDrawCircle(pos, rad)
+        persistent mineDraw;
+        
+        if (~constDebugMode)
+            return;
+        end
+        
+        %get color
+        dcolor = spiel.farbe.blau;
+        if strcmp (farbe, 'rot')
+            dcolor = spiel.farbe.rot;
+        end
+        
+        if ~isempty(mineDraw)
+            delete(mineDraw);
+        end
+        
+        if (rad > 0)
+            mineDraw = rectangle ('Parent', spiel.spielfeld_handle, 'Position', [pos-rad, rad*2, rad*2], 'Curvature', [1 1], 'FaceColor', 'none', 'EdgeColor', dcolor);
+        end
+    end
+
+    function debugDisp(str)
+        if (~constDebugMode)
+            return;
+        end
+        
+        disp(str);
     end
 end
