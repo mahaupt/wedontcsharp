@@ -160,7 +160,7 @@ function bes = beschleunigung(spiel, farbe)
         tankeCompetition = false;
         waitForEnemy = false;
         setupNodeGrid();
-        createTankList();
+        %createTankList();
     end
 
     %registriert Änderungen im Spielfeld und Handelt entsprechend
@@ -183,7 +183,7 @@ function bes = beschleunigung(spiel, farbe)
 
             NumberOfTank = spiel.n_tanke;
             ignoreTanke = 0;
-            createTankList();
+            %createTankList();
         end
     end
 
