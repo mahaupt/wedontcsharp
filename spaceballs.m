@@ -57,7 +57,7 @@ spiel.blau.spur(spiel.n_t, 2) = 0;
 
 %% Video abspeichern?
 
-video.abspeichern = true;
+video.abspeichern = false;
 
 if video.abspeichern
     

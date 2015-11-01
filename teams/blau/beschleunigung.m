@@ -131,18 +131,18 @@ function bes = beschleunigung(spiel, farbe)
             
             %%Erst wenn alle Tanken weg sind und wir weniger haben, als der Gegner - Fliehen!
             fleeEnemy();
-            Verteidigung = true;
-%         else 
-%             if (dispWhatToDo ~= 3)
-%                 dispWhatToDo = 3;
-%                 debugDisp('whatToDo: Tanke');
-%             end
-%             
-%             Verteidigung = false;
-%             %wenn Wegpunktliste leer => Pfad zur besten Tankstelle setzen
-%             createPathToNextTanke()
-%             %Erreicht der Gegner die anvisierte Tankstelle vor uns? dann löschen
-%             checkTankPath()
+           
+        else 
+            if (dispWhatToDo ~= 3)
+                dispWhatToDo = 3;
+                debugDisp('whatToDo: Tanke');
+            end
+            
+            Verteidigung = false;
+            %wenn Wegpunktliste leer => Pfad zur besten Tankstelle setzen
+            createPathToNextTanke()
+            %Erreicht der Gegner die anvisierte Tankstelle vor uns? dann löschen
+            checkTankPath()
         end
     end
     
@@ -1735,13 +1735,17 @@ function bes = beschleunigung(spiel, farbe)
     %Verteidigung
     function fleeEnemy()
         if numel(waypointList) == 0
-%             mineTricking();
+            if  NumberOfTank <= 0
             cornerTricking();
+            else
+            mineTricking();
+            end
         end
     end
 
+    
     function cornerTricking()
-        
+        Verteidigung = true  
         %define a Matrix that contains all corner positions
         cornerNodes = [0.015,0.985,0;0.985,0.985,0;0.015,0.015,0;0.985,0.015,0];
         if waitForEnemy == false
@@ -1802,17 +1806,21 @@ function bes = beschleunigung(spiel, farbe)
     end
 
     function mineTricking()
+        
         ClosestMine = getNearestMineId(me.pos);
-        dreh_trafo = [0 -1; 1 0];
-        if numel(waypointList) <= 0
-            if norm((spiel.mine(ClosestMine).pos - spiel.spaceball_radius - spiel.mine_radius) - me.pos) < 0.05 
-                waypointList{1} = spiel.mine(ClosestMine).pos + (spiel.spaceball_radius + spiel.mine_radius);
-            else
-                waypointList{1} = spiel.mine(ClosestMine).pos - (spiel.spaceball_radius + spiel.mine_radius);
-            end
+        enemyDist = spiel.mine(ClosestMine).pos - enemy.pos
+      
+        if numel(waypointList) <= 0 || norm(enemyDist) < 0.3
+            waypointList = [];
+            waypointList{1} =  spiel.mine(ClosestMine).pos + vecNorm(enemyDist)*spiel.mine_radius + constSafeBorder*vecNorm(enemyDist) + spiel.spaceball_radius*vecNorm(enemyDist)*2 
+            besCalculationMode = 1;
+            calcMineBes();
         end
+        
         debugDRAW();
     end
+
+
         
 
 
