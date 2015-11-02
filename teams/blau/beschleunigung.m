@@ -13,8 +13,8 @@ function bes = beschleunigung(spiel, farbe)
     %Strafpunkte für Nodes - je dichter an Mine, desto höher
     %wichtig für den Pathfinder
     constMineProxPenality = 0.00001; % 0.0006
-    %0.3 je größer der Winkel zum nächsten Wegpunkt, desto höheres Bremsen. Faktor.
-    constCornerBreaking = 0.40; 
+    %0.4 je größer der Winkel zum nächsten Wegpunkt, desto höheres Bremsen. Faktor.
+    constCornerBreaking = 0.65; 
     %Faktor für Seitwärtsbbeschleunigungen fürs Emergencybreaking
     constEmrBrkAccFac = 0.2; 
     %Faktor für Geschwindigkeit fürs Emergencybreaking
@@ -58,7 +58,6 @@ function bes = beschleunigung(spiel, farbe)
     %statische Variablen definieren
     persistent nodeGrid;
     persistent waypointList;
-    persistent drawHandles; %debug drawing
     persistent ArrayOfMines; %Zur Bestimmung des Minenverschwindens benötigt
     persistent StartNumberOfTank; %Zur Entscheidung über Angriff und Tanken benötigt
     persistent NumberOfTank; %Momentane Anzahl der Tankstellen
@@ -145,7 +144,6 @@ function bes = beschleunigung(spiel, farbe)
     %initialisiert wichtige Variablen
     function initSpaceball()
         nodeGrid = [];
-        drawHandles = [];
         waypointList = [];
         ignoreTanke = 0;
         ArrayOfMines = spiel.mine;
@@ -177,6 +175,10 @@ function bes = beschleunigung(spiel, farbe)
             NumberOfTank = spiel.n_tanke;
             ignoreTanke = 0;
         end
+        
+        
+        %debug clear all drawings
+        debugDrawCircle(0, 0, 0, true);
     end
 
 
@@ -196,7 +198,6 @@ function bes = beschleunigung(spiel, farbe)
             besCalculationMode = 0;
             besMineID = 0;
             debugDisp('calculateBES: Mine Mode disabled!');
-            
             if (nargin > 0)
                 return;
             end
@@ -234,7 +235,6 @@ function bes = beschleunigung(spiel, farbe)
             calcMineBes();
         else
             calcLineBes();
-            debugDrawCircle([0,0], -1);
         end
     end
 
@@ -331,7 +331,7 @@ function bes = beschleunigung(spiel, farbe)
         end
         
         %debug drawing
-        debugDrawCircle(minePos, mineDriveRadius);
+        debugDrawCircle(1, minePos, mineDriveRadius);
         
         %exit circle mode
         %Springe aus diesem Beschleunigungsmodus, wenn der nächste Wegpunkt
@@ -360,7 +360,8 @@ function bes = beschleunigung(spiel, farbe)
         %acceleration
         dir = vecNorm(waypointList{1}-me.pos);
         corr = dir-vecNorm(me.ges);
-        bes = dir + corr*5;
+        corr = 300*corr * norm(me.ges);
+        bes = dir + corr;
         
         %calculate safe breaking endvelocity
         breakingEndVel = calcBreakingEndVel();
@@ -369,7 +370,7 @@ function bes = beschleunigung(spiel, farbe)
         distanceToWaypoint=norm(waypointList{1}-me.pos);
         breakDistance = calcBreakDistance(norm(me.ges), breakingEndVel);
         if (breakDistance > distanceToWaypoint || checkIfTooFast())
-            bes=-dir + corr*5;
+            bes=-dir + corr;
         end
         
         %emergencyBreaking
@@ -379,6 +380,7 @@ function bes = beschleunigung(spiel, farbe)
         
         
         wpReachedDist = calcWaypointReachedRadius(breakingEndVel);
+        debugDrawCircle(1, waypointList{1}, wpReachedDist);
         
         %%Überprüfen, ob Wegpunkt erreicht wurde, dann 1. Punkt löschen
         if norm(me.pos-waypointList{1}) < wpReachedDist
@@ -554,7 +556,7 @@ function bes = beschleunigung(spiel, farbe)
         
         %get time to align waypoints
         time = getTimeToAlignVelocity(endvel*dir1, dir2);
-        erg = clamp(time/2 * norm(me.ges), constWayPointReachedRadius, 0.1);
+        erg = clamp(time/1.6 * norm(me.ges), constWayPointReachedRadius, 0.1);
     end
      
 
@@ -1229,8 +1231,11 @@ function bes = beschleunigung(spiel, farbe)
             
             
             %avoid setting tanke as new wp before collecting it
-            if (norm(me.pos - spiel.tanke(i).pos) < 3*constWayPointReachedRadius)
-                ignoreThisTanke = true;
+            if (norm(me.pos - spiel.tanke(i).pos) < 5*constWayPointReachedRadius)
+                if (dot(vecNorm(spiel.tanke(i).pos-me.pos), vecNorm(me.ges)) > 0.90 ||
+                    norm(me.pos - spiel.tanke(i).pos) < 2*constWayPointReachedRadius)
+                    ignoreThisTanke = true;
+                end
             end
             
             if (ignoreThisTanke || ignoreTanke == i)
@@ -1462,6 +1467,7 @@ function bes = beschleunigung(spiel, farbe)
             
             waypointList{endIndex} = getAccPos(enemypos);
             debugDRAW();
+            debugDrawCircle(2, enemypos, spiel.spaceball_radius);
         else
             pathResolution = clamp(norm(enemypos-me.pos)/2, 0.1, 0.5);
             
@@ -1483,6 +1489,7 @@ function bes = beschleunigung(spiel, farbe)
                 waypointList = appendToArray(waypointList, findPath(startPos,enemypos));
 
                 debugDRAW();
+                debugDrawCircle(2, enemypos, spiel.spaceball_radius);
             end
         end
     end
@@ -1571,6 +1578,11 @@ function bes = beschleunigung(spiel, farbe)
         %manually
         overrideBesCalculation = true;
         bes = (rotMat2*[ax1comp, ax2comp]')';
+        
+        %debug
+        drawradius = norm(rotEnemyGes(2)-rotMeGes(2))*20 + norm(rotEnemyPos(2)-rotMePos(2));
+        debugDrawCircle(2, enemy.pos, clamp(drawradius, 0.02 - 0.01*lockAnnouncement, 0.2));
+        
         
          %minimal to enemy velocity
         if (lockAnnouncement == 0 && norm(toEnemy(1)/rotMeGes(1)) > 10)
@@ -1776,13 +1788,15 @@ function bes = beschleunigung(spiel, farbe)
 %% Debugging
     %Wegpunkte einzeichnen
     function debugDRAW()
+        persistent drawHandles;
+        
         if (~constDebugMode)
             return;
         end
         
         %delete all draw handles
         for i = 1 : numel(drawHandles)
-            if (~isempty(drawHandles(i)))
+            if (ishandle(drawHandles(i)))
                 delete(drawHandles(i))
             end
         end
@@ -1800,10 +1814,21 @@ function bes = beschleunigung(spiel, farbe)
     end
 
 
-    function debugDrawCircle(pos, rad)
+    function debugDrawCircle(index, pos, rad, clearall)
         persistent mineDraw;
         
+        %skip
         if (~constDebugMode)
+            return;
+        end
+        
+        %delete all
+        if (nargin > 3)
+            for i=1:numel(mineDraw)
+                if ishandle(mineDraw(i))
+                    delete(mineDraw(i));
+                end
+            end
             return;
         end
         
@@ -1813,12 +1838,15 @@ function bes = beschleunigung(spiel, farbe)
             dcolor = spiel.farbe.rot;
         end
         
-        if ~isempty(mineDraw)
-            delete(mineDraw);
+        %empty prev drawing
+        if (index <= numel(mineDraw))
+            if ishandle(mineDraw(index))
+                delete(mineDraw(index));
+            end
         end
         
         if (rad > 0)
-            mineDraw = rectangle ('Parent', spiel.spielfeld_handle, 'Position', [pos-rad, rad*2, rad*2], 'Curvature', [1 1], 'FaceColor', 'none', 'EdgeColor', dcolor);
+            mineDraw(index) = rectangle ('Parent', spiel.spielfeld_handle, 'Position', [pos-rad, rad*2, rad*2], 'Curvature', [1 1], 'FaceColor', 'none', 'EdgeColor', dcolor);
         end
     end
 
