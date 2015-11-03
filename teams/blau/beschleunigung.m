@@ -82,15 +82,11 @@ function bes = beschleunigung(spiel, farbe)
     if spiel.i_t==1
         initSpaceball();
     end
-    
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
-    %zum debuggen (einfach nen Breakpoint bei "return" setzen)
+
+%% zum debuggen (einfach nen Breakpoint bei "return" setzen)
     %if spiel.i_t==60
     %    return;
     %end
->>>>>>> Chris-MacBook
     
 %% Veränderungen des Spielfeldes bemerken und dementsprechend handeln
     gameChangeHandler()
@@ -169,11 +165,7 @@ function bes = beschleunigung(spiel, farbe)
         tankeCompetition = false;
         waitForEnemy = false;
         setupNodeGrid();
-<<<<<<< HEAD
         CreatePathAllTanken(spiel.tanke);
-=======
-        %createTankList();
->>>>>>> origin/master
     end
 
     %registriert Änderungen im Spielfeld und Handelt entsprechend
@@ -188,14 +180,16 @@ function bes = beschleunigung(spiel, farbe)
         end
 
         
-        %wenn der Gegner eine Tanke einsammelt, die auf unserem Pfad liegt:
+        %wenn der Gegner eine Tanke einsammelt:
         if enemy.getankt ~= NumberOfTankEnemy
-            for i = 1:numel(waypointList)
-                if norm(waypointList{i}-enemy.pos) < 0.05
-                    CreatePathAllTanken(spiel.tanke);
-                end
-            end
-<<<<<<< HEAD
+            
+            %, die auf unserem Pfad liegt:      BUG, im Angriff geht das
+            %nicht!
+%             for i = 1:numel(waypointList)
+%                 if norm(waypointList{i} - enemy.pos) < 0.05
+%                     CreatePathAllTanken(spiel.tanke);
+%                 end
+%             end
             NumberOfTankEnemy = enemy.getankt;
         end
         
@@ -209,17 +203,9 @@ function bes = beschleunigung(spiel, farbe)
 %             NumberOfTank = spiel.n_tanke;
 %             %ignoreTanke = 0;
 %         end
-=======
-
-            NumberOfTank = spiel.n_tanke;
-            ignoreTanke = 0;
-            %createTankList();
-        end
-        
         
         %debug clear all drawings
         debugDrawCircle(0, 0, 0, true);
->>>>>>> origin/master
     end
 
 
@@ -1206,8 +1192,7 @@ function bes = beschleunigung(spiel, farbe)
         waypointList = [];
         waypointList{1} = endPosition;
     end
-=======
->>>>>>> ChrisTest
+
     
     function erg = getNearestMineId(pos)
         if (spiel.n_mine <= 0)
@@ -1276,8 +1261,7 @@ function bes = beschleunigung(spiel, farbe)
             
             %avoid setting tanke as new wp before collecting it
             if (norm(me.pos - spiel.tanke(i).pos) < 5*constWayPointReachedRadius)
-                if (dot(vecNorm(spiel.tanke(i).pos-me.pos), vecNorm(me.ges)) > 0.90 ||
-                    norm(me.pos - spiel.tanke(i).pos) < 2*constWayPointReachedRadius)
+                if (dot(vecNorm(spiel.tanke(i).pos-me.pos), vecNorm(me.ges)) > 0.90 || norm(me.pos - spiel.tanke(i).pos) < 2*constWayPointReachedRadius)
                     ignoreThisTanke = true;
                 end
             end
