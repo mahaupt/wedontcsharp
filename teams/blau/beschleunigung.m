@@ -24,7 +24,7 @@ function bes = beschleunigung(spiel, farbe)
     %Mine proximity radius
     constMineProxRadius = spiel.mine_radius + spiel.spaceball_radius + 1.5*constNavSecurity;
     %Anzahl Ebenen für Tankpfadfindung:
-    constEbenen = 5;
+    constEbenen = 4;
     
     %TANKEN
     %Zeitdifferenz die der Gegner schneller bei der Tanke sein darf,
@@ -116,9 +116,9 @@ function bes = beschleunigung(spiel, farbe)
                 debugDisp('whatToDo: Angriff');
             end
             
-
             %Wenn wir mehr als die Hälfte der Tanken haben oder nahe des Gegners sind und mehr getankt haben - Angriff!
             attackEnemy();
+            
         elseif enemy.getankt > StartNumberOfTank*0.5 || (thit <= 0.5 && me.getankt<enemy.getankt && ~corridorColliding(me.pos, enemy.pos, constNavSecurity))
             if (dispWhatToDo ~= 2)
                 %vorher: tanken
@@ -133,14 +133,16 @@ function bes = beschleunigung(spiel, farbe)
             
             %%Erst wenn alle Tanken weg sind und wir weniger haben, als der Gegner - Fliehen!
             fleeEnemy();
+            
         else
+            
             if (dispWhatToDo ~= 3)
                 dispWhatToDo = 3;
                 debugDisp('whatToDo: Tanken');
             end
             
-            if numel(waypointList) <= 0
-                CreatePathAllTanken();
+            if numel(waypointList) <= 0 && numel(spiel.tanke) > 0
+                CreatePathAllTanken(spiel.tanke);
             end
             %wenn Wegpunktliste leer => Pfad zur besten Tankstelle setzen
             %createPathToNextTanke()
@@ -165,7 +167,7 @@ function bes = beschleunigung(spiel, farbe)
         tankeCompetition = false;
         waitForEnemy = false;
         setupNodeGrid();
-        CreatePathAllTanken();
+        CreatePathAllTanken(spiel.tanke);
     end
 
     %registriert Änderungen im Spielfeld und Handelt entsprechend
@@ -180,11 +182,16 @@ function bes = beschleunigung(spiel, farbe)
         end
 
         
-        %wenn der Gegner eine Tanke einsammelt:
+        %wenn der Gegner eine Tanke einsammelt, die auf unserem Pfad liegt:
         if enemy.getankt ~= NumberOfTankEnemy
-            CreatePathAllTanken();
+            for i = 1:numel(waypointList)
+                if norm(waypointList{i}-enemy.pos) < 0.05
+                    CreatePathAllTanken(spiel.tanke);
+                end
+            end
             NumberOfTankEnemy = enemy.getankt;
         end
+        
         %beim Verschwinden einer Tanke:
 %         if (NumberOfTank ~= spiel.n_tanke)
 %             %if (tankeCompetition)
@@ -194,7 +201,6 @@ function bes = beschleunigung(spiel, farbe)
 % 
 %             NumberOfTank = spiel.n_tanke;
 %             %ignoreTanke = 0;
-%             CreatePathAllTanken();
 %         end
     end
 
@@ -1427,18 +1433,21 @@ function bes = beschleunigung(spiel, farbe)
     function penalty = calcTankPen(tankPos, prevPos, prevPath)
         distPen = norm(tankPos - prevPos);
         dirPen  = getTimeToAlignVelocity(vecNorm(tankPos-prevPos), vecNorm(prevPath));
-        distToEnemyPen = 1/norm(tankPos - enemy.pos);
         collPen = 0;
         if corridorColliding(tankPos, prevPos, constNavSecurity);
             collPen = 1;
         end
-        penalty = distPen + dirPen + distToEnemyPen + 1.5*collPen;
+        penalty = distPen + dirPen + 1.5*collPen;
     end
 
-    function CreatePathAllTanken()
-        disp('finding best Path for Tanken');
-        [e1, TankList] = createTankList(0, spiel.tanke, me.pos, me.ges, constEbenen);
+    function CreatePathAllTanken(Liste)
+        disp('finding our Tank-path');
+        [e1, TankList] = createTankList(0, Liste, me.pos, me.ges, constEbenen);
+%        disp('finding enemys Tank-path');
+%        [e2, TankListEnemy] = createTankList(0, Liste, enemy.pos, enemy.ges, round(constEbenen/2));
         TankList = fliplr(TankList);
+%        TankListEnemy = fliplr(TankListEnemy);
+
         disp('calculating Path between Tanken');
         waypointList = [];
         for i = 1:numel(TankList)-1
