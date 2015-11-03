@@ -82,6 +82,7 @@ function bes = beschleunigung(spiel, farbe)
         initSpaceball();
     end
     
+<<<<<<< HEAD
     
 %% Veränderungen des Spielfeldes bemerken und dementsprechend handeln
     gameChangeHandler()
@@ -1162,6 +1163,8 @@ function bes = beschleunigung(spiel, farbe)
         waypointList = [];
         waypointList{1} = endPosition;
     end
+=======
+>>>>>>> ChrisTest
     
     function erg = getNearestMineId(pos)
         if (spiel.n_mine <= 0)
