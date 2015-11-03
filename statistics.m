@@ -226,16 +226,6 @@ seedNum = (length(unentDefence)+length(unentAttack)+length(loseSeeds));
     %rng(r);
 % In spaceballs.m "spiel.zeitraffer_checkbox_anfangswert" auf true setzen!
 
-<<<<<<< HEAD
-clear all
-close all
-clc
-=======
-Durchgaenge = 10; % Anzahl Durchgänge
-Farbe = 'blau'; % Farbe des eigenen SpaceBalls eintragen: 'rot' oder 'blau'
-
->>>>>>> origin/master
-
 load('seeds.mat')             
 seedData = [str2double(unentDefence); str2double(unentAttack); str2double(loseSeeds)];
 seedNum = (length(unentDefence)+length(unentAttack)+length(loseSeeds));
