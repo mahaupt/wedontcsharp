@@ -61,7 +61,6 @@ function bes = beschleunigung(spiel, farbe)
     persistent waypointList;
     persistent ArrayOfMines; %Zur Bestimmung des Minenverschwindens benötigt
     persistent StartNumberOfTank; %Zur Entscheidung über Angriff und Tanken benötigt
-    persistent NumberOfTank; %Momentane Anzahl der Tankstellen
     persistent NumberOfTankEnemy; %Momentane Anzahl der Tanken des Gegners
     persistent ignoreTanke; %number of tanke to be ignored by targetNextTanke
     persistent tankeCompetition;
@@ -147,7 +146,7 @@ function bes = beschleunigung(spiel, farbe)
             %createPathToNextTanke()
             
             %Erreicht der Gegner die anvisierte Tankstelle vor uns? dann löschen
-            %checkTankPath()
+            checkTankPath();
             
         end
     end
@@ -182,29 +181,14 @@ function bes = beschleunigung(spiel, farbe)
         
         %wenn der Gegner eine Tanke einsammelt:
         if enemy.getankt ~= NumberOfTankEnemy
-            
-            %, die auf unserem Pfad liegt:      BUG, im Angriff geht das
-            %nicht!
-%             for i = 1:numel(waypointList)
-%                 if norm(waypointList{i} - enemy.pos) < 0.05
-                     CreatePathAllTanken(spiel.tanke);
-%                 end
-%             end
+            validTanken = spiel.tanke;
+            if ignoreTanke ~= 0
+                validTanken(ignoreTanke) = [];
+            end
+            CreatePathAllTanken(validTanken);
             NumberOfTankEnemy = enemy.getankt;
         end
         
-        %beim Verschwinden einer Tanke:
-%         if (NumberOfTank ~= spiel.n_tanke)
-%             %if (tankeCompetition)
-%             %    safeDeleteWaypoints();
-%             %    tankeCompetition = false;
-%             %end
-% 
-%             NumberOfTank = spiel.n_tanke;
-%             %ignoreTanke = 0;
-%         end
-        
-        %debug clear all drawings
         debugDrawCircle(0, 0, 0, true);
     end
 
@@ -1320,7 +1304,6 @@ function bes = beschleunigung(spiel, farbe)
 
     %Check if target tanke is still there
     function checkTankPath()
-        %get Tanken on Waypoints
         
         %check if enemy reaches targeted tanken before us
         for i = 1:numel(spiel.tanke)
@@ -1357,8 +1340,7 @@ function bes = beschleunigung(spiel, farbe)
                     end
                 end
                 continue;
-            end %if
-            
+            end
             
             
             %only if tanke is about to get taken
@@ -1377,10 +1359,10 @@ function bes = beschleunigung(spiel, farbe)
                     debugDRAW();
                     return;
                     
-                elseif (tenemy+tvenemy < town+tvown && ~tankeCompetition && (tvenemy < 0.5 || norm(enemyPath) < 0.03))
-                    debugDisp('checkTankPath: enemy reaches tanke before us .. get new target tanke');
-                    ignoreTanke = i;
-                    return;
+%                elseif (tenemy+tvenemy < town+tvown && ~tankeCompetition && (tvenemy < 0.5 || norm(enemyPath) < 0.03))
+%                    debugDisp('checkTankPath: enemy reaches tanke before us .. get new target tanke');
+%                    ignoreTanke = i;
+%                    return;
                 end
             end
           
@@ -1448,19 +1430,18 @@ function bes = beschleunigung(spiel, farbe)
     end
 
     function CreatePathAllTanken(Liste)
-        disp('finding our Tank-path');
-        [e1, TankList] = createTankList(0, Liste, me.pos, me.ges, constEbenen);
-%        disp('finding enemys Tank-path');
-%        [e2, TankListEnemy] = createTankList(0, Liste, enemy.pos, enemy.ges, round(constEbenen/2));
-        TankList = fliplr(TankList);
-%        TankListEnemy = fliplr(TankListEnemy);
-
-        disp('calculating Path between Tanken');
-        waypointList = [];
-        for i = 1:numel(TankList)-1
-            waypointList = appendToArray(waypointList, findPath(TankList{i},TankList{i+1}));
+        if ~tankeCompetition
+            disp('finding our Tank-path');
+            TankList=[];
+            [e1, TankList] = createTankList(0, Liste, me.pos, me.ges, constEbenen);
+            TankList = fliplr(TankList);
+            disp('calculating Path between Tanken');
+            waypointList = [];
+            for i = 1:numel(TankList)-1
+                waypointList = appendToArray(waypointList, findPath(TankList{i},TankList{i+1}));
+            end
+            debugDRAW();
         end
-        debugDRAW();
     end
 
 %% Angriff
