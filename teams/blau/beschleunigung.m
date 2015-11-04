@@ -24,7 +24,7 @@ function bes = beschleunigung(spiel, farbe)
     %Mine proximity radius
     constMineProxRadius = spiel.mine_radius + spiel.spaceball_radius + 1.5*constNavSecurity;
     %Anzahl Ebenen für Tankpfadfindung:
-    constEbenen = 4;
+    constEbenen = 5;
     
     %TANKEN
     %Zeitdifferenz die der Gegner schneller bei der Tanke sein darf,
@@ -140,7 +140,7 @@ function bes = beschleunigung(spiel, farbe)
                 debugDisp('whatToDo: Tanken');
             end
             
-            if numel(waypointList) <= 0 && numel(spiel.tanke) > 0
+            if numel(waypointList) <= 1 && numel(spiel.tanke) > 1
                 CreatePathAllTanken(spiel.tanke);
             end
             %wenn Wegpunktliste leer => Pfad zur besten Tankstelle setzen
@@ -187,7 +187,7 @@ function bes = beschleunigung(spiel, farbe)
             %nicht!
 %             for i = 1:numel(waypointList)
 %                 if norm(waypointList{i} - enemy.pos) < 0.05
-%                     CreatePathAllTanken(spiel.tanke);
+                     CreatePathAllTanken(spiel.tanke);
 %                 end
 %             end
             NumberOfTankEnemy = enemy.getankt;
