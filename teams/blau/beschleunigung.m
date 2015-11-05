@@ -108,7 +108,7 @@ function bes = beschleunigung(spiel, farbe)
         
         thit = calculateSmoothHitTime(true);
         
-        if StartNumberOfTank*0.5 < me.getankt || (thit <= 0.5 && me.getankt>enemy.getankt && ~corridorColliding(me.pos, enemy.pos, constNavSecurity))
+        if (numel(spiel.tanke) == 0 && me.getankt > enemy.getankt) || (thit <= 0.5 && me.getankt>enemy.getankt && ~corridorColliding(me.pos, enemy.pos, constNavSecurity))
             if (dispWhatToDo ~= 1)
                 dispWhatToDo = 1;
                 debugDisp('whatToDo: Angriff');
@@ -1432,7 +1432,7 @@ function bes = beschleunigung(spiel, farbe)
                 enemyPen = enemyPen + 10/i;
             end
         end
-        penalty = distPen + 0.5 * dirPen + 1.5*collPen + enemyPen;
+        penalty = distPen + dirPen + 1.5*collPen + enemyPen;
     end
 
     function CreatePathAllTanken(Liste)
