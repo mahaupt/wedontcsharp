@@ -23,13 +23,13 @@ function bes = beschleunigung(spiel, farbe)
     constSkipSimplifyPath = false;
     %Mine proximity radius
     constMineProxRadius = spiel.mine_radius + spiel.spaceball_radius + 1.5*constNavSecurity;
-    %Anzahl Ebenen für Tankpfadfindung:
-    constEbenen = 5;
     
     %TANKEN
     %Zeitdifferenz die der Gegner schneller bei der Tanke sein darf,
     %wir es aber dennoch versuchen
     constCompetitionModeThreshold = 0.1;
+    %Anzahl Ebenen für Tankpfadfindung:
+    constEbenen = 5;
     
     %ATTACK
     % Gegnerinterpolationsmethode 
@@ -65,6 +65,7 @@ function bes = beschleunigung(spiel, farbe)
     persistent ignoreTanke; %number of tanke to be ignored by targetNextTanke
     persistent tankeCompetition;
     persistent waitForEnemy; %benötigt, um auf den Gegner warten zu können
+    persistent dispWhatToDo;
 
     
     %%Farbe prüfen und zuweisen
@@ -101,14 +102,10 @@ function bes = beschleunigung(spiel, farbe)
 %% Was soll der Spaceball tun?
     %Tanken oder Angreifen oder Verteidigen?
     function whatToDo()
-        persistent dispWhatToDo;
-        if (spiel.i_t==1)
-            dispWhatToDo = -1;
-        end
         
         thit = calculateSmoothHitTime(true);
         
-        if StartNumberOfTank*0.5 < me.getankt || (thit <= 0.5 && me.getankt>enemy.getankt && ~corridorColliding(me.pos, enemy.pos, constNavSecurity))
+        if (numel(spiel.tanke) == 0 && me.getankt > enemy.getankt) || (thit <= 0.5 && me.getankt>enemy.getankt && ~corridorColliding(me.pos, enemy.pos, constNavSecurity))
             if (dispWhatToDo ~= 1)
                 dispWhatToDo = 1;
                 debugDisp('whatToDo: Angriff');
@@ -142,11 +139,8 @@ function bes = beschleunigung(spiel, farbe)
             if numel(waypointList) <= 1 && numel(spiel.tanke) > 1
                 CreatePathAllTanken(spiel.tanke);
             end
-            %wenn Wegpunktliste leer => Pfad zur besten Tankstelle setzen
-            %createPathToNextTanke()
-            
-            %Erreicht der Gegner die anvisierte Tankstelle vor uns? dann löschen
-            checkTankPath();
+
+            %checkTankPath();
             
         end
     end
@@ -154,12 +148,12 @@ function bes = beschleunigung(spiel, farbe)
     %wird einmal am Start aufgerufen
     %initialisiert wichtige Variablen
     function initSpaceball()
+        dispWhatToDo = -1;
         nodeGrid = [];
         waypointList = [];
         ignoreTanke = 0;
         ArrayOfMines = spiel.mine;
         StartNumberOfTank = spiel.n_tanke;
-        NumberOfTank = spiel.n_tanke;
         NumberOfTankEnemy = enemy.getankt;
         tankeCompetition = false;
         waitForEnemy = false;
@@ -179,13 +173,14 @@ function bes = beschleunigung(spiel, farbe)
         end
 
         
-        %wenn der Gegner eine Tanke einsammelt:
-        if enemy.getankt ~= NumberOfTankEnemy
-            validTanken = spiel.tanke;
-            if ignoreTanke ~= 0
-                validTanken(ignoreTanke) = [];
+        %wenn der Gegner eine Tanke einsammelt, die auf unserer Wegpunktliste liegt:
+        if enemy.getankt ~= NumberOfTankEnemy && dispWhatToDo == 3
+            for i = 1:numel(waypointList)
+                if norm(enemy.pos-waypointList{i}) < 0.05
+                    CreatePathAllTanken(spiel.tanke);
+                    break;
+                end
             end
-            CreatePathAllTanken(validTanken);
             NumberOfTankEnemy = enemy.getankt;
         end
         
@@ -1423,16 +1418,18 @@ function bes = beschleunigung(spiel, farbe)
         distPen = norm(tankPos - prevPos);
         dirPen  = getTimeToAlignVelocity(vecNorm(tankPos-prevPos), vecNorm(prevPath));
         collPen = 0;
+        enemyPen = 0;
         if corridorColliding(tankPos, prevPos, constNavSecurity);
-            collPen = 1;
+            collPen = 1.5;
         end
-        penalty = distPen + dirPen + 1.5*collPen;
+        %enemyPen = 1 / norm(enemy.pos-tankPos) + 1/ getTimeToAlignVelocity(vecNorm(enemy.ges), (tankPos - enemy.pos));
+        penalty = distPen + dirPen + collPen + enemyPen;
     end
 
     function CreatePathAllTanken(Liste)
         if ~tankeCompetition
-            disp('finding our Tank-path');
             TankList=[];
+            disp('finding our Tank-path');
             [e1, TankList] = createTankList(0, Liste, me.pos, me.ges, constEbenen);
             TankList = fliplr(TankList);
             disp('calculating Path between Tanken');
