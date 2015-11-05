@@ -90,7 +90,8 @@ function bes = beschleunigung(spiel, farbe)
     
 %% Entscheidungen fällen und Beschleunigung berechnen
     %Entscheidung über Angriff/Verteidigung/Tanken
-    whatToDo();
+    fleeEnemy()
+%     whatToDo();
     
     %Beschleunigung berechnen:
     calculateBES();
@@ -471,6 +472,18 @@ function bes = beschleunigung(spiel, farbe)
         end
     end
 
+   function erg = checkIfTooFastECrash ()
+        
+        enemyPath = me.pos-enemy.pos;
+              
+
+          if  (norm(enemyPath)) < (((norm(enemy.ges))^2)/(norm(enemy.bes)*2));
+            erg = true;
+            
+          else 
+            erg = false;
+        end
+    end
 
     %emergency breaking
     function erg = emergencyBreaking(customv, customa)
@@ -1735,17 +1748,17 @@ function bes = beschleunigung(spiel, farbe)
     %Verteidigung
     function fleeEnemy()
         if numel(waypointList) == 0
-            if  NumberOfTank <= 0
+%             if  NumberOfTank <= 0
             cornerTricking();
-            else
-            mineTricking();
-            end
+%             else
+%             mineTricking();
+%             end
         end
     end
 
     
     function cornerTricking()
-        Verteidigung = true  
+        
         %define a Matrix that contains all corner positions
         cornerNodes = [0.015,0.985,0;0.985,0.985,0;0.015,0.015,0;0.985,0.015,0];
         if waitForEnemy == false
@@ -1761,8 +1774,23 @@ function bes = beschleunigung(spiel, farbe)
             waitForEnemy = true; 
             %waiting for the enemy
         else
-            if checkIfTooFastE () == true || norm(me.pos-enemy.pos) <= 0.15 
+            if checkIfTooFastE () == true || norm(me.pos-enemy.pos) <= 0.15
+            if checkIfTooFastECrash() == true && norm (waypointList{1} - me.pos) > 0.2 
+                      
+                Verteidigung = false 
+                debugDisp('cornerTricking. Pt3');
+                    for i=1:4
+                        cornerNodes(i,3)=norm(cornerNodes(i,1:2)-me.pos-enemy.ges);
+                    end
+                    
+                nextCorner = sortrows(cornerNodes, [3 2 1]);
+                           
+                waypointList = [];
+                waypointList{1} = nextCorner(4,1:2);
+            else
+                Verteidigung = true  
                 debugDisp('cornerTricking: Pt2');
+            
                     %sort all corners based on the direction the enemy is coming from and their distance to us
                     for i=1:4
                         cornerNodes(i,3)=norm(cornerNodes(i,1:2)-me.pos-enemy.ges);
@@ -1774,7 +1802,46 @@ function bes = beschleunigung(spiel, farbe)
                        % if enemy.getankt > StartNumberOfTank*0.5
                             waypointList = [];
                             waypointList{1} = nextCorner(2,1:2);
-                          
+            end
+        end
+%         elseif  checkIfTooFastECrash() == true;
+%                 Verteidigung = false 
+%                 debugDisp('cornerTricking. Pt3');
+%                     for i=1:4
+%                         cornerNodes(i,3)=norm(cornerNodes(i,1:2)-me.pos-enemy.ges);
+%                     end
+%                     
+%                 nextCorner = sortrows(cornerNodes, [3 2 1]);
+%                            
+%                 waypointList = [];
+%                 waypointList{1} = nextCorner(4,1:2);
+%             
+%         else
+%             if checkIfTooFastE () == true || norm(me.pos-enemy.pos) <= 0.15
+%             Verteidigung = true  
+%             debugDisp('cornerTricking: Pt2');
+%             
+%                     %sort all corners based on the direction the enemy is coming from and their distance to us
+%                     for i=1:4
+%                         cornerNodes(i,3)=norm(cornerNodes(i,1:2)-me.pos-enemy.ges);
+%                     end
+%                     
+%                     nextCorner = sortrows(cornerNodes, [3 2 1]);
+%                            
+%                                
+%                        % if enemy.getankt > StartNumberOfTank*0.5
+%                             waypointList = [];
+%                             waypointList{1} = nextCorner(2,1:2);
+%             end
+                    
+            
+            
+          
+        end
+    end
+
+        
+%                                       
                          
 %                        else
 %               
@@ -1801,24 +1868,34 @@ function bes = beschleunigung(spiel, farbe)
 % 
 %                             end
 %                         end
-                    end
-                end
-    end
+%                     end
+%                 end
+%     end
 
     function mineTricking()
         
         ClosestMine = getNearestMineId(me.pos);
         enemyDist = spiel.mine(ClosestMine).pos - enemy.pos
       
-        if numel(waypointList) <= 0 || norm(enemyDist) < 0.3
-            waypointList = [];
-            waypointList{1} =  spiel.mine(ClosestMine).pos + vecNorm(enemyDist)*spiel.mine_radius + constSafeBorder*vecNorm(enemyDist) + spiel.spaceball_radius*vecNorm(enemyDist)*2 
+        if numel(waypointList) <= 0 
+            waypointList{1} =  spiel.mine(ClosestMine).pos + vecNorm(enemyDist)*spiel.mine_radius + constSafeBorder*vecNorm(enemyDist) + spiel.spaceball_radius*vecNorm(enemyDist)*1.2 
             besCalculationMode = 1;
             calcMineBes();
         end
         
         debugDRAW();
     end
+
+%     function cornerRescue() 
+%         for i=1:4
+%             cornerNodes(i,3)=norm(cornerNodes(i,1:2)-me.pos-enemy.ges);
+%         end
+%                     
+%         nextCorner = sortrows(cornerNodes, [3 2 1]);
+%                            
+%         waypointList = [];
+%         waypointList{1} = nextCorner(4,1:2);
+%     end
 
 
         
