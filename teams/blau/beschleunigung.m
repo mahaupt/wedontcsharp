@@ -105,7 +105,7 @@ function bes = beschleunigung(spiel, farbe)
         
         thit = calculateSmoothHitTime(true);
         
-        if (numel(spiel.tanke) == 0 && me.getankt > enemy.getankt) || (thit <= 0.5 && me.getankt>enemy.getankt && ~corridorColliding(me.pos, enemy.pos, constNavSecurity))
+        if ((numel(spiel.tanke) == 0 && me.getankt > enemy.getankt) || (thit <= 0.5 && me.getankt>enemy.getankt && ~corridorColliding(me.pos, enemy.pos, constNavSecurity))) && ~tankeCompetition
             if (dispWhatToDo ~= 1)
                 dispWhatToDo = 1;
                 debugDisp('whatToDo: Angriff');
@@ -136,11 +136,9 @@ function bes = beschleunigung(spiel, farbe)
                 debugDisp('whatToDo: Tanken');
             end
             
-            if numel(waypointList) <= 1 && numel(spiel.tanke) > 1
-                CreatePathAllTanken(spiel.tanke);
-            end
 
-            %checkTankPath();
+            %%Competition Mode:
+            checkTankPath();
             
         end
     end
@@ -158,7 +156,7 @@ function bes = beschleunigung(spiel, farbe)
         tankeCompetition = false;
         waitForEnemy = false;
         setupNodeGrid();
-        CreatePathAllTanken(spiel.tanke);
+        CreatePathAllTanken();
     end
 
     %registriert Änderungen im Spielfeld und Handelt entsprechend
@@ -172,16 +170,26 @@ function bes = beschleunigung(spiel, farbe)
             ArrayOfMines = spiel.mine;
         end
 
+        %Tanken:
         
         %wenn der Gegner eine Tanke einsammelt, die auf unserer Wegpunktliste liegt:
         if enemy.getankt ~= NumberOfTankEnemy && dispWhatToDo == 3
             for i = 1:numel(waypointList)
                 if norm(enemy.pos-waypointList{i}) < 0.05
-                    CreatePathAllTanken(spiel.tanke);
+                    CreatePathAllTanken();
                     break;
                 end
             end
             NumberOfTankEnemy = enemy.getankt;
+        end
+        
+        %wenn die Wegpunktliste leer wird
+        if numel(waypointList) <= 1 && numel(spiel.tanke) > 1 && ~tankeCompetition
+            if numel(spiel.tanke) == 2 && numel(waypointList) == 1
+                return;
+            else
+                CreatePathAllTanken();
+            end
         end
         
         debugDrawCircle(0, 0, 0, true);
@@ -390,6 +398,11 @@ function bes = beschleunigung(spiel, farbe)
         %%Überprüfen, ob Wegpunkt erreicht wurde, dann 1. Punkt löschen
         if norm(me.pos-waypointList{1}) < wpReachedDist
             waypointList(1) = [];
+            if tankeCompetition
+                tankeCompetition = false;
+                debugDisp('competitionMode deaktivated');
+                CreatePathAllTanken();
+            end
             debugDRAW();
             
         else
@@ -1187,115 +1200,7 @@ function bes = beschleunigung(spiel, farbe)
         end
     end
 
-%% Tankenfindungs-System
-    %Search for nearest Tanken and create Path between them
-    function createPathToNextTanke()
-        waypointCount = numel(waypointList);
-        headedTankenList = getHeadedTanken();
-        
-        if numel(headedTankenList) <= 1 && spiel.n_tanke > 1 || ...
-                numel(headedTankenList) == 0 && spiel.n_tanke == 1 %prevent loop on last tanke
-            
-            %delete other WPs if spaceball is flying not to a tanke
-            if (waypointCount >= 0 && numel(headedTankenList) == 0)
-                safeDeleteWaypoints();
-                waypointCount = numel(waypointList);
-            end
-            
-            %get last waypoint to append new waypoints
-            lastWaypoint = me.pos;
-            if (waypointCount >= 1)
-                lastWaypoint = waypointList{waypointCount};
-            end
-            
-            %set new waypoints
-            tankdistance=createTankEvaluation(lastWaypoint);
-            if (numel(tankdistance) <= 0)
-                return;
-            end
-            
-            debugDisp('createPathToNextTanke: finding Path to next Tanke');
-            
-            next_tanke = tankdistance(1,1);
-            waypointList = appendToArray(waypointList, findPath(lastWaypoint, spiel.tanke(next_tanke).pos));
-            debugDRAW();
-        end
-    end
-
-    %Create Tank Distance Table
-    function erg=createTankEvaluation(position)
-        erg = zeros(spiel.n_tanke, 5);
-        headedTankenList = getHeadedTanken();
-        for i=1:spiel.n_tanke
-            
-            %avoid setting WP to a tanke twice
-            ignoreThisTanke = false;
-            for j=1:numel(headedTankenList)
-                if (headedTankenList(j) == i)
-                    ignoreThisTanke = true;
-                    break;
-                end
-            end
-            
-            
-            %avoid setting tanke as new wp before collecting it
-            if (norm(me.pos - spiel.tanke(i).pos) < 5*constWayPointReachedRadius)
-                if (dot(vecNorm(spiel.tanke(i).pos-me.pos), vecNorm(me.ges)) > 0.90 || norm(me.pos - spiel.tanke(i).pos) < 2*constWayPointReachedRadius)
-                    ignoreThisTanke = true;
-                end
-            end
-            
-            if (ignoreThisTanke || ignoreTanke == i)
-                continue;
-            end
-            
-            
-            %Create Tank Evaluation
-            erg(i,1) = i;                                       %Spalte 1: Tankstellennummer
-            erg(i,2) = 1/norm(spiel.tanke(i).pos-position);     %Spalte 2: Entfernung zu "position"
-            erg(i,3) = norm(spiel.tanke(i).pos-enemy.pos);      %Spalte 3: Entfernung zum Gegner
-            erg(i,4) = 0;
-            
-            %iterate through tanken
-            dirToTanke = vecNorm(spiel.tanke(i).pos-position);
-            for j=1:spiel.n_tanke 
-                dirToNextTanke = vecNorm(spiel.tanke(j).pos-spiel.tanke(i).pos);
-                if (dot(dirToTanke, dirToNextTanke) > 0.7) 
-                    erg(i,4) = erg(i,4) + 1;
-                end
-            end
-            
-            
-            %end evaluation
-            erg(i,5) = erg(i,2) + erg(i,3)*0.3 + erg(i,4)*10;
-        end
-        
-        %remove empty rows
-        erg( ~any(erg,2), : ) = [];
-        %sort rows
-        erg=sortrows(erg,[-5 2 -3 1]);
-    end
-
-    %get tanken list from current waypoints
-    function tankenList = getHeadedTanken()
-        tankenList = zeros(5,1);
-        
-        %get targeted tanken
-        for i=1:numel(waypointList)
-            for j=1:spiel.n_tanke
-                if norm(spiel.tanke(j).pos-waypointList{i}) <= spiel.tanke_radius+constGridRadius
-                    insertIndex = numel(tankenList) + 1;
-                    tankenList(insertIndex) = j;
-                    break;
-                end
-            end
-        end
-        
-        %remove duplicates
-        tankenList = unique(tankenList);
-        %remove zeros
-        tankenList = tankenList(tankenList > 0);
-    end
+%% Altes Tankenfindungs-System
 
     %Check if target tanke is still there
     function checkTankPath()
@@ -1326,16 +1231,16 @@ function bes = beschleunigung(spiel, farbe)
             end
             
             %check if ignoreTanke is still valid
-            if ignoreTanke
-                if i == ignoreTanke
-                    if ~(tenemy < 0.25 && ~enemyColliding  && (tvenemy < 0.5 || norm(enemyPath) < 0.03))
-                        %uncheck ignoreTanke if above is false
-                        ignoreTanke = 0;
-                        debugDisp('checkTankPath: disabled ignoretanke');
-                    end
-                end
-                continue;
-            end
+%             if ignoreTanke
+%                 if i == ignoreTanke
+%                     if ~(tenemy < 0.25 && ~enemyColliding  && (tvenemy < 0.5 || norm(enemyPath) < 0.03))
+%                         %uncheck ignoreTanke if above is false
+%                         ignoreTanke = 0;
+%                         debugDisp('checkTankPath: disabled ignoretanke');
+%                     end
+%                 end
+%                 continue;
+%             end
             
             
             %only if tanke is about to get taken
@@ -1354,36 +1259,38 @@ function bes = beschleunigung(spiel, farbe)
                     debugDRAW();
                     return;
                     
-%                elseif (tenemy+tvenemy < town+tvown && ~tankeCompetition && (tvenemy < 0.5 || norm(enemyPath) < 0.03))
-%                    debugDisp('checkTankPath: enemy reaches tanke before us .. get new target tanke');
-%                    ignoreTanke = i;
-%                    return;
-                end
+%                 elseif (tenemy+tvenemy < town+tvown && ~tankeCompetition && (tvenemy < 0.5 || norm(enemyPath) < 0.03))
+%                     debugDisp('checkTankPath: enemy reaches tanke before us .. get new target tanke');
+%                     ignoreTanke = i;
+%                     CreatePathAllTanken();
+%                     return;
+                 end
             end
           
             %Notbremse bei zu spätem Erreichen einer Tanke
-            if (tankeCompetition && i==1 && tenemy < town)
-                vel = norm(me.ges);
-                acc = spiel.bes;
-                dist = norm(ownPath);
-                
-                tacc = (sqrt(vel^2+2*acc*dist)-vel)/acc; %t beim beschleunigen
-                tbrk = (-sqrt(vel^2-2*acc*dist)+vel)/acc; %t beim bremsen
-                deltat = tbrk-tacc; %differenz
-                
-                %distanz die Gegner in deltat zurück legen kann
-                Distance = deltat*norm(enemy.ges);
-                
-                if (Distance <= spiel.spaceball_radius * 2)
-                    debugDisp('checkTankPath: Notbremse, Tanke wird nicht vor Gegner erreicht');
-                    safeDeleteWaypoints();
-                    if isWalkable(waypointList{1} - 0.3 * enemy.ges, spiel.spaceball_radius)
-                        waypointList{1} = waypointList{1} - 0.3 * enemy.ges;
-                    end
-                    ignoreTanke = i;
-                    tankeCompetition = false;
-                end
-            end
+%             if (tankeCompetition && i==1 && tenemy < town)
+%                 vel = norm(me.ges);
+%                 acc = spiel.bes;
+%                 dist = norm(ownPath);
+%                 
+%                 tacc = (sqrt(vel^2+2*acc*dist)-vel)/acc; %t beim beschleunigen
+%                 tbrk = (-sqrt(vel^2-2*acc*dist)+vel)/acc; %t beim bremsen
+%                 deltat = tbrk-tacc; %differenz
+%                 
+%                 %distanz die Gegner in deltat zurück legen kann
+%                 Distance = deltat*norm(enemy.ges);
+%                 
+%                 if (Distance <= spiel.spaceball_radius * 2)
+%                     debugDisp('checkTankPath: Notbremse, Tanke wird nicht vor Gegner erreicht');
+%                     safeDeleteWaypoints();
+%                     if isWalkable(waypointList{1} - 0.3 * enemy.ges, spiel.spaceball_radius)
+%                         waypointList{1} = waypointList{1} - 0.3 * enemy.ges;
+%                     end
+%                     ignoreTanke = i;
+%                     tankeCompetition = false;
+%                     CreatePathAllTanken();
+%                 end
+%             end
         end
     end
 
@@ -1422,13 +1329,17 @@ function bes = beschleunigung(spiel, farbe)
         if corridorColliding(tankPos, prevPos, constNavSecurity);
             collPen = 1.5;
         end
-        enemyPen = - norm(enemy.pos-tankPos) + getTimeToAlignVelocity(vecNorm(enemy.ges), vecNorm(tankPos - enemy.pos));
+        enemyPen = - (norm(enemy.pos-tankPos) + getTimeToAlignVelocity(vecNorm(enemy.ges), vecNorm(tankPos - enemy.pos)));
         penalty = distPen + dirPen / 75 + collPen + enemyPen;
     end
 
-    function CreatePathAllTanken(Liste)
+    function CreatePathAllTanken()
         if ~tankeCompetition
             TankList=[];
+            Liste = spiel.tanke;
+                if ignoreTanke ~= 0
+                    Liste(ignoreTanke) = [];
+                end
             disp('finding our Tank-path');
             [e1, TankList] = createTankList(0, Liste, me.pos, me.ges, constEbenen);
             TankList = fliplr(TankList);
