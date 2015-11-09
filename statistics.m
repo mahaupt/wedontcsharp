@@ -12,7 +12,7 @@ clc
 
 
 % Anzahl Durchgänge
-Durchgaenge = 10; 
+Durchgaenge = 2; 
 rows = Durchgaenge+1;
 
 
@@ -35,6 +35,7 @@ data{1,5} = 'Seed:';
 % Zufallswert erzeugt werden kann
 zw = round(rand(1)*1000000);
 zwVar = rng(zw);
+totalTime = 0;
 
 
 for i = 1 : Durchgaenge
@@ -106,9 +107,9 @@ for i = 1 : Durchgaenge
            data{i+1,6} = 99;
         end
         
-               
+        totalTime = totalTime + toc       
 % clear variables mit Ausnahmen
-        clearvars -except data Durchgaenge Farbe myName enemyName zw zwVar
+        clearvars -except data Durchgaenge Farbe myName enemyName zw zwVar totalTime
         close all
 end
 
@@ -200,7 +201,8 @@ seedNum = (length(unentDefense)+length(unentAttack)+length(loseSeeds));
 save seeds.mat loseSeeds unentDefense unentAttack Farbe
 
 
-% Auswertung
+% Auswertung num2str(sum(cell2mat(data(2:end,4))*1/60))
+time = horzcat('Gesamtzeit: ', num2str(round(totalTime/60),1), ' Minuten');
 Gegner = horzcat(myName, '  VS  ', enemyName);
 SatzA = horzcat('Von ', num2str(Durchgaenge), ' Spielen wurden ', num2str(sumWins), ' gewonnen');
 SatzAB = horzcat('Von ', num2str(Durchgaenge), ' Spielen wurden ', num2str(sumWins), ' in durchschnittlich ', num2str(medianTime), ' Sekunden gewonnen.');
@@ -245,6 +247,7 @@ disp(Quote7);
 disp(' ');
 disp(Quote8);
 disp(' ');
+disp(time);
 disp(' ');
 disp(Statistische_Erhebung);
 
@@ -280,7 +283,7 @@ data{1,5} = 'Seed:';
 % Zufallswert erzeugt werden kann (r könnte sonst vom letzten durchgang erhalten sein)
 zw = round(rand(1)*1000000);
 zwVar = rng(zw);
-
+totalTime = 0;
 
 if isempty(seedData)
     disp ('Keine Seeds vorhanden')
@@ -358,7 +361,7 @@ for i = 1 : Durchgaenge
         
                
 % clear variables mit Ausnahmen
-        clearvars -except data Durchgaenge Farbe myName enemyName zw zwVar seedData
+        clearvars -except data Durchgaenge Farbe myName enemyName zw zwVar seedData totalTime
         close all
 end
 
@@ -451,6 +454,7 @@ save seedsNew.mat loseSeedsNew unentDefenseNew unentAttackNew Farbe
 
 
 % Auswertung
+time = horzcat('Gesamtzeit: ', num2str(round(totalTime/60),1), ' Minuten');
 Gegner = horzcat(myName, '  VS  ', enemyName);
 SatzA = horzcat('Von ', num2str(Durchgaenge), ' Spielen wurden ', num2str(sumWins), ' gewonnen');
 SatzAB = horzcat('Von ', num2str(Durchgaenge), ' Spielen wurden ', num2str(sumWins), ' in durchschnittlich ', num2str(medianTime), ' Sekunden gewonnen.');
@@ -495,5 +499,6 @@ disp(Quote7);
 disp(' ');
 disp(Quote8);
 disp(' ');
+disp(time);
 disp(' ');
 disp(Statistische_Erhebung);
