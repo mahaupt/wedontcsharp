@@ -1422,8 +1422,8 @@ function bes = beschleunigung(spiel, farbe)
         if corridorColliding(tankPos, prevPos, constNavSecurity);
             collPen = 1.5;
         end
-        %enemyPen = 1 / norm(enemy.pos-tankPos) + 1/ getTimeToAlignVelocity(vecNorm(enemy.ges), (tankPos - enemy.pos));
-        penalty = distPen + dirPen + collPen + enemyPen;
+        enemyPen = - norm(enemy.pos-tankPos) + getTimeToAlignVelocity(vecNorm(enemy.ges), vecNorm(tankPos - enemy.pos));
+        penalty = distPen + dirPen / 75 + collPen + enemyPen;
     end
 
     function CreatePathAllTanken(Liste)
