@@ -1,5 +1,6 @@
 %% Initialisierung
 
+
 % clear variables
 % close all
 % clc
@@ -7,7 +8,7 @@
 %  rng shuffle
 %  r = round(rand(1)*1000000)
 %  rng(r);
- 
+
 
 %% Konstanten definieren
 
