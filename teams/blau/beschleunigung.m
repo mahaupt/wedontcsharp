@@ -185,6 +185,7 @@ function bes = beschleunigung(spiel, farbe)
         
         %wenn die Wegpunktliste leer wird
         if numel(waypointList) <= 1 && numel(spiel.tanke) > 1 && ~tankeCompetition
+            % bei den letzten zwei Tanken überspringen, da es sonst in jeder Iteration durchgeführt wird
             if numel(spiel.tanke) == 2 && numel(waypointList) == 1
                 return;
             else
@@ -1212,7 +1213,7 @@ function bes = beschleunigung(spiel, farbe)
             
             %estimated time of tanken arrival
             tenemy  = norm(enemyPath)/projectVectorNorm(enemy.ges, enemyPath);
-            tvenemy = getTimeToAlignVelocity(enemy.ges, enemyPath);
+%            tvenemy = getTimeToAlignVelocity(enemy.ges, enemyPath);
             
             %time to correct velocity to tanke
             town = norm(ownPath) / projectVectorNorm(me.ges, ownPath);
