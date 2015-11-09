@@ -66,6 +66,7 @@ function bes = beschleunigung(spiel, farbe)
     persistent tankeCompetition;
     persistent waitForEnemy; %benötigt, um auf den Gegner warten zu können
     persistent dispWhatToDo;
+    persistent CompetitionNotbremse;
 
     
     %%Farbe prüfen und zuweisen
@@ -156,6 +157,7 @@ function bes = beschleunigung(spiel, farbe)
         tankeCompetition = false;
         waitForEnemy = false;
         setupNodeGrid();
+        CompetitionNotbremse = false;
         CreatePathAllTanken();
     end
 
@@ -1269,29 +1271,29 @@ function bes = beschleunigung(spiel, farbe)
             end
           
             %Notbremse bei zu spätem Erreichen einer Tanke
-%             if (tankeCompetition && i==1 && tenemy < town)
-%                 vel = norm(me.ges);
-%                 acc = spiel.bes;
-%                 dist = norm(ownPath);
-%                 
-%                 tacc = (sqrt(vel^2+2*acc*dist)-vel)/acc; %t beim beschleunigen
-%                 tbrk = (-sqrt(vel^2-2*acc*dist)+vel)/acc; %t beim bremsen
-%                 deltat = tbrk-tacc; %differenz
-%                 
-%                 %distanz die Gegner in deltat zurück legen kann
-%                 Distance = deltat*norm(enemy.ges);
-%                 
-%                 if (Distance <= spiel.spaceball_radius * 2)
-%                     debugDisp('checkTankPath: Notbremse, Tanke wird nicht vor Gegner erreicht');
-%                     safeDeleteWaypoints();
-%                     if isWalkable(waypointList{1} - 0.3 * enemy.ges, spiel.spaceball_radius)
-%                         waypointList{1} = waypointList{1} - 0.3 * enemy.ges;
-%                     end
-%                     ignoreTanke = i;
-%                     tankeCompetition = false;
-%                     CreatePathAllTanken();
-%                 end
-%             end
+            if (tankeCompetition && i==1 && tenemy < town && ~CompetitionNotbremse && enemy.getankt > me.getankt)
+                vel = norm(me.ges);
+                acc = spiel.bes;
+                dist = norm(ownPath);
+                
+                tacc = (sqrt(vel^2+2*acc*dist)-vel)/acc; %t beim beschleunigen
+                tbrk = (-sqrt(vel^2-2*acc*dist)+vel)/acc; %t beim bremsen
+                deltat = tbrk-tacc; %differenz
+                
+                %distanz die Gegner in deltat zurück legen kann
+                Distance = deltat*norm(enemy.ges);
+                
+                if (Distance <= spiel.spaceball_radius * 2)
+                    debugDisp('checkTankPath: Notbremse, Tanke wird nicht vor Gegner erreicht');
+                    safeDeleteWaypoints();
+                    %%WEGFINDUNG VERBESSERN!
+                    if isWalkable(waypointList{1} - 0.3 * enemy.ges, spiel.spaceball_radius)
+                        waypointList{1} = waypointList{1} - 0.3 * enemy.ges;
+                    end
+                    ignoreTanke = i;
+                    CompetitionNotbremse = true;
+                end
+            end
         end
     end
 
@@ -1341,6 +1343,7 @@ function bes = beschleunigung(spiel, farbe)
                 if ignoreTanke ~= 0
                     Liste(ignoreTanke) = [];
                 end
+            CompetitionNotbremse = false;
             disp('finding our Tank-path');
             [e1, TankList] = createTankList(0, Liste, me.pos, me.ges, constEbenen);
             TankList = fliplr(TankList);
