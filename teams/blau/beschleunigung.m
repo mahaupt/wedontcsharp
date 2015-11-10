@@ -138,7 +138,9 @@ function bes = beschleunigung(spiel, farbe)
             end
 
             %%Competition Mode aktivieren und überprüfen:
-            checkTankPath();
+            if numel(waypointList) > 0
+                checkTankPath();
+            end
             
         end
     end
@@ -162,6 +164,7 @@ function bes = beschleunigung(spiel, farbe)
 
     %registriert Änderungen im Spielfeld und Handelt entsprechend
     function gameChangeHandler()
+        
         %Nodegrid beim Verschwinden einer Mine aktualisieren:
         if numel(spiel.mine) < numel(ArrayOfMines)
             debugDisp('beschleunigung: Updating NodeGrid');
@@ -185,13 +188,8 @@ function bes = beschleunigung(spiel, farbe)
         end
         
         %wenn die Wegpunktliste leer wird
-        if numel(waypointList) <= 1 && numel(spiel.tanke) > 1 && ~tankeCompetition && dispWhatToDo == 3
-            % bei den letzten zwei Tanken überspringen, da es sonst in jeder Iteration durchgeführt wird
-            if numel(spiel.tanke) == 2 && numel(waypointList) == 1
-                return;
-            else
-                CreatePathAllTanken();
-            end
+        if numel(waypointList) <= 2 && numel(spiel.tanke) > 2 && ~tankeCompetition && dispWhatToDo == 3
+            CreatePathAllTanken();
         end
         
         debugDrawCircle(0, 0, 0, true);
