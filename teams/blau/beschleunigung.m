@@ -408,6 +408,7 @@ function bes = beschleunigung(spiel, farbe)
             if tankeCompetition
                 tankeCompetition = false;
                 debugDisp('competitionMode deaktivated');
+                ignoreTanke = 0;
                 CreatePathAllTanken();
             end
             debugDRAW();
@@ -1211,7 +1212,7 @@ function bes = beschleunigung(spiel, farbe)
 
     %Check if target tanke is still there
     function checkTankPath()
-        
+
         %check if enemy reaches targeted tanken before us
         for i = 1:numel(spiel.tanke)
             enemyPath = spiel.tanke(i).pos - enemy.pos;
