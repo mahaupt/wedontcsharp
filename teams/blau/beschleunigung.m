@@ -62,6 +62,7 @@ function bes = beschleunigung(spiel, farbe)
     persistent ArrayOfMines; %Zur Bestimmung des Minenverschwindens benötigt
     persistent StartNumberOfTank; %Zur Entscheidung über Angriff und Tanken benötigt
     persistent NumberOfTankEnemy; %Momentane Anzahl der Tanken des Gegners
+    persistent currentNumberOfTank; %aktuelle Anzahl an Tanken
     persistent ignoreTanke; %number of tanke to be ignored by targetNextTanke
     persistent tankeCompetition;
     persistent waitForEnemy; %benötigt, um auf den Gegner warten zu können
@@ -155,6 +156,7 @@ function bes = beschleunigung(spiel, farbe)
         ArrayOfMines = spiel.mine;
         StartNumberOfTank = spiel.n_tanke;
         NumberOfTankEnemy = enemy.getankt;
+        currentNumberOfTank = numel(spiel.tanke);
         tankeCompetition = false;
         waitForEnemy = false;
         setupNodeGrid();
@@ -176,21 +178,26 @@ function bes = beschleunigung(spiel, farbe)
 
         %Tanken:
         
-        %wenn der Gegner eine Tanke einsammelt, die auf unserer Wegpunktliste liegt:
-        if enemy.getankt ~= NumberOfTankEnemy && dispWhatToDo == 3
-            for i = 1:numel(waypointList)
-                if norm(enemy.pos-waypointList{i}) < 0.05
-                    CreatePathAllTanken();
-                    break;
-                end
-            end
-            NumberOfTankEnemy = enemy.getankt;
+        if currentNumberOfTank ~= numel(spiel.tanke)
+            CreatePathAllTanken();
+            currentNumberOfTank = numel(spiel.tanke);
         end
         
-        %wenn die Wegpunktliste leer wird
-        if numel(waypointList) <= 2 && numel(spiel.tanke) > 2 && ~tankeCompetition && dispWhatToDo == 3
-            CreatePathAllTanken();
-        end
+%         %wenn der Gegner eine Tanke einsammelt, die auf unserer Wegpunktliste liegt:
+%         if enemy.getankt ~= NumberOfTankEnemy && dispWhatToDo == 3
+%             for i = 1:numel(waypointList)
+%                 if norm(enemy.pos-waypointList{i}) < 0.05
+%                     CreatePathAllTanken();
+%                     break;
+%                 end
+%             end
+%             NumberOfTankEnemy = enemy.getankt;
+%         end
+%         
+%         %wenn die Wegpunktliste leer wird
+%         if numel(waypointList) <= 2 && numel(spiel.tanke) > 2 && ~tankeCompetition && dispWhatToDo == 3
+%             CreatePathAllTanken();
+%         end
         
         debugDrawCircle(0, 0, 0, true);
     end
