@@ -90,8 +90,8 @@ function bes = beschleunigung(spiel, farbe)
     
 %% Entscheidungen fällen und Beschleunigung berechnen
     %Entscheidung über Angriff/Verteidigung/Tanken
-    fleeEnemy()
-%     whatToDo();
+%     fleeEnemy()
+    whatToDo();
     
     %Beschleunigung berechnen:
     calculateBES();
@@ -1747,13 +1747,11 @@ function bes = beschleunigung(spiel, farbe)
 %% Verteidigung
     %Verteidigung
     function fleeEnemy()
-        if numel(waypointList) == 0
-%             if  NumberOfTank <= 0
+%         if  NumberOfTank <= 0
             cornerTricking();
-%             else
+%         else
 %             mineTricking();
-%             end
-        end
+%         end
     end
 
     
@@ -1766,7 +1764,7 @@ function bes = beschleunigung(spiel, farbe)
             %get nearest corner, go there and wait
             for i=1:4 % checking every corner
                 % calculating distance to each corner
-                cornerNodes(i,3)=norm(cornerNodes(i,1:2)-me.pos-enemy.ges);   
+                cornerNodes(i,3)=norm(cornerNodes(i,1:2)-me.pos-enemy.pos*2);   
             end
             nearestCorner = sortrows(cornerNodes, [3 2 1]); % finding the best corner 
             % add nodes of nearest corner to wplist 
@@ -1775,70 +1773,38 @@ function bes = beschleunigung(spiel, farbe)
             %waiting for the enemy
         else
             if checkIfTooFastE () == true || norm(me.pos-enemy.pos) <= 0.15
-            if checkIfTooFastECrash() == true && norm (waypointList{1} - me.pos) > 0.2 
-                      
-                Verteidigung = false 
-                debugDisp('cornerTricking. Pt3');
-                    for i=1:4
-                        cornerNodes(i,3)=norm(cornerNodes(i,1:2)-me.pos-enemy.ges);
-                    end
-                    
+                
                 nextCorner = sortrows(cornerNodes, [3 2 1]);
-                           
-                waypointList = [];
-                waypointList{1} = nextCorner(4,1:2);
-            else
-                Verteidigung = true  
-                debugDisp('cornerTricking: Pt2');
-            
-                    %sort all corners based on the direction the enemy is coming from and their distance to us
-                    for i=1:4
-                        cornerNodes(i,3)=norm(cornerNodes(i,1:2)-me.pos-enemy.ges);
-                    end
-                    
+                
+                if checkIfTooFastECrash() == true && norm(me.pos - enemy.pos) < 0.5 && (norm(me.ges)^2)/spiel.bes < norm (me.pos - nextCorner(1,1:2))+ spiel.spaceball_radius && norm (me.pos - nextCorner(1,1:2)) < 0.2 && corridorColliding(me.pos, nextCorner(3,1:2), spiel.mine_radius*2) == false
+
+                    Verteidigung = false 
+                    debugDisp('cornerTricking. Pt3');
+                        for i=1:4
+                            cornerNodes(i,3)=norm(cornerNodes(i,1:2)-me.pos-enemy.pos);
+                        end
+
                     nextCorner = sortrows(cornerNodes, [3 2 1]);
-                           
-                               
-                       % if enemy.getankt > StartNumberOfTank*0.5
-                            waypointList = [];
-                            waypointList{1} = nextCorner(2,1:2);
-            end
-        end
-%         elseif  checkIfTooFastECrash() == true;
-%                 Verteidigung = false 
-%                 debugDisp('cornerTricking. Pt3');
-%                     for i=1:4
-%                         cornerNodes(i,3)=norm(cornerNodes(i,1:2)-me.pos-enemy.ges);
-%                     end
-%                     
-%                 nextCorner = sortrows(cornerNodes, [3 2 1]);
-%                            
-%                 waypointList = [];
-%                 waypointList{1} = nextCorner(4,1:2);
-%             
-%         else
-%             if checkIfTooFastE () == true || norm(me.pos-enemy.pos) <= 0.15
-%             Verteidigung = true  
-%             debugDisp('cornerTricking: Pt2');
-%             
-%                     %sort all corners based on the direction the enemy is coming from and their distance to us
-%                     for i=1:4
-%                         cornerNodes(i,3)=norm(cornerNodes(i,1:2)-me.pos-enemy.ges);
-%                     end
-%                     
-%                     nextCorner = sortrows(cornerNodes, [3 2 1]);
-%                            
-%                                
-%                        % if enemy.getankt > StartNumberOfTank*0.5
-%                             waypointList = [];
-%                             waypointList{1} = nextCorner(2,1:2);
-%             end
-                    
-            
-            
-          
+
+                    waypointList = [];
+                    waypointList{1} = nextCorner(3,1:2);
+                else
+                    Verteidigung = true  
+                    debugDisp('cornerTricking: Pt2');
+
+                        %sort all corners based on the direction the enemy is coming from and their distance to us
+                        for i=1:4
+                            cornerNodes(i,3)=norm(cornerNodes(i,1:2)-me.pos-enemy.pos);
+                        end
+
+                        nextCorner = sortrows(cornerNodes, [3 2 1]);
+
+                        waypointList = [];
+                        waypointList{1} = nextCorner(2,1:2);
+                end
         end
     end
+end
 
         
 %                                       
@@ -1885,21 +1851,6 @@ function bes = beschleunigung(spiel, farbe)
         
         debugDRAW();
     end
-
-%     function cornerRescue() 
-%         for i=1:4
-%             cornerNodes(i,3)=norm(cornerNodes(i,1:2)-me.pos-enemy.ges);
-%         end
-%                     
-%         nextCorner = sortrows(cornerNodes, [3 2 1]);
-%                            
-%         waypointList = [];
-%         waypointList{1} = nextCorner(4,1:2);
-%     end
-
-
-        
-
 
 %% Debugging
     %Wegpunkte einzeichnen
