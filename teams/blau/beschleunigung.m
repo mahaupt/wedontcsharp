@@ -65,8 +65,8 @@ function bes = beschleunigung(spiel, farbe)
     persistent currentNumberOfTank; %aktuelle Anzahl an Tanken
     persistent ignoreTanke; %number of tanke to be ignored by targetNextTanke
     persistent tankeCompetition;
-    persistent waitForEnemy; %benötigt, um auf den Gegner warten zu können
-    persistent Verteidigung;
+    persistent waitForEnemy; %benÃ¶tigt, um auf den Gegner warten zu kÃ¶nnen
+    persistent Verteidigung 
     persistent dispWhatToDo;
     persistent CompetitionNotbremse;
 
@@ -96,9 +96,9 @@ function bes = beschleunigung(spiel, farbe)
     gameChangeHandler()
 
     
-%% Entscheidungen fällen und Beschleunigung berechnen
-    %Entscheidung über Angriff/Verteidigung/Tanken
-%     fleeEnemy()
+
+%% Entscheidungen fÃ¤llen und Beschleunigung berechnen
+    %Entscheidung Ã¼ber Angriff/Verteidigung/Tanken
     whatToDo();
     
     %Beschleunigung berechnen:
@@ -116,12 +116,10 @@ function bes = beschleunigung(spiel, farbe)
                 debugDisp('whatToDo: Angriff');
             end
             
-            %Wenn wir mehr als die Hälfte der Tanken haben oder nahe des Gegners sind und mehr getankt haben - Angriff!
-            Verteidigung = false;
+            %Wenn wir mehr als die HÃ¤lfte der Tanken haben oder nahe des Gegners sind und mehr getankt haben - Angriff!
             attackEnemy();
-
-        elseif enemy.getankt > StartNumberOfTank*0.5 || (thit <= 0.5 && me.getankt<enemy.getankt && ~corridorColliding(me.pos, enemy.pos, constNavSecurity))
-
+            
+        elseif (enemy.getankt > StartNumberOfTank*0.5 || (thit <= 0.5 && me.getankt<enemy.getankt && ~corridorColliding(me.pos, enemy.pos, constNavSecurity)) && ~tankeCompetition)
             if (dispWhatToDo ~= 2)
                 %vorher: tanken
                 if (dispWhatToDo == 3)
@@ -136,7 +134,8 @@ function bes = beschleunigung(spiel, farbe)
             %%Erst wenn alle Tanken weg sind und wir weniger haben, als der Gegner - Fliehen!
             fleeEnemy();
            
-        else 
+        else
+            
             if (dispWhatToDo ~= 3)
                 dispWhatToDo = 3;
                 debugDisp('whatToDo: Tanken');
@@ -146,12 +145,6 @@ function bes = beschleunigung(spiel, farbe)
             if numel(waypointList) > 0
                 checkTankPath();
             end
-            
-            Verteidigung = false;
-            %wenn Wegpunktliste leer => Pfad zur besten Tankstelle setzen
-            createPathToNextTanke()
-            %Erreicht der Gegner die anvisierte Tankstelle vor uns? dann löschen
-            checkTankPath()
         end
     end
 
