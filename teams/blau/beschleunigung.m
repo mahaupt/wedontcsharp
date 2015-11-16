@@ -159,8 +159,15 @@ function bes = beschleunigung(spiel, farbe)
         currentNumberOfTank = numel(spiel.tanke);
         tankeCompetition = false;
         waitForEnemy = false;
-        setupNodeGrid();
         CompetitionNotbremse = false;
+        
+        %compile mex files
+        if strcmp (farbe, 'rot')
+            mex teams/rot/source/esc_find_path.cpp
+        else
+            mex teams/blau/source/esc_find_path.cpp
+        end
+        
         CreatePathAllTanken();
     end
 
@@ -585,36 +592,6 @@ function bes = beschleunigung(spiel, farbe)
 
 
 %% Node-Grid erstellen, bzw. updaten
-    %setup node grid for path finding
-    function setupNodeGrid()
-        gridSizeX = round(1/(constGridRadius*2));
-        gridSizeY = round(1/(constGridRadius*2));
-        
-        %create grid
-        for x = 1 : gridSizeX+1
-            for y = 1 : gridSizeY+1
-                worldPos = [constGridRadius*2*x, constGridRadius*2*y];
-                gridPos = [x, y];
-                nodeGrid(x,y).worldPos = worldPos;
-                nodeGrid(x,y).gridPos = gridPos;
-                nodeGrid(x,y).isWalkable = isWalkable(worldPos, constSafeBorder + spiel.spaceball_radius);
-                nodeGrid(x,y).hCost = 0;
-                nodeGrid(x,y).fCost = 0;
-                nodeGrid(x,y).gCost = 0;
-                nodeGrid(x,y).heapIndex = 0;
-                mineCost = 0;
-                
-                %Je dichter an Mine, desto teurer!
-                for i=1:spiel.n_mine
-                    if (norm(nodeGrid(x,y).worldPos-spiel.mine(i).pos)-spiel.mine_radius < 0.1)
-                        mineCost = mineCost + constMineProxPenality/(norm(nodeGrid(x,y).worldPos-spiel.mine(i).pos)-spiel.mine_radius)^2;
-                    end
-                end
-                
-                nodeGrid(x,y).mineCost = mineCost;
-            end
-        end
-    end
 
     %check if node is a collider (mine, border)
     function erg=isWalkable(pos, radius)
@@ -632,37 +609,6 @@ function bes = beschleunigung(spiel, farbe)
             if (norm(spiel.mine(i).pos-pos) < spiel.mine(i).radius+secureSpaceballRadius)
                 erg = false;
                 return;
-            end
-        end
-    end
-
-    function updateNodeGrid(PosOfMine, radius)
-        gridSizeX = round(1/(constGridRadius*2));
-        gridSizeY = round(1/(constGridRadius*2));
-        
-        radius = radius+0.1+constSafeBorder;
-        radius = round(radius / 2 / constGridRadius);
-        gridPos = worldPosToGridPos(PosOfMine);
-       
-        startX = clamp(gridPos(1)-radius,1,gridSizeX);
-        startY = clamp(gridPos(2)-radius,1,gridSizeY);
-        endX = clamp(gridPos(1)+radius,1,gridSizeX);
-        endY = clamp(gridPos(2)+radius,1,gridSizeY);
-        
-        %create grid
-        for x = startX : endX
-            for y = startY : endY
-                worldPos = [constGridRadius*2*x, constGridRadius*2*y];
-                nodeGrid(x,y).isWalkable = isWalkable(worldPos, constSafeBorder + spiel.spaceball_radius);
-                mineCost = 0;
-                
-                %Je dichter an Mine, desto teurer!
-                for i=1:spiel.n_mine
-                    if (norm(nodeGrid(x,y).worldPos-spiel.mine(i).pos)-spiel.mine_radius < 0.1)
-                        mineCost = mineCost + constMineProxPenality/(norm(nodeGrid(x,y).worldPos-spiel.mine(i).pos)-spiel.mine_radius);
-                    end
-                end
-                nodeGrid(x,y).mineCost = mineCost;
             end
         end
     end
@@ -691,127 +637,10 @@ function bes = beschleunigung(spiel, farbe)
 %% Pathfinder
     %Wegpunkte finden
     function waypoints = findPath(startp, endp)
-        pathSuccess = false; % - Pfad gefunden
-        
-        startPos = getValidNodePos(worldPosToGridPos(startp));
-        endPos = getValidNodePos(worldPosToGridPos(endp));
-        
-        %debug purposes
-        if (equalsVec(startPos, endPos))
-            debugDisp('findPath: stard equals end, return zero waypoints');
-        end
-        
-        openSet = {};
-        openSet = insertHeapNode(openSet, startPos);
-        closedSet = {};
-        closedSetIndex = 1;
-        
-        startNode = nodeFromGridCoords(startPos);
-        endNode = nodeFromGridCoords(endPos);
-        
-        %if start and end node is invalid - abort
-        if (~startNode.isWalkable || ~endNode.isWalkable)
-            waypoints = [];
-            debugDisp('findPath: invalid start or end position');
-            return;
-        end
-        
-        %find path...
-        while(numel(openSet) > 0)
-            %get first heap node and resort heap
-            currentNode = nodeFromGridCoords(openSet{1});
-            openSet = removeHeapNode(openSet, 1);
-            openSet = sortHeapNodeDown(openSet, 1);
-            
-            %add node to closed set
-            closedSet = insertHeapNode(closedSet, currentNode.gridPos);
-            closedSetIndex = closedSetIndex + 1;
-            
-            %if it is target - close - path found!
-            if (currentNode.gridPos == endPos)
-                pathSuccess = true;
-                break;
-            end
-            
-            %calculate neighbour cost indices
-            neighbours = getNeighbourNodes(currentNode);
-            for i = 1 : numel(neighbours)
-                neighbour = neighbours(i);
-                if (~neighbour.isWalkable || containsHeapNode(closedSet, neighbour.gridPos))
-                    continue;
-                end
-                
-                %update costs for neighbours
-                movementCostToNeighbour = currentNode.gCost + norm(currentNode.worldPos - neighbour.worldPos);
-                if (movementCostToNeighbour < neighbour.gCost || ~containsHeapNode(openSet, neighbour.gridPos))
-                    
-                    nodeGrid(neighbour.gridPos(1), neighbour.gridPos(2)).gCost = movementCostToNeighbour;
-                    nodeGrid(neighbour.gridPos(1), neighbour.gridPos(2)).hCost = norm(endp - neighbour.worldPos);
-                    nodeGrid(neighbour.gridPos(1), neighbour.gridPos(2)).fCost = movementCostToNeighbour + norm(endp - neighbour.worldPos) + neighbour.mineCost;
-                    nodeGrid(neighbour.gridPos(1), neighbour.gridPos(2)).parent = currentNode.gridPos;
-                    heapIndex = neighbour.heapIndex;
-                    
-                    %add neighbour to openSet
-                    if (~containsHeapNode(openSet, neighbour.gridPos))
-                        %insert node into heap and resort heap
-                        openSet = insertHeapNode(openSet, neighbour.gridPos);
-                        heapIndex = numel(openSet);
-                        openSet = sortHeapNodeUp(openSet, heapIndex);
-                    else
-                        openSet = sortHeapNodeUp(openSet, heapIndex);
-                    end
-                end
-            end
-        end
-        
-        %finished pathfinding
-        if (pathSuccess)
-            %retrace path
-            currentNode = nodeFromGridCoords(endPos);
-            waypoints = [];
-            waypointIndex = 1;
-            
-            while (~equalsVec(currentNode.gridPos, startPos))
-               waypoints{waypointIndex} = currentNode.worldPos;
-               waypointIndex = waypointIndex + 1;
-               currentNode = nodeFromGridCoords(currentNode.parent);
-            end
-            
-            %flip waypoints
-            waypoints = simplifyPath(fliplr(waypoints));
-        else
-            waypoints = [];
-        end
+        waypoints = simplifyPath(esc_find_path(spiel.mine, startp, endp));
     end
 
-    % if node is not walkable, check for valid node in neighbours
-    function erg = getValidNodePos(gridPos)
-        node = nodeFromGridCoords(gridPos);
-        erg = gridPos;
-        
-        %nothing to do
-        if (node.isWalkable)
-            return;
-        end
-        
-        %check neighbours
-        neighbours = getNeighbourNodes(node);
-        for i = 1 : numel(neighbours)
-            neighbour = neighbours(i);
-            
-            if (neighbour.isWalkable)
-                erg = neighbour.gridPos;
-                return;
-            end
-        end   
-    end
-
-    %calculate nodegrid position from world position
-    function erg = worldPosToGridPos(pos)
-        erg = [round(pos(1)/constGridRadius/2), round(pos(2)/constGridRadius/2)];
-        erg = clamp(erg, 1, round(1/(constGridRadius*2)));
-    end
-
+   
     %clamps value between min and max
     function erg = clamp(value, min, max)
        for i=1:numel(value)
@@ -824,47 +653,12 @@ function bes = beschleunigung(spiel, farbe)
        end
        erg = value;
     end
-    
-    %get node-number from grid coordinates
-    function erg = nodeFromGridCoords(pos)
-        erg = nodeGrid(pos(1), pos(2));
-    end
-
-    %check if nodes are equal
-    function erg = equalsNode(a, b)
-        erg = false;
-        if (a.gridPos(1) == b.gridPos(1) && a.gridPos(2) == b.gridPos(2))
-            erg = true;
-        end
-    end
-
+ 
     %check if vectors are equal
     function erg = equalsVec(a, b)
         erg = false;
         if (a(1) == b(1) && a(2) == b(2))
             erg = true;
-        end
-    end
-
-    %get node neighbours
-    function erg = getNeighbourNodes(node)
-        gridSizeX = round(1/(constGridRadius*2));
-        gridSizeY = round(1/(constGridRadius*2));
-        
-        i = 1;
-        for x = node.gridPos(1) -1 : node.gridPos(1) +1
-            for y = node.gridPos(2) -1 : node.gridPos(2) + 1
-                %check if grid coors are valid
-                if (x >= 1 && x <= gridSizeX && y >= 1 && y <= gridSizeY)
-                
-                    if (equalsNode(nodeGrid(x, y), node))
-                        continue;
-                    end
-
-                    erg(i) = nodeGrid(x, y);
-                    i = i + 1;
-                end
-            end
         end
     end
 
@@ -923,151 +717,6 @@ function bes = beschleunigung(spiel, farbe)
         waypointList = appendToArray({me.pos}, waypointList);
         waypointList = simplifyPath(waypointList);
     end
-
-
-%% Heap-System
-    %check if heap contains node
-    function erg = containsHeapNode(nodes, pos)
-        erg = false;
-        index = nodeGrid(pos(1), pos(2)).heapIndex;
-        if (index < 1 || index > numel(nodes))
-            return;
-        end
-        
-        node = nodes{index};
-        
-        if (node(1) == pos(1) && node(2) == pos(2))
-            erg = true;
-            return;
-        end
-
-    end
-
-    %insert node into heap
-    function erg = insertHeapNode(heap, nodePos)
-        insertIndex = numel(heap) + 1;
-        heap{insertIndex} = nodePos;
-        nodeGrid(nodePos(1), nodePos(2)).heapIndex = insertIndex;
-        
-        erg = heap;
-    end
-
-    %remove node from heap
-    %replace last node in heap with given node
-    function erg = removeHeapNode(heap, index)
-        
-        nodePos = heap{index};
-        nodeGrid(nodePos(1), nodePos(2)).heapIndex = 0;
-        
-        lastIndex = numel(heap);
-        lastNode = heap{lastIndex};
-        if (lastIndex ~= index)
-            nodeGrid(lastNode(1), lastNode(2)).heapIndex = index;
-        end
-        
-        heap{index} = lastNode;
-        heap(lastIndex) = [];
-        
-        erg = heap;
-    end
-
-    %sorts the heap system downwards
-    function erg = sortHeapNodeDown(heap, index)
-        erg = heap;
-        %nothing to do
-        if (index > numel(heap))
-            return;
-        end
-        
-        parentPos = heap{index};
-        parentNode = nodeFromGridCoords(parentPos);
-        
-        child1 = round(index*2);
-        child2 = round(index*2+1);
-        
-        %node has no child nodes
-        if (child1 > numel(heap))
-            return;
-        end
-        
-        childPos1 = heap{child1};
-        childNode1 = nodeFromGridCoords(childPos1);
-        
-        swapIndex = 0;
-        
-        %node has two child nodes
-        if (child2 <= numel(heap))
-            childPos2 = heap{child2};
-            childNode2 = nodeFromGridCoords(childPos2);
-
-
-            if (childNode1.fCost > childNode2.fCost)
-                if (childNode2.fCost < parentNode.fCost)
-                    swapIndex = child2;
-                end
-            else
-                if (childNode1.fCost < parentNode.fCost)
-                    swapIndex = child1;
-                end
-            end
-        else
-            %node has one child node
-            if (childNode1.fCost < parentNode.fCost)
-                    swapIndex = child1;
-            end
-        end
-        
-        
-        if (swapIndex > 0)
-            %swap nodes
-            erg = swapHeapNodes(erg, swapIndex, index);
-            
-            %get new index and continue downsorting
-            newNode = nodeFromGridCoords(parentPos);
-            erg = sortHeapNodeDown(erg, newNode.heapIndex);
-        end
-    end
-
-    %sorts the heap system upwards
-    function erg = sortHeapNodeUp(heap, index)
-        erg = heap;
-        parentIndex = round(index/2-0.25);
-        
-        if (parentIndex <= 0)
-            return;
-        end
-        
-        parentPos = heap{parentIndex};
-        childPos = heap{index};
-        
-        
-        parentNode = nodeFromGridCoords(parentPos);
-        childNode = nodeFromGridCoords(childPos);
-        
-        if (parentNode.fCost > childNode.fCost)
-            %swap position
-            erg = swapHeapNodes(erg, index, parentIndex);
-            
-            %get new node index
-            newNode = nodeFromGridCoords(childPos);
-            newIndex = newNode.heapIndex;
-            erg = sortHeapNodeUp(erg, newIndex);
-        end
-    end
-
-    %Swap two nodes saved in heap;
-    function erg = swapHeapNodes(heap, index1, index2)
-        nodePos1 = heap{index1};
-        nodeGrid(nodePos1(1), nodePos1(2)).heapIndex = index2;
-        
-        nodePos2 = heap{index2};
-        nodeGrid(nodePos2(1), nodePos2(2)).heapIndex = index1;
-        
-        heap{index1} = nodePos2;
-        heap{index2} = nodePos1;
-        erg = heap;
-    end
-
 
 
 %% Andere Funktionen
