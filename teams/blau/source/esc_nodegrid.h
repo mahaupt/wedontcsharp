@@ -3,7 +3,7 @@
 class Nodegrid {
 public:
     const float constGridRadius = 0.001;
-    const float constSafeBorder = 0.0001;
+    const float constSafeBorder = 0.001;
     const float constSpaceballRadius = 0.01;
     const float constMineProxPenality = 0.00001;
     
@@ -19,9 +19,9 @@ public:
         
         nodeGrid = vector<vector<Node>>();
         
-        for (int x=0; x<gridSize; x++) {
+        for (int x=0; x<=gridSize; x++) {
             nodeGrid.push_back(vector<Node>());
-            for(int y=0; y<gridSize; y++) {
+            for(int y=0; y<=gridSize; y++) {
                 Vector2 gridPos = Vector2(x, y);
                 Vector2 worldPos = gridPosToWorldPos(gridPos);
                 bool is_walkable = isWalkableCheck(worldPos, mineList);
@@ -40,7 +40,7 @@ public:
         }
         
         duration = ( std::clock() - start ) / (double) CLOCKS_PER_SEC;
-        mexPrintf("Nodegrid calculated in %f s\n", duration);
+        mexPrintf("Nodegrid (%u x %u nodes) calculated in %f s\n", nodeGrid.size(), nodeGrid[0].size(), (float)duration);
     }
     
     
@@ -54,7 +54,7 @@ public:
         gridPos.x = (int)gridPos.x;
         gridPos.y = (int)gridPos.y;
         
-        return gridPos.clamp(0, gridSize-1);
+        return gridPos.clamp(0, gridSize);
     }
     
     Node &getNodeFromGridPos(Vector2 gridPos) {
@@ -90,7 +90,7 @@ public:
             for (int j = -1; j <= 1; j++) {
                 if (i == 0 && j == 0)
                     continue;
-                if (i < 0 || j < 0 || i >= gridSize || j >= gridSize)
+                if (gp.x+i < 0 || gp.y+j < 0 || gp.x+i >= gridSize || gp.y+j >= gridSize)
                     continue;
                 neighbours.push_back(&getNodeFromGridPos(Vector2(gp.x+i, gp.y+j)));
             }

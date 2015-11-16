@@ -17,13 +17,14 @@ using namespace std;
 void mexFunction(int outCount,mxArray *outVars[],int inCount,const mxArray *inVars[]) {
     static vector<Mine> mineList = vector<Mine>();
     static Nodegrid nodeGrid = Nodegrid();
+    static bool firstRound = true;
             
     if (inCount <= 0)
         mexErrMsgIdAndTxt("MATLAB:textfunc:inputArgumentNumber", "Not Enough input arguments!");
     if (!mxIsStruct(inVars[0]))
         mexErrMsgIdAndTxt("MATLAB:textfunc:inputNotStruct", "First Parameter must be a structure");
     
-    if (mineList.size() != mxGetNumberOfElements(inVars[0])) {
+    if (firstRound || mineList.size() != mxGetNumberOfElements(inVars[0])) {
         mexPrintf("Reparsed MineList\n");
         mineList = Mine::parseMineStruct(inVars[0]);
         mexPrintf("Recalculate Nodegrid\n");
@@ -60,4 +61,6 @@ void mexFunction(int outCount,mxArray *outVars[],int inCount,const mxArray *inVa
         
         mxSetCell(outVars[0], i, tmp);
     }
+    
+    firstRound = false;
 }

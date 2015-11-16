@@ -16,7 +16,7 @@ public:
     static vector<Mine> parseMineStruct(const mxArray *structArray) { 
         int nelements = mxGetNumberOfElements(structArray);
         
-        //mexPrintf("Number of elements: %d\n", nfields, nelements);
+        mexPrintf("Number of Mines: %d\n", nelements);
         
         vector<Mine> mineList = vector<Mine>();
         

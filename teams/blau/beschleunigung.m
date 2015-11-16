@@ -10,9 +10,6 @@ function bes = beschleunigung(spiel, farbe)
     constGridRadius = 0.003;
     %Korridorbreite für simplifyPath
     constNavSecurity = 0.02;
-    %Strafpunkte für Nodes - je dichter an Mine, desto höher
-    %wichtig für den Pathfinder
-    constMineProxPenality = 0.00001; % 0.0006
     %0.4 je größer der Winkel zum nächsten Wegpunkt, desto höheres Bremsen. Faktor.
     constCornerBreaking = 0.65; 
     %Faktor für Seitwärtsbbeschleunigungen fürs Emergencybreaking
