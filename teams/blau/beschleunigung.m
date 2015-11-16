@@ -161,8 +161,10 @@ function bes = beschleunigung(spiel, farbe)
         %compile mex files
         if strcmp (farbe, 'rot')
             mex teams/rot/source/esc_find_path.cpp
+            mex teams/rot/source/esc_find_tanke.cpp
         else
             mex teams/blau/source/esc_find_path.cpp
+            mex teams/blau/source/esc_find_tanke.cpp
         end
         
         CreatePathAllTanken();
@@ -953,51 +955,10 @@ function bes = beschleunigung(spiel, farbe)
 
 %% NEUE Tankenfindung
 
-    function [penalty, tList] = createTankList(pathPenalty, tankList, prevPos, prevPath, Ebenen)
-        if numel(tankList) <= 0 || Ebenen == 0
-            penalty = pathPenalty;
-            tList = {prevPos};
-            return
-        end
-        
-        penalty = inf;
-        
-        for i = 1:numel(tankList)
-            pen = calcTankPen(tankList(i).pos, prevPos, prevPath);
-            j = setdiff(1:numel(tankList), i);
-            [erg1, erg2] = createTankList(pen + pathPenalty, tankList(j), tankList(i).pos, tankList(i).pos-prevPos, Ebenen-1);
-            if (erg1 < penalty)
-                penalty = erg1;
-                tList = erg2;
-            end
-        end
-        
-        insertIndex = numel(tList)+1;
-        tList{insertIndex} = prevPos;
-    end
-
-    function penalty = calcTankPen(tankPos, prevPos, prevPath)
-        distPen = norm(tankPos - prevPos);
-        dirPen  = getTimeToAlignVelocity(vecNorm(tankPos-prevPos), vecNorm(prevPath));
-        collPen = 0;
-        enemyPen = 0;
-        if corridorColliding(tankPos, prevPos, constNavSecurity);
-            collPen = 1.5;
-        end
-        enemyPen = - (norm(enemy.pos-tankPos) + getTimeToAlignVelocity(vecNorm(enemy.ges), vecNorm(tankPos - enemy.pos)));
-        penalty = distPen + dirPen / 75 + collPen + enemyPen;
-    end
 
     function CreatePathAllTanken()
         if ~tankeCompetition
-            TankList=[];
-            Liste = spiel.tanke;
-                if ignoreTanke ~= 0
-                    Liste(ignoreTanke) = [];
-                end
-            CompetitionNotbremse = false;
-            disp('finding our Tank-path');
-            [e1, TankList] = createTankList(0, Liste, me.pos, me.ges, constEbenen);
+            TankList = esc_find_tanke(spiel.mine, spiel.tanke, me.pos, me.ges, enemy.pos, enemy.ges);
             TankList = fliplr(TankList);
             disp('calculating Path between Tanken');
             waypointList = [];

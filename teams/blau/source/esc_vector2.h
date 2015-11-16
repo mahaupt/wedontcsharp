@@ -67,6 +67,20 @@ public:
         return sqrt(x*x+y*y);
     }
     Vector2 norm() {
-        return Vector2(x,y)/magnitude();
+        float mag = magnitude();
+        
+        if (mag > 0) {
+            return Vector2(x,y)/mag;
+        } else {
+            return Vector2(0, 0);
+        }
+    }
+    
+    float dot(const Vector2 & right) {
+        return x*right.x + y*right.y;
+    }
+    
+    Vector2 getPerpend() {
+        return Vector2(-y, x);
     }
 };

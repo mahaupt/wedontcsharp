@@ -40,7 +40,7 @@ public:
         }
         
         duration = ( std::clock() - start ) / (double) CLOCKS_PER_SEC;
-        mexPrintf("Nodegrid (%u x %u nodes) calculated in %f s\n", nodeGrid.size(), nodeGrid[0].size(), (float)duration);
+        //mexPrintf("Nodegrid (%u x %u nodes) calculated in %f s\n", nodeGrid.size(), nodeGrid[0].size(), (float)duration);
     }
     
     
