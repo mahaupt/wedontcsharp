@@ -173,9 +173,6 @@ function bes = beschleunigung(spiel, farbe)
         
         %Nodegrid beim Verschwinden einer Mine aktualisieren:
         if numel(spiel.mine) < numel(ArrayOfMines)
-            debugDisp('beschleunigung: Updating NodeGrid');
-            NumberOfMine = customSetdiff(spiel.mine, ArrayOfMines);
-            updateNodeGrid(NumberOfMine.pos, spiel.mine_radius);
             resimplifyWaypoints();
             ArrayOfMines = spiel.mine;
         end
@@ -393,7 +390,7 @@ function bes = beschleunigung(spiel, farbe)
         %decelleration
         distanceToWaypoint=norm(waypointList{1}-me.pos);
         breakDistance = calcBreakDistance(norm(me.ges), breakingEndVel);
-        if (breakDistance > distanceToWaypoint || checkIfTooFast())
+        if (breakDistance > distanceToWaypoint && breakingEndVel < norm(me.ges) || checkIfTooFast())
             bes=-dir + corr;
         end
         
@@ -813,12 +810,16 @@ function bes = beschleunigung(spiel, farbe)
 
     function erg = getMaxVelocityToAlignInTime(vec1, vec2, time)
         dotp = dot(vecNorm(vec1), vecNorm(vec2));
-        angle = acos(dotp);
+        angle = real(acos(dotp));
         if dotp < 0
             angle = angle + pi/2;
         end
         
         erg = time*spiel.bes/angle;
+        
+        if (angle == 0)
+            erg = inf;
+        end
     end
 
     function endPosition = safeDeleteWaypoints()

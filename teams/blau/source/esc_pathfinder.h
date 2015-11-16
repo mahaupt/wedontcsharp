@@ -33,7 +33,7 @@ public:
                 if (newCostToN < nbs[i]->gCost || !openSet.contains(*nbs[i])) {
                     nbs[i]->gCost = newCostToN;
                     nbs[i]->hCost = (end - nbs[i]->worldPos).magnitude();
-                    nbs[i]->fCost = nbs[i]->gCost + nbs[i]->hCost;// + nbs[i]->mineCost;
+                    nbs[i]->fCost = nbs[i]->gCost + nbs[i]->hCost + nbs[i]->mineCost;
                     nbs[i]->parent = &currentNode;
                     
                     //mexPrintf("\nNeighbour: [%f, %f] fCost: %f, gCost: %f\n", nbs[i]->gridPos.x, nbs[i]->gridPos.y, nbs[i]->fCost, nbs[i]->gCost);

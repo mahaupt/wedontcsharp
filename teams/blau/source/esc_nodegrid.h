@@ -2,7 +2,7 @@
 
 class Nodegrid {
 public:
-    const float constGridRadius = 0.001;
+    const float constGridRadius = 0.003;
     const float constSafeBorder = 0.001;
     const float constSpaceballRadius = 0.01;
     const float constMineProxPenality = 0.00001;

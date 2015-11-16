@@ -25,9 +25,9 @@ void mexFunction(int outCount,mxArray *outVars[],int inCount,const mxArray *inVa
         mexErrMsgIdAndTxt("MATLAB:textfunc:inputNotStruct", "First Parameter must be a structure");
     
     if (firstRound || mineList.size() != mxGetNumberOfElements(inVars[0])) {
-        mexPrintf("Reparsed MineList\n");
+        //mexPrintf("Reparsed MineList\n");
         mineList = Mine::parseMineStruct(inVars[0]);
-        mexPrintf("Recalculate Nodegrid\n");
+        //mexPrintf("Recalculate Nodegrid\n");
         nodeGrid.setupNodeGrid(mineList);
     }
     
@@ -46,7 +46,7 @@ void mexFunction(int outCount,mxArray *outVars[],int inCount,const mxArray *inVa
     vector<Vector2> wps = Pathfinder::findPath(nodeGrid, startp, endp);
     
     duration = ( std::clock() - start ) / (double) CLOCKS_PER_SEC;
-    mexPrintf("Path (%d nodes) found in %f s\n", wps.size(), duration);
+    //mexPrintf("Path (%d nodes) found in %f s\n", wps.size(), duration);
     
     outVars[0] = mxCreateCellMatrix(1, wps.size());
     for (int i=0; i < wps.size(); i++) {
