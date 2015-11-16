@@ -67,14 +67,16 @@ public:
         //mexPrintf("Pos x: %f, y: %f\n", node1.gridPos.x, node1.gridPos.y);
         
         //nothing to do
-        if (true || node1.is_walkable)
+        if (node1.is_walkable)
             return node1;
         
         //check walkable neighbours
-        vector<Node*> nbList = getNeighbours(node1);
-        for(int i=0; i<nbList.size(); i++) {
-            if (nbList[i]->is_walkable) {
-                return (*nbList[i]);
+        for (int range = 1; range <= 5; range++) {
+            vector<Node*> nbList = getNeighbours(node1, range);
+            for(int i=0; i<nbList.size(); i++) {
+                if (nbList[i]->is_walkable) {
+                    return (*nbList[i]);
+                }
             }
         }
         
@@ -82,12 +84,12 @@ public:
     }
     
     
-    const vector<Node*> getNeighbours(const Node &node) {
+    const vector<Node*> getNeighbours(const Node &node, int range=1) {
         vector<Node*> neighbours = vector<Node*>();
         
         const Vector2 &gp = node.gridPos;
-        for (int i = -1; i <= 1; i++) {
-            for (int j = -1; j <= 1; j++) {
+        for (int i = -range; i <= range; i++) {
+            for (int j = -range; j <= range; j++) {
                 if (i == 0 && j == 0)
                     continue;
                 if (gp.x+i < 0 || gp.y+j < 0 || gp.x+i >= gridSize || gp.y+j >= gridSize)
