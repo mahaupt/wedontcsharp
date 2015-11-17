@@ -792,11 +792,14 @@ function bes = beschleunigung(spiel, farbe)
             TankList = esc_find_tanke(spiel.mine, currentTankList, me.pos, me.ges, enemy.pos, enemy.ges);
             TankList = fliplr(TankList);
             debugDisp('calculating Path between Tanken');
-            waypointList = [];
-            for i = 1:numel(TankList)-1
-                waypointList = appendToArray(waypointList, findPath(TankList{i},TankList{i+1}));
+            
+            if (numel(TankList) > 0)
+                waypointList = findPath(me.pos,spiel.tanke(TankList{1}).pos);
+                for i = 1:numel(TankList)-1
+                    waypointList = appendToArray(waypointList, findPath(spiel.tanke(TankList{i}).pos,spiel.tanke(TankList{i+1}).pos));
+                end
+                debugDRAW();
             end
-            debugDRAW();
         end
     end
 

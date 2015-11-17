@@ -20,7 +20,9 @@ public:
         }
         
         if (tankListSize <= 0) {
-            tList.push_back(thisTankID);
+            if (thisTankID > 0) {
+                tList.push_back(thisTankID);
+            }
             return pathPenalty;
         }
         
@@ -37,7 +39,7 @@ public:
             tankList[i] = 0;
             
             vector<int> erg2 = vector<int>();
-            float erg1 = findTanke(erg2, pen + pathPenalty, tankList, tmp->pos, tmp->pos-prevPos, i);
+            float erg1 = findTanke(erg2, pen + pathPenalty, tankList, tmp->pos, tmp->pos-prevPos, i+1);
             
             //add tanke i to list
             tankList[i] = tmp;
@@ -49,7 +51,7 @@ public:
         }
         
         //add prev pos to tank list
-        if (thisTankID != 0) {
+        if (thisTankID > 0) {
             tList.push_back(thisTankID);
         }
         
