@@ -1,6 +1,10 @@
 %% Initialisierung
 
+clear variables
+close all
+clc
 
+<<<<<<< HEAD
 % clear variables
 % close all
 % clc
@@ -8,6 +12,11 @@
 % %  rng shuffle
 % %  r = round(rand(1)*1000000)
 %  rng(200444);
+=======
+rng shuffle
+r = round(rand(1)*1000000)
+rng(r);
+>>>>>>> origin/master
 
 
 %% Konstanten definieren
