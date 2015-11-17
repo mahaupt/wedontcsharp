@@ -974,49 +974,6 @@ function bes = beschleunigung(spiel, farbe)
     function attackEnemy()
         %lockon attack ist nur sicher, wenn sich zwischen Gegner und Mir
         %keine Mine befindet
-        
-        %bitte stehen lassen! ich weiß noch nicht ob die untere einfache
-        %Methode, sicher ist!
-%         useLockonAttack = false;
-%         if (spiel.n_mine < constMaxLockonMineCount)
-%             useLockonAttack = true;
-%             if (spiel.n_mine > 0)
-%                 % 0 - constMaxLockonMineCount mines, calculate
-%                 dangerRadius = spiel.spaceball_radius + spiel.mine_radius + constSafeBorder;
-%                 
-%                 dirToEnemy = vecNorm(enemy.pos-me.pos);
-%                 dirToAxis = [dirToEnemy(1)/norm(dirToEnemy(1)), 0]; % [-1, 0 ] or [1, 0] in enemy direction
-%                 angle = acos(dot(dirToEnemy, dirToAxis));
-% 
-%                 %negative angle if rotated clockwise
-%                 if (dirToAxis(1) < 0)
-%                     if (dirToEnemy(2) < 0)
-%                         angle = -angle;
-%                     end
-%                 else
-%                      if (dirToEnemy(2) > 0)
-%                         angle = -angle;
-%                      end
-%                 end
-% 
-%                 %calculate rotation matrices
-%                 rotMat1 = [cos(angle), -sin(angle); sin(angle), cos(angle)]; %rotate to enemy direction
-%                 ownPos = (rotMat1*me.pos')';
-%                 
-%                 %check every mine
-%                 for i=1:spiel.n_mine
-%                     minePos = (rotMat1*spiel.mine(i).pos')';
-%                     % größer null - gefahr!
-%                     %kleiner null - mine hinter mir!
-%                     checkPos = (minePos(1)-ownPos(1))*dirToAxis(1) + dangerRadius;  
-%                     if (checkPos > 0)
-%                         useLockonAttack = false;
-%                         break;
-%                     end
-%                 end
-%             end
-%         end
-
         useLockonAttack = false;
         if (~corridorColliding(me.pos, enemy.pos, spiel.mine_radius*3))
             useLockonAttack = true;
@@ -1130,7 +1087,7 @@ function bes = beschleunigung(spiel, farbe)
         toEnemy = vecNorm(rotEnemyPos - rotMePos);
         
         %position aligned - finetune position -> lock onto target
-        if (norm(rotMeGes(2)-rotEnemyGes(2)) < 0.0005 && norm(rotMePos(2)-rotEnemyPos(2)) < spiel.spaceball_radius*0.8)
+        if (norm(rotMeGes(2)-rotEnemyGes(2)) < 0.001 && norm(rotMePos(2)-rotEnemyPos(2)) < spiel.spaceball_radius*0.8)
             if (lockAnnouncement ~= 1)
                 debugDisp('LockOnAttack: Target Locked!');
                 lockAnnouncement = 1;
