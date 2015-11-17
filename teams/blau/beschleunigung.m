@@ -132,6 +132,7 @@ function bes = beschleunigung(spiel, farbe)
         StartNumberOfTank = spiel.n_tanke;
         currentNumberOfTank = numel(spiel.tanke);
         tankeCompetition = false;
+        ignoreTanke = 0;
         waitForEnemy = false;
         
         %compile mex files
@@ -160,6 +161,10 @@ function bes = beschleunigung(spiel, farbe)
             currentNumberOfTank = numel(spiel.tanke);
         end
         
+        doesEnemyGetTanke();
+        
+        competitionMode();
+        
         debugDrawCircle(0, 0, 0, true);
         
     end
@@ -180,7 +185,7 @@ function bes = beschleunigung(spiel, farbe)
         if (nargin > 0 || ((spiel.n_mine <= 0 || spiel.n_mine < besMineID) && besCalculationMode == 1))
             besCalculationMode = 0;
             besMineID = 0;
-            debugDisp('calculateBES: Mine Mode disabled!');
+%            debugDisp('calculateBES: Mine Mode disabled!');
             if (nargin > 0)
                 return;
             end
@@ -203,14 +208,14 @@ function bes = beschleunigung(spiel, farbe)
             if (toMine1 < constMineProxRadius && toMine2 < constMineProxRadius && checkMineID == mineID)
                 besCalculationMode = 1;
                 besMineID = mineID;
-                debugDisp('calculateBES: Mine Mode activated!');
+%                debugDisp('calculateBES: Mine Mode activated!');
             end
         elseif (spiel.n_mine > 0 && besCalculationMode == 1)
             toMine = norm(spiel.mine(besMineID).pos - me.pos);
             if (toMine > constMineProxRadius*1.1)
                 besCalculationMode = 0;
                 besMineID = 0;
-                debugDisp('calculateBES: Mine Mode disabled!');
+%                debugDisp('calculateBES: Mine Mode disabled!');
             end
         end
         
@@ -784,7 +789,6 @@ function bes = beschleunigung(spiel, farbe)
 
     function CreatePathAllTanken()
         if ~tankeCompetition
-            ignoreTanke = 5;
             currentTankList = spiel.tanke;
             if ignoreTanke <= numel(spiel.tanke) && ignoreTanke > 0
                 currentTankList(ignoreTanke) = [];
@@ -801,6 +805,14 @@ function bes = beschleunigung(spiel, farbe)
                 debugDRAW();
             end
         end
+    end
+
+    function doesEnemyGetTanke()
+        ignoreTanke = 0;
+    end
+
+    function competitionMode()
+        return;
     end
 
 
