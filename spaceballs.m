@@ -1,5 +1,8 @@
 %% Initialisierung
+<<<<<<< HEAD
 
+=======
+>>>>>>> master
 clear variables
 close all
 clc

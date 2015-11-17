@@ -892,7 +892,10 @@ function bes = beschleunigung(spiel, farbe)
     function attackEnemy()
         %lockon attack ist nur sicher, wenn sich zwischen Gegner und Mir
         %keine Mine befindet
+<<<<<<< HEAD
 
+=======
+>>>>>>> master
         useLockonAttack = false;
         if (~corridorColliding(me.pos, enemy.pos, spiel.mine_radius*3))
             useLockonAttack = true;
