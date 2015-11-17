@@ -335,7 +335,7 @@ function bes = beschleunigung(spiel, farbe)
         
         %exit circle mode
         %Springe aus diesem Beschleunigungsmodus, wenn der n‰chste Wegpunkt
-        %au√üerhalb des Orbitradiusses liegt und unser Beschleunigungsvektor
+        %auﬂerhalb des Orbitradiusses liegt und unser Beschleunigungsvektor
         %auf den n‰chsten Wegpunkt zeigt
         towp = vecNorm(waypointList{1}-me.pos);
         wpdist = norm(waypointList{1} - minePos);
@@ -388,7 +388,6 @@ function bes = beschleunigung(spiel, farbe)
             if tankeCompetition
                 tankeCompetition = false;
                 debugDisp('competitionMode deaktivated');
-                ignoreTanke = 0;
                 CreatePathAllTanken();
             end
             debugDRAW();
@@ -824,7 +823,7 @@ function bes = beschleunigung(spiel, farbe)
             
             %estimated time of tanken arrival
             tenemy  = norm(enemyPath)/projectVectorNorm(enemy.ges, enemyPath);
-%            tvenemy = getTimeToAlignVelocity(enemy.ges, enemyPath);
+%           tvenemy = getTimeToAlignVelocity(enemy.ges, enemyPath);
             
             %time to correct velocity to tanke
             town = norm(ownPath) / projectVectorNorm(me.ges, ownPath);
@@ -842,19 +841,6 @@ function bes = beschleunigung(spiel, farbe)
                 town = inf;
             end
             
-            %check if ignoreTanke is still valid
-%             if ignoreTanke
-%                 if i == ignoreTanke
-%                     if ~(tenemy < 0.25 && ~enemyColliding  && (tvenemy < 0.5 || norm(enemyPath) < 0.03))
-%                         %uncheck ignoreTanke if above is false
-%                         ignoreTanke = 0;
-%                         debugDisp('checkTankPath: disabled ignoretanke');
-%                     end
-%                 end
-%                 continue;
-%             end
-            
-            
             %only if tanke is about to get taken
             if (tenemy < 0.3 && ~enemyColliding)
                 if (norm(spiel.tanke(i).pos - waypointList{1}) < 0.05 && norm(tenemy- town) < constCompetitionModeThreshold && ~tankeCompetition && ~ownColliding ...
@@ -871,11 +857,6 @@ function bes = beschleunigung(spiel, farbe)
                     debugDRAW();
                     return;
                     
-%                 elseif (tenemy+tvenemy < town+tvown && ~tankeCompetition && (tvenemy < 0.5 || norm(enemyPath) < 0.03))
-%                     debugDisp('checkTankPath: enemy reaches tanke before us .. get new target tanke');
-%                     ignoreTanke = i;
-%                     CreatePathAllTanken();
-%                     return;
                  end
             end
           
@@ -899,7 +880,6 @@ function bes = beschleunigung(spiel, farbe)
                     if isWalkable(waypointList{1} - 0.3 * enemy.ges, spiel.spaceball_radius)
                         waypointList{1} = waypointList{1} - 0.3 * enemy.ges;
                     end
-                    ignoreTanke = i;
                     CompetitionNotbremse = true;
                 end
             end
@@ -912,48 +892,6 @@ function bes = beschleunigung(spiel, farbe)
     function attackEnemy()
         %lockon attack ist nur sicher, wenn sich zwischen Gegner und Mir
         %keine Mine befindet
-        
-        %bitte stehen lassen! ich wei√ü noch nicht ob die untere einfache
-        %Methode, sicher ist!
-%         useLockonAttack = false;
-%         if (spiel.n_mine < constMaxLockonMineCount)
-%             useLockonAttack = true;
-%             if (spiel.n_mine > 0)
-%                 % 0 - constMaxLockonMineCount mines, calculate
-%                 dangerRadius = spiel.spaceball_radius + spiel.mine_radius + constSafeBorder;
-%                 
-%                 dirToEnemy = vecNorm(enemy.pos-me.pos);
-%                 dirToAxis = [dirToEnemy(1)/norm(dirToEnemy(1)), 0]; % [-1, 0 ] or [1, 0] in enemy direction
-%                 angle = acos(dot(dirToEnemy, dirToAxis));
-% 
-%                 %negative angle if rotated clockwise
-%                 if (dirToAxis(1) < 0)
-%                     if (dirToEnemy(2) < 0)
-%                         angle = -angle;
-%                     end
-%                 else
-%                      if (dirToEnemy(2) > 0)
-%                         angle = -angle;
-%                      end
-%                 end
-% 
-%                 %calculate rotation matrices
-%                 rotMat1 = [cos(angle), -sin(angle); sin(angle), cos(angle)]; %rotate to enemy direction
-%                 ownPos = (rotMat1*me.pos')';
-%                 
-%                 %check every mine
-%                 for i=1:spiel.n_mine
-%                     minePos = (rotMat1*spiel.mine(i).pos')';
-%                     % grˆﬂer null - gefahr!
-%                     %kleiner null - mine hinter mir!
-%                     checkPos = (minePos(1)-ownPos(1))*dirToAxis(1) + dangerRadius;  
-%                     if (checkPos > 0)
-%                         useLockonAttack = false;
-%                         break;
-%                     end
-%                 end
-%             end
-%         end
 
         useLockonAttack = false;
         if (~corridorColliding(me.pos, enemy.pos, spiel.mine_radius*3))
@@ -991,7 +929,7 @@ function bes = beschleunigung(spiel, farbe)
             pathResolution = clamp(norm(enemypos-me.pos)/2, 0.1, 0.5);
             
             %Pr¸fe, ob Pfad neu berechnet werden soll (Gegner liegt
-            %au√üerhalb von pathResolution vom letzten Wegpunkt)
+            %auﬂerhalb von pathResolution vom letzten Wegpunkt)
             recalcPath = false;
             if numel(waypointList) >= 1
                 if norm(enemypos-waypointList{numel(waypointList)}) > pathResolution
@@ -1066,7 +1004,7 @@ function bes = beschleunigung(spiel, farbe)
         toEnemy = vecNorm(rotEnemyPos - rotMePos);
         
         %position aligned - finetune position -> lock onto target
-        if (norm(rotMeGes(2)-rotEnemyGes(2)) < 0.0005 && norm(rotMePos(2)-rotEnemyPos(2)) < spiel.spaceball_radius*0.8)
+        if (norm(rotMeGes(2)-rotEnemyGes(2)) < 0.001 && norm(rotMePos(2)-rotEnemyPos(2)) < spiel.spaceball_radius*0.8)
             if (lockAnnouncement ~= 1)
                 debugDisp('LockOnAttack: Target Locked!');
                 lockAnnouncement = 1;
