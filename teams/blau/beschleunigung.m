@@ -31,10 +31,6 @@ function bes = beschleunigung(spiel, farbe)
     % 0: s= v*t+ 0.5*a*t^2
     % 1: s= v*t
     constEnemyInterpMode = 0; 
-    %wenn true, dann wird immer interpoliert (ignoriert Konstante eins weiter unten)
-    constEnemyAlwaysInterpolate = true;
-    %Ab welcher Nähe (Zeitlich bis Treffer) interpoliert werden darf
-    constEnemyInterpolationDistance = 1; 
     %bildet den Mittelwert aus den letzten x Beschleunigungswerten des
     %Gegners - smoothed die Interpolations
     constAccInterpolationSmoothing = 10;
@@ -44,7 +40,6 @@ function bes = beschleunigung(spiel, farbe)
     overrideBesCalculation = false;
     %Maximale Anzahl an Minen, bei der auf lockOnAttack geschaltet werden
     %kann wenn der Weg frei ist
-    %constMaxLockonMineCount = 12;
     
     %DEBUG MODE
     %true: ermöglicht ausgabe von Text und Zeichnen von gizmos
@@ -146,7 +141,6 @@ function bes = beschleunigung(spiel, farbe)
         waypointList = [];
         ArrayOfMines = spiel.mine;
         StartNumberOfTank = spiel.n_tanke;
-        NumberOfTankEnemy = enemy.getankt;
         currentNumberOfTank = numel(spiel.tanke);
         tankeCompetition = false;
         waitForEnemy = false;
@@ -894,7 +888,7 @@ function bes = beschleunigung(spiel, farbe)
         %keine Mine befindet
 
         useLockonAttack = false;
-        if (~corridorColliding(me.pos, enemy.pos, spiel.mine_radius*3))
+        if (~corridorColliding(me.pos, enemy.pos, spiel.mine_radius*2.5))
             useLockonAttack = true;
         end
         
@@ -909,7 +903,7 @@ function bes = beschleunigung(spiel, farbe)
     function directAttack()
         
         %check if path to enemy is free
-        enemypos = calcEnemyHitPosition(constEnemyInterpMode, constEnemyAlwaysInterpolate);
+        enemypos = calcEnemyHitPosition(constEnemyInterpMode);
         if (~corridorColliding(me.pos, enemypos, constNavSecurity) || norm(me.pos-enemypos) < constWayPointReachedRadius+2*constGridRadius)
             %delete all other waypoints
             if (numel(waypointList) > 1)
@@ -926,7 +920,7 @@ function bes = beschleunigung(spiel, farbe)
             debugDRAW();
             debugDrawCircle(2, enemypos, spiel.spaceball_radius);
         else
-            pathResolution = clamp(norm(enemypos-me.pos)/2, 0.1, 0.5);
+            pathResolution = clamp(norm(enemypos-me.pos)/3, 0.05, 0.4);
             
             %Prüfe, ob Pfad neu berechnet werden soll (Gegner liegt
             %außerhalb von pathResolution vom letzten Wegpunkt)
@@ -1069,7 +1063,7 @@ function bes = beschleunigung(spiel, farbe)
         end
     end
 
-    function erg = calcEnemyHitPosition(interpolationMode, alwaysInterpolate)
+    function erg = calcEnemyHitPosition(interpolationMode)
         % SMOOTH ACCELERATION VALUES
         persistent lastInterpEnemyPos;
         
@@ -1078,10 +1072,6 @@ function bes = beschleunigung(spiel, farbe)
         end
         
         
-        %always interpolate
-        if (nargin <= 2)
-            alwaysInterpolate = false;
-        end
         if (nargin <= 1)
             interpolationMode = 0;
         end
@@ -1095,24 +1085,19 @@ function bes = beschleunigung(spiel, farbe)
             enemyacc = 0;
         end
         
-        %vorher : (thit > 1) neu : (dist > 0.2)
-        if (thit > constEnemyInterpolationDistance && ~alwaysInterpolate)
-            erg = enemy.pos;
-            lastInterpEnemyPos = erg;
+        
+        %interpolate
+        erg = enemy.pos + enemy.ges*thit + 0.5*enemyacc*thit^2;
+
+        %clamping erg
+        safeSpaceballRadius = spiel.spaceball_radius + constSafeBorder;
+        erg = clamp(erg, safeSpaceballRadius, 1-safeSpaceballRadius);
+
+        %point is not walkable -> set own point
+        if (~isWalkable(erg, spiel.spaceball_radius + constSafeBorder))
+            erg = lastInterpEnemyPos;
         else
-            %interpolate
-            erg = enemy.pos + enemy.ges*thit + 0.5*enemyacc*thit^2;
-            
-            %clamping erg
-            safeSpaceballRadius = spiel.spaceball_radius + constSafeBorder;
-            erg = clamp(erg, safeSpaceballRadius, 1-safeSpaceballRadius);
-            
-            %point is not walkable -> set own point
-            if (~isWalkable(erg, spiel.spaceball_radius + constSafeBorder))
-                erg = lastInterpEnemyPos;
-            else
-                lastInterpEnemyPos = erg;
-            end
+            lastInterpEnemyPos = erg;
         end
     end
 
@@ -1178,14 +1163,19 @@ function bes = beschleunigung(spiel, farbe)
         %calculate time only if necessary
         if (lastTimeCalculated ~= spiel.i_t)
             a = norm(enemyAccSmooth-meAccSmooth);
-            v = norm(me.ges - enemy.ges);
-            s = norm(me.pos - enemy.pos);
+            vvec = enemy.ges - me.ges;
+            svec = enemy.pos - me.pos;
+            v = norm(vvec);
+            s = norm(svec);
 
-            if (a > 0.0001)
+            if (a > 0.001)
                 lastCalculatedValue = (sqrt(v^2+2*a*s)-v)/a;
             else
                 lastCalculatedValue = s/v;
             end
+            
+            lastCalculatedValue = clamp(lastCalculatedValue, 0, 1.3);
+            
             lastTimeCalculated = spiel.i_t;
         end
         
