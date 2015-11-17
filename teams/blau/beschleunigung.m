@@ -46,7 +46,7 @@ function bes = beschleunigung(spiel, farbe)
     persistent StartNumberOfTank; %Zur Entscheidung über Angriff und Tanken benötigt
     persistent currentNumberOfTank; %aktuelle Anzahl an Tanken
     persistent tankeCompetition; %ist CompetitionMode aktiviert?
-    persistent ignoreTanken; %diese Tanken ignorieren!
+    persistent ignoreTanke; %diese Tanke ignorieren!
     persistent waitForEnemy; %benötigt, um auf den Gegner warten zu können
     persistent dispWhatToDo;
     
@@ -784,13 +784,10 @@ function bes = beschleunigung(spiel, farbe)
 
     function CreatePathAllTanken()
         if ~tankeCompetition
-            ignoreTanken(1) = 1;
-            ignoreTanken(2) = 8;
+            ignoreTanke = 1;
             currentTankList = spiel.tanke;
-            for i=1:numel(ignoreTanken)
-                if ignoreTanken(i) < numel(spiel.tanke)
-                    currentTankList(ignoreTanken(i)) = [];
-                end
+            if ignoreTanke <= numel(spiel.tanken) && ignoreTanke > 0
+                currentTankList(ignoreTanke) = [];
             end
             TankList = esc_find_tanke(spiel.mine, currentTankList, me.pos, me.ges, enemy.pos, enemy.ges);
             TankList = fliplr(TankList);
