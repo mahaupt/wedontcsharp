@@ -51,7 +51,7 @@ void mexFunction(int outCount,mxArray *outVars[],int inCount,const mxArray *inVa
     tf.findTanke(wps, 0, tankListP, mePos, meGes);
     
     duration = ( std::clock() - start ) / (double) CLOCKS_PER_SEC;
-    mexPrintf("TankList (%d nodes from %d) found in %f s\n", wps.size(), tankListP.size(), duration);
+    //mexPrintf("TankList (%d nodes from %d) found in %f s\n", wps.size(), tankListP.size(), duration);
     
     outVars[0] = mxCreateCellMatrix(1, wps.size());
     for (int i=0; i < wps.size(); i++) {
