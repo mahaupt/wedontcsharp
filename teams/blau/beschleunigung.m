@@ -50,10 +50,10 @@ function bes = beschleunigung(spiel, farbe)
     persistent ArrayOfMines; %Zur Bestimmung des Minenverschwindens benötigt
     persistent StartNumberOfTank; %Zur Entscheidung über Angriff und Tanken benötigt
     persistent currentNumberOfTank; %aktuelle Anzahl an Tanken
-    persistent tankeCompetition;
+    persistent tankeCompetition; %ist CompetitionMode aktiviert?
+    persistent ignoreTanken; %diese Tanken ignorieren!
     persistent waitForEnemy; %benötigt, um auf den Gegner warten zu können
     persistent dispWhatToDo;
-    persistent currentTankList
     
     %%Farbe prüfen und zuweisen
     if strcmp (farbe, 'rot')
@@ -158,7 +158,7 @@ function bes = beschleunigung(spiel, farbe)
             ArrayOfMines = spiel.mine;
         end
 
-        %Tanken:
+        %TankListe beim Verschwinden einer Tanke aktualisieren:
         
         if currentNumberOfTank ~= numel(spiel.tanke)
             CreatePathAllTanken();
@@ -789,7 +789,14 @@ function bes = beschleunigung(spiel, farbe)
 
     function CreatePathAllTanken()
         if ~tankeCompetition
+            ignoreTanken(1) = 1;
+            ignoreTanken(2) = 8;
             currentTankList = spiel.tanke;
+            for i=1:numel(ignoreTanken)
+                if ignoreTanken(i) < numel(spiel.tanke)
+                    currentTankList(ignoreTanken(i)) = [];
+                end
+            end
             TankList = esc_find_tanke(spiel.mine, currentTankList, me.pos, me.ges, enemy.pos, enemy.ges);
             TankList = fliplr(TankList);
             debugDisp('calculating Path between Tanken');
