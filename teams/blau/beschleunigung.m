@@ -784,9 +784,9 @@ function bes = beschleunigung(spiel, farbe)
 
     function CreatePathAllTanken()
         if ~tankeCompetition
-            ignoreTanke = 1;
+            ignoreTanke = 5;
             currentTankList = spiel.tanke;
-            if ignoreTanke <= numel(spiel.tanken) && ignoreTanke > 0
+            if ignoreTanke <= numel(spiel.tanke) && ignoreTanke > 0
                 currentTankList(ignoreTanke) = [];
             end
             TankList = esc_find_tanke(spiel.mine, currentTankList, me.pos, me.ges, enemy.pos, enemy.ges);
