@@ -46,7 +46,7 @@ void mexFunction(int outCount,mxArray *outVars[],int inCount,const mxArray *inVa
 	}
     
     //do calculations
-    vector<Vector2> wps = vector<Vector2>();
+    vector<int> wps = vector<int>();
     Tankfinder tf = Tankfinder(mineList, enemyPos, enemyGes);
     tf.findTanke(wps, 0, tankListP, mePos, meGes);
     
@@ -55,15 +55,7 @@ void mexFunction(int outCount,mxArray *outVars[],int inCount,const mxArray *inVa
     
     outVars[0] = mxCreateCellMatrix(1, wps.size());
     for (int i=0; i < wps.size(); i++) {
-        double * dynamicData;
-        dynamicData = (double*)mxMalloc(2 * sizeof(double));
-        
-        dynamicData[0] = (double)wps[i].x;
-        dynamicData[1] = (double)wps[i].y;
-        
-        mxArray * tmp = mxCreateDoubleMatrix(1, 2, mxREAL);
-        mxSetPr(tmp, dynamicData);
-        
+        mxArray * tmp = mxCreateDoubleScalar((double)wps[i]);
         mxSetCell(outVars[0], i, tmp);
     }
     

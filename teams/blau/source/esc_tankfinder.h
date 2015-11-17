@@ -11,7 +11,7 @@ public:
         enemyGes = _enemyGes;
     }
     
-    float findTanke(vector<Vector2> &tList, float pathPenalty, vector<Tanke*> &tankList, Vector2 prevPos, Vector2 prevPath) {
+    float findTanke(vector<int> &tList, float pathPenalty, vector<Tanke*> &tankList, Vector2 prevPos, Vector2 prevPath, int thisTankID = 0) {
         int tankListSize = 0;
         for (int i = 0; i<tankList.size(); i++) {
             if (tankList[i] != 0) {
@@ -20,7 +20,7 @@ public:
         }
         
         if (tankListSize <= 0) {
-            tList.push_back(prevPos);
+            tList.push_back(thisTankID);
             return pathPenalty;
         }
         
@@ -36,8 +36,8 @@ public:
             Tanke* tmp = tankList[i];
             tankList[i] = 0;
             
-            vector<Vector2> erg2 = vector<Vector2>();
-            float erg1 = findTanke(erg2, pen + pathPenalty, tankList, tmp->pos, tmp->pos-prevPos);
+            vector<int> erg2 = vector<int>();
+            float erg1 = findTanke(erg2, pen + pathPenalty, tankList, tmp->pos, tmp->pos-prevPos, i);
             
             //add tanke i to list
             tankList[i] = tmp;
@@ -49,7 +49,9 @@ public:
         }
         
         //add prev pos to tank list
-        tList.push_back(prevPos);
+        if (thisTankID != 0) {
+            tList.push_back(thisTankID);
+        }
         
         return penalty;
     }

@@ -5,7 +5,7 @@ public:
     const float constGridRadius = 0.003;
     const float constSafeBorder = 0.001;
     const float constSpaceballRadius = 0.01;
-    const float constMineProxPenality = 0.00001;
+    const float constMineProxPenality = 0.0002;
     
     int gridSize = 0;
     vector<vector<Node>> nodeGrid;
@@ -28,11 +28,9 @@ public:
                 Node node = Node(gridPos, worldPos, is_walkable);
                 
                 for (int i=0; i<mineList.size(); i++) {
-                    float dist = (mineList[i].pos-worldPos).magnitude() - mineList[i].radius - constSpaceballRadius - constSafeBorder;
+                    float dist = (mineList[i].pos-worldPos).magnitude();
                     
-                    if (dist > 0.1) {
-                        node.mineCost += constMineProxPenality/pow(dist, 2);
-                    }
+                    node.mineCost += constMineProxPenality/dist/dist;
                 }
                 
                 nodeGrid[x].push_back(node);
