@@ -6,18 +6,18 @@ function bes = beschleunigung(spiel, farbe)
     constSafeBorder = 0.001;
     %Standardradius zum Erreichen eines Wegpunktes
     constWayPointReachedRadius = 0.02;
-    %AuflÃ¶sung des NodeGrids (Radius eines Nodes)
+    %Auflösung des NodeGrids (Radius eines Nodes)
     constGridRadius = 0.003;
-    %Korridorbreite fÃ¼r simplifyPath
+    %Korridorbreite für simplifyPath
     constNavSecurity = 0.02;
-    %Strafpunkte fÃ¼r Nodes - je dichter an Mine, desto hÃ¶her
-    %wichtig fÃ¼r den Pathfinder
+    %Strafpunkte für Nodes - je dichter an Mine, desto höher
+    %wichtig für den Pathfinder
     constMineProxPenality = 0.00001; % 0.0006
-    %0.4 je grÃ¶ÃŸer der Winkel zum nÃ¤chsten Wegpunkt, desto hÃ¶heres Bremsen. Faktor.
+    %0.4 je größer der Winkel zum nächsten Wegpunkt, desto höheres Bremsen. Faktor.
     constCornerBreaking = 0.65; 
-    %Faktor fÃ¼r SeitwÃ¤rtsbbeschleunigungen fÃ¼rs Emergencybreaking
+    %Faktor für Seitwärtsbbeschleunigungen fürs Emergencybreaking
     constEmrBrkAccFac = 0.2; 
-    %Faktor fÃ¼r Geschwindigkeit fÃ¼rs Emergencybreaking
+    %Faktor für Geschwindigkeit fürs Emergencybreaking
     constEmrBrkVelFac = 1.2; 
     %simplifyPath umgehen
     constSkipSimplifyPath = false;
@@ -28,7 +28,7 @@ function bes = beschleunigung(spiel, farbe)
     %Zeitdifferenz die der Gegner schneller bei der Tanke sein darf,
     %wir es aber dennoch versuchen
     constCompetitionModeThreshold = 0.1;
-    %Anzahl Ebenen fÃ¼r Tankpfadfindung:
+    %Anzahl Ebenen für Tankpfadfindung:
     constEbenen = 5;
     
     %ATTACK
@@ -38,13 +38,13 @@ function bes = beschleunigung(spiel, farbe)
     constEnemyInterpMode = 0; 
     %wenn true, dann wird immer interpoliert (ignoriert Konstante eins weiter unten)
     constEnemyAlwaysInterpolate = true;
-    %Ab welcher NÃ¤he (Zeitlich bis Treffer) interpoliert werden darf
+    %Ab welcher Nähe (Zeitlich bis Treffer) interpoliert werden darf
     constEnemyInterpolationDistance = 1; 
     %bildet den Mittelwert aus den letzten x Beschleunigungswerten des
     %Gegners - smoothed die Interpolations
     constAccInterpolationSmoothing = 10;
-    %TRUE: Beschleunigungsberechnung wird Ã¼berbrÃ¼ckt,
-    %sinnvoll fÃ¼r prÃ¤zise ManÃ¶ver ohne Waypoints
+    %TRUE: Beschleunigungsberechnung wird überbrückt,
+    %sinnvoll für präzise Manöver ohne Waypoints
     %ACHTUNG: jegliche Kollisionssicherung wird umgangen
     overrideBesCalculation = false;
     %Maximale Anzahl an Minen, bei der auf lockOnAttack geschaltet werden
@@ -52,25 +52,24 @@ function bes = beschleunigung(spiel, farbe)
     %constMaxLockonMineCount = 12;
     
     %DEBUG MODE
-    %true: ermÃ¶glicht ausgabe von Text und Zeichnen von gizmos
+    %true: ermöglicht ausgabe von Text und Zeichnen von gizmos
     constDebugMode = true;
     
     
     %statische Variablen definieren
     persistent nodeGrid;
     persistent waypointList;
-    persistent ArrayOfMines; %Zur Bestimmung des Minenverschwindens benÃ¶tigt
-    persistent StartNumberOfTank; %Zur Entscheidung Ã¼ber Angriff und Tanken benÃ¶tigt
+    persistent ArrayOfMines; %Zur Bestimmung des Minenverschwindens benötigt
+    persistent StartNumberOfTank; %Zur Entscheidung über Angriff und Tanken benötigt
     persistent NumberOfTankEnemy; %Momentane Anzahl der Tanken des Gegners
-    persistent currentNumberOfTank; %aktuelle Anzahl an Tanken
     persistent ignoreTanke; %number of tanke to be ignored by targetNextTanke
     persistent tankeCompetition;
-    persistent waitForEnemy; %benÃ¶tigt, um auf den Gegner warten zu kÃ¶nnen
+    persistent waitForEnemy; %benötigt, um auf den Gegner warten zu können
     persistent dispWhatToDo;
     persistent CompetitionNotbremse;
 
     
-    %%Farbe prÃ¼fen und zuweisen
+    %%Farbe prüfen und zuweisen
     if strcmp (farbe, 'rot')
         me = spiel.rot;
         enemy = spiel.blau;
@@ -80,7 +79,7 @@ function bes = beschleunigung(spiel, farbe)
     end
     
     
-    %wird einmal am Anfang ausgefÃ¼hrt
+    %wird einmal am Anfang ausgeführt
     if spiel.i_t==1
         initSpaceball();
     end
@@ -90,12 +89,12 @@ function bes = beschleunigung(spiel, farbe)
     %    return;
     %end
     
-%% VerÃ¤nderungen des Spielfeldes bemerken und dementsprechend handeln
+%% Veränderungen des Spielfeldes bemerken und dementsprechend handeln
     gameChangeHandler()
 
     
-%% Entscheidungen fÃ¤llen und Beschleunigung berechnen
-    %Entscheidung Ã¼ber Angriff/Verteidigung/Tanken
+%% Entscheidungen fällen und Beschleunigung berechnen
+    %Entscheidung über Angriff/Verteidigung/Tanken
     whatToDo();
     
     %Beschleunigung berechnen:
@@ -113,7 +112,7 @@ function bes = beschleunigung(spiel, farbe)
                 debugDisp('whatToDo: Angriff');
             end
             
-            %Wenn wir mehr als die HÃ¤lfte der Tanken haben oder nahe des Gegners sind und mehr getankt haben - Angriff!
+            %Wenn wir mehr als die Hälfte der Tanken haben oder nahe des Gegners sind und mehr getankt haben - Angriff!
             attackEnemy();
             
         elseif (enemy.getankt > StartNumberOfTank*0.5 || (thit <= 0.5 && me.getankt<enemy.getankt && ~corridorColliding(me.pos, enemy.pos, constNavSecurity)) && ~tankeCompetition)
@@ -138,10 +137,8 @@ function bes = beschleunigung(spiel, farbe)
                 debugDisp('whatToDo: Tanken');
             end
 
-            %%Competition Mode aktivieren und Ã¼berprÃ¼fen:
-            if numel(waypointList) > 0
-                checkTankPath();
-            end
+            %%Competition Mode aktivieren und überprüfen:
+            checkTankPath();
             
         end
     end
@@ -156,7 +153,6 @@ function bes = beschleunigung(spiel, farbe)
         ArrayOfMines = spiel.mine;
         StartNumberOfTank = spiel.n_tanke;
         NumberOfTankEnemy = enemy.getankt;
-        currentNumberOfTank = numel(spiel.tanke);
         tankeCompetition = false;
         waitForEnemy = false;
         setupNodeGrid();
@@ -164,9 +160,8 @@ function bes = beschleunigung(spiel, farbe)
         CreatePathAllTanken();
     end
 
-    %registriert Ã„nderungen im Spielfeld und Handelt entsprechend
+    %registriert Änderungen im Spielfeld und Handelt entsprechend
     function gameChangeHandler()
-        
         %Nodegrid beim Verschwinden einer Mine aktualisieren:
         if numel(spiel.mine) < numel(ArrayOfMines)
             debugDisp('beschleunigung: Updating NodeGrid');
@@ -178,26 +173,26 @@ function bes = beschleunigung(spiel, farbe)
 
         %Tanken:
         
-        if currentNumberOfTank ~= numel(spiel.tanke)
-            CreatePathAllTanken();
-            currentNumberOfTank = numel(spiel.tanke);
+        %wenn der Gegner eine Tanke einsammelt, die auf unserer Wegpunktliste liegt:
+        if enemy.getankt ~= NumberOfTankEnemy && dispWhatToDo == 3
+            for i = 1:numel(waypointList)
+                if norm(enemy.pos-waypointList{i}) < 0.05
+                    CreatePathAllTanken();
+                    break;
+                end
+            end
+            NumberOfTankEnemy = enemy.getankt;
         end
         
-%         %wenn der Gegner eine Tanke einsammelt, die auf unserer Wegpunktliste liegt:
-%         if enemy.getankt ~= NumberOfTankEnemy && dispWhatToDo == 3
-%             for i = 1:numel(waypointList)
-%                 if norm(enemy.pos-waypointList{i}) < 0.05
-%                     CreatePathAllTanken();
-%                     break;
-%                 end
-%             end
-%             NumberOfTankEnemy = enemy.getankt;
-%         end
-%         
-%         %wenn die Wegpunktliste leer wird
-%         if numel(waypointList) <= 2 && numel(spiel.tanke) > 2 && ~tankeCompetition && dispWhatToDo == 3
-%             CreatePathAllTanken();
-%         end
+        %wenn die Wegpunktliste leer wird
+        if numel(waypointList) <= 1 && numel(spiel.tanke) > 1 && ~tankeCompetition && dispWhatToDo == 3
+            % bei den letzten zwei Tanken überspringen, da es sonst in jeder Iteration durchgeführt wird
+            if numel(spiel.tanke) == 2 && numel(waypointList) == 1
+                return;
+            else
+                CreatePathAllTanken();
+            end
+        end
         
         debugDrawCircle(0, 0, 0, true);
     end
@@ -225,7 +220,7 @@ function bes = beschleunigung(spiel, farbe)
         end
         
         
-        %Ist kein Wegpunkt vorhanden, schnellstmÃ¶glich auf 0 abbremsen und stehen bleiben
+        %Ist kein Wegpunkt vorhanden, schnellstmöglich auf 0 abbremsen und stehen bleiben
         if (numel(waypointList) <= 0)
             bes = -me.ges;
             return;
@@ -303,7 +298,7 @@ function bes = beschleunigung(spiel, farbe)
         %Radius darf nicht zu klein werden sonst kommt es zur kollision
         mineDriveRadius = clamp(mineDriveRadius, minimumMineDist, inf);
         
-        %ragt Radius Ã¼ber das spielfeld hinaus?
+        %ragt Radius über das spielfeld hinaus?
         if (minePos(1) + mineDriveRadius > 1-secureSpaceballRadius)
             mineDriveRadius = (1-minePos(1)+spiel.mine_radius)/2;
         end
@@ -354,9 +349,9 @@ function bes = beschleunigung(spiel, farbe)
         debugDrawCircle(1, minePos, mineDriveRadius);
         
         %exit circle mode
-        %Springe aus diesem Beschleunigungsmodus, wenn der nÃ¤chste Wegpunkt
-        %auÃŸerhalb des Orbitradiusses liegt und unser Beschleunigungsvektor
-        %auf den nÃ¤chsten Wegpunkt zeigt
+        %Springe aus diesem Beschleunigungsmodus, wenn der nächste Wegpunkt
+        %außerhalb des Orbitradiusses liegt und unser Beschleunigungsvektor
+        %auf den nächsten Wegpunkt zeigt
         towp = vecNorm(waypointList{1}-me.pos);
         wpdist = norm(waypointList{1} - minePos);
         if (wpdist > constMineProxRadius)
@@ -402,19 +397,18 @@ function bes = beschleunigung(spiel, farbe)
         wpReachedDist = calcWaypointReachedRadius(breakingEndVel);
         debugDrawCircle(1, waypointList{1}, wpReachedDist);
         
-        %%ÃœberprÃ¼fen, ob Wegpunkt erreicht wurde, dann 1. Punkt lÃ¶schen
+        %%Überprüfen, ob Wegpunkt erreicht wurde, dann 1. Punkt löschen
         if norm(me.pos-waypointList{1}) < wpReachedDist
             waypointList(1) = [];
             if tankeCompetition
                 tankeCompetition = false;
                 debugDisp('competitionMode deaktivated');
-                ignoreTanke = 0;
                 CreatePathAllTanken();
             end
             debugDRAW();
             
         else
-            %%Ã¼berprÃ¼fe, ob 1. Wegpunkt erreichbar ist - wenn nicht, lÃ¶sche und
+            %%überprüfe, ob 1. Wegpunkt erreichbar ist - wenn nicht, lösche und
             %%berechne neu
             
             %Sonderfall, Spaceball selbst viel zu nah an mine:
@@ -509,8 +503,8 @@ function bes = beschleunigung(spiel, farbe)
 
         %new emergency breaking - is it better?
         breakTime = velocity / spiel.bes;
-        %only get the direction changing acceleration (90Â° from v)
-        gesPerpend = vecNorm(getPerpend(customv)); %vector 90Â° from v
+        %only get the direction changing acceleration (90° from v)
+        gesPerpend = vecNorm(getPerpend(customv)); %vector 90° from v
         besPerpend = gesPerpend*projectVectorNorm(customa, gesPerpend);
         checkPoint1 = me.pos + 0.5*customv*breakTime*constEmrBrkVelFac + 0.5*besPerpend*constEmrBrkAccFac*breakTime^2;
         checkPoint2 = me.pos + 0.5*customv*breakTime*constEmrBrkVelFac; %without acceleration
@@ -1212,7 +1206,7 @@ function bes = beschleunigung(spiel, farbe)
 
     %Check if target tanke is still there
     function checkTankPath()
-
+        
         %check if enemy reaches targeted tanken before us
         for i = 1:numel(spiel.tanke)
             enemyPath = spiel.tanke(i).pos - enemy.pos;
@@ -1275,7 +1269,7 @@ function bes = beschleunigung(spiel, farbe)
                  end
             end
           
-            %Notbremse bei zu spÃ¤tem Erreichen einer Tanke
+            %Notbremse bei zu spätem Erreichen einer Tanke
             if (tankeCompetition && i==1 && tenemy < town && ~CompetitionNotbremse && enemy.getankt > me.getankt)
                 vel = norm(me.ges);
                 acc = spiel.bes;
@@ -1285,7 +1279,7 @@ function bes = beschleunigung(spiel, farbe)
                 tbrk = (-sqrt(vel^2-2*acc*dist)+vel)/acc; %t beim bremsen
                 deltat = tbrk-tacc; %differenz
                 
-                %distanz die Gegner in deltat zurÃ¼ck legen kann
+                %distanz die Gegner in deltat zurück legen kann
                 Distance = deltat*norm(enemy.ges);
                 
                 if (Distance <= spiel.spaceball_radius * 2)
@@ -1367,7 +1361,7 @@ function bes = beschleunigung(spiel, farbe)
         %lockon attack ist nur sicher, wenn sich zwischen Gegner und Mir
         %keine Mine befindet
         
-        %bitte stehen lassen! ich weiÃŸ noch nicht ob die untere einfache
+        %bitte stehen lassen! ich weiß noch nicht ob die untere einfache
         %Methode, sicher ist!
 %         useLockonAttack = false;
 %         if (spiel.n_mine < constMaxLockonMineCount)
@@ -1398,7 +1392,7 @@ function bes = beschleunigung(spiel, farbe)
 %                 %check every mine
 %                 for i=1:spiel.n_mine
 %                     minePos = (rotMat1*spiel.mine(i).pos')';
-%                     % grÃ¶ÃŸer null - gefahr!
+%                     % größer null - gefahr!
 %                     %kleiner null - mine hinter mir!
 %                     checkPos = (minePos(1)-ownPos(1))*dirToAxis(1) + dangerRadius;  
 %                     if (checkPos > 0)
@@ -1445,8 +1439,8 @@ function bes = beschleunigung(spiel, farbe)
         else
             pathResolution = clamp(norm(enemypos-me.pos)/2, 0.1, 0.5);
             
-            %PrÃ¼fe, ob Pfad neu berechnet werden soll (Gegner liegt
-            %auÃŸerhalb von pathResolution vom letzten Wegpunkt)
+            %Prüfe, ob Pfad neu berechnet werden soll (Gegner liegt
+            %außerhalb von pathResolution vom letzten Wegpunkt)
             recalcPath = false;
             if numel(waypointList) >= 1
                 if norm(enemypos-waypointList{numel(waypointList)}) > pathResolution
@@ -1522,18 +1516,16 @@ function bes = beschleunigung(spiel, farbe)
         toEnemy = vecNorm(rotEnemyPos - rotMePos);
         
         %position aligned - finetune position -> lock onto target
-        if (norm(rotMeGes(2)-rotEnemyGes(2)) < 0.0005 && norm(rotMePos(2)-rotEnemyPos(2)) < spiel.spaceball_radius*0.8)
+        if (norm(rotMeGes(2)-rotEnemyGes(2)) < 0.001 && norm(rotMePos(2)-rotEnemyPos(2)) < spiel.spaceball_radius)
             if (lockAnnouncement ~= 1)
                 debugDisp('LockOnAttack: Target Locked!');
                 lockAnnouncement = 1;
                 transformationAngle = angle;
             end
         elseif (lockAnnouncement ~= 0)
-            if (norm(rotMeGes(2)-rotEnemyGes(2)) > 0.002 && norm(rotMePos(2)-rotEnemyPos(2)) > spiel.spaceball_radius*1.2)
-                debugDisp('LockOnAttack: WARNING! Lock failed! Realigning...');
-                lockAnnouncement = 0;
-                transformationAngle = 0;
-            end
+            debugDisp('LockOnAttack: WARNING! Lock failed! Realigning...');
+            lockAnnouncement = 0;
+            transformationAngle = 0;
         end
 
         %copy enemy acceleration

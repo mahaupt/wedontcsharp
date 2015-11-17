@@ -1,5 +1,9 @@
 %% Initialisierung
 
+clear variables
+close all
+clc
+
 
 % clear variables
 % close all
