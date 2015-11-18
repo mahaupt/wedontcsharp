@@ -2,6 +2,7 @@
 % In spaceballs.m INITIALISIERUNG komplett auskommentieren!
 % In spaceballs.m "spiel.zeitraffer_checkbox_anfangswert" auf true setzen!
 % Part 1 über Strg+Enter ausführen, erst danach Part 2 ab Zeile 253 wieder über Strg+Enter
+% In Part 2 steht zur Auswahl, ob alle oder nur Problem-Seeds erneut verwendet werden sollen
 
 
 %%
@@ -9,10 +10,10 @@
 clear all
 close all
 clc
-
+mex -setup C++
 
 % Anzahl Durchgänge
-Durchgaenge = 100; 
+Durchgaenge = 10; 
 rows = Durchgaenge+1;
 
 
@@ -35,7 +36,7 @@ data{1,5} = 'Seed:';
 % Zufallswert erzeugt werden kann
 zw = round(rand(1)*1000000);
 zwVar = rng(zw);
-totalTime = 30;
+totalTime = 0;
 
 
 for i = 1 : Durchgaenge
@@ -199,8 +200,9 @@ unentAttack = unentAttack(~cellfun('isempty',unentAttack));
 % Seeddaten sammeln und speichern
 seedData = [cell2mat(unentDefense); cell2mat(unentAttack); cell2mat(loseSeeds)];
 seedNum = (length(unentDefense)+length(unentAttack)+length(loseSeeds));
-save seeds.mat loseSeeds unentDefense unentAttack Farbe zw
-
+seedsAll = cell2mat(data(2:end,5))
+save seedsFaulty.mat seedData Farbe zw 
+save seedsAll.mat seedsAll Farbe zw
 
 % Auswertung num2str(sum(cell2mat(data(2:end,4))*1/60))
 time = horzcat('Gesamtrechenzeit: ', num2str(round(totalTime/60,1)), ' Minuten');
@@ -258,15 +260,28 @@ disp(Statistische_Erhebung);
 clear all
 close all
 clc
+mex -setup C++
+
+
+% Auswahl der Seedquelle
+seedSource = 0          % 1 für alle Seeds, 0 für Problem-Seeds
 
 
 % Seeds laden, Variablen anpassen
-load('seeds.mat')             
-seedData = [cell2mat(unentDefense); cell2mat(unentAttack); cell2mat(loseSeeds)];
-seedNum = (length(unentDefense)+length(unentAttack)+length(loseSeeds));
+if seedSource == 1
+   load('seedsAll.mat')
+   seedData = seedsAll;
+   seedNum = length(seedsAll);
+elseif seedSource == 0
+   load('seedsFaulty.mat')
+   seedNum = length(seedData);
+end
+
+
 Durchgaenge = seedNum;
 rows = Durchgaenge+1;
-Farbe = Farbe; 
+Farbe = Farbe;
+
 
 
 % Datentabelle erzeugen
@@ -360,9 +375,11 @@ for i = 1 : Durchgaenge
            data{i+1,6} = 99;
         end
         
+        totalTime = totalTime + toc
+        i
                
 % clear variables mit Ausnahmen
-        clearvars -except data Durchgaenge Farbe myName enemyName zw zwVar seedData totalTime
+        clearvars -except data Durchgaenge Farbe myName enemyName zw zwVar seedData totalTime seedSource
         close all
 end
 
@@ -451,7 +468,14 @@ unentAttackNew = unentAttackNew(~cellfun('isempty',unentAttackNew));
 % Seeddaten sammeln und speichern
 seedData = [cell2mat(unentDefenseNew); cell2mat(unentAttackNew); cell2mat(loseSeedsNew)];
 seedNum = (length(unentDefenseNew)+length(unentAttackNew)+length(loseSeedsNew));
-save seedsNew.mat loseSeedsNew unentDefenseNew unentAttackNew Farbe
+seedsAll = cell2mat(data(2:end,5))
+
+
+if seedSource == 1
+   save seedsAll.mat seedsAll Farbe zw
+elseif seedSource == 0
+   save seedsStillFaulty.mat seedData Farbe zw 
+end
 
 
 % Auswertung
