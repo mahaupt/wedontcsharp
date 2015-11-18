@@ -12,7 +12,7 @@ clc
 
 
 % Anzahl Durchgänge
-Durchgaenge = 100; 
+Durchgaenge = 2; 
 rows = Durchgaenge+1;
 
 
@@ -35,7 +35,7 @@ data{1,5} = 'Seed:';
 % Zufallswert erzeugt werden kann
 zw = round(rand(1)*1000000);
 zwVar = rng(zw);
-totalTime = 30;
+totalTime = 0;
 
 
 for i = 1 : Durchgaenge
@@ -107,8 +107,7 @@ for i = 1 : Durchgaenge
            data{i+1,6} = 99;
         end
         
-        totalTime = totalTime + toc
-        i
+        totalTime = totalTime + toc       
 % clear variables mit Ausnahmen
         clearvars -except data Durchgaenge Farbe myName enemyName zw zwVar totalTime
         close all
@@ -199,11 +198,11 @@ unentAttack = unentAttack(~cellfun('isempty',unentAttack));
 % Seeddaten sammeln und speichern
 seedData = [cell2mat(unentDefense); cell2mat(unentAttack); cell2mat(loseSeeds)];
 seedNum = (length(unentDefense)+length(unentAttack)+length(loseSeeds));
-save seeds.mat loseSeeds unentDefense unentAttack Farbe zw
+save seeds.mat loseSeeds unentDefense unentAttack Farbe
 
 
 % Auswertung num2str(sum(cell2mat(data(2:end,4))*1/60))
-time = horzcat('Gesamtrechenzeit: ', num2str(round(totalTime/60,1)), ' Minuten');
+time = horzcat('Gesamtzeit: ', num2str(round(totalTime/60),1), ' Minuten');
 Gegner = horzcat(myName, '  VS  ', enemyName);
 SatzA = horzcat('Von ', num2str(Durchgaenge), ' Spielen wurden ', num2str(sumWins), ' gewonnen');
 SatzAB = horzcat('Von ', num2str(Durchgaenge), ' Spielen wurden ', num2str(sumWins), ' in durchschnittlich ', num2str(medianTime), ' Sekunden gewonnen.');
@@ -455,7 +454,7 @@ save seedsNew.mat loseSeedsNew unentDefenseNew unentAttackNew Farbe
 
 
 % Auswertung
-time = horzcat('Gesamtrechenzeit: ', num2str(round(totalTime/60,1)), ' Minuten');
+time = horzcat('Gesamtzeit: ', num2str(round(totalTime/60),1), ' Minuten');
 Gegner = horzcat(myName, '  VS  ', enemyName);
 SatzA = horzcat('Von ', num2str(Durchgaenge), ' Spielen wurden ', num2str(sumWins), ' gewonnen');
 SatzAB = horzcat('Von ', num2str(Durchgaenge), ' Spielen wurden ', num2str(sumWins), ' in durchschnittlich ', num2str(medianTime), ' Sekunden gewonnen.');
