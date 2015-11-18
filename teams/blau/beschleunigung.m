@@ -67,9 +67,9 @@ function bes = beschleunigung(spiel, farbe)
 
     
 %% zum debuggen (einfach nen Breakpoint bei "return" setzen)
-    %if spiel.i_t==60
-    %    return;
-    %end
+%    if spiel.i_t==50*27
+%        return;
+%    end
     
     
 %% Veränderungen des Spielfeldes bemerken und dementsprechend handeln
@@ -821,22 +821,41 @@ function bes = beschleunigung(spiel, farbe)
 
     function doesEnemyGetTanke()
         if numel(TankList) > 1
-            if norm(enemy.pos-spiel.tanke(TankList{1}).pos) <0.1
+            enemyDist1 = norm(enemy.pos-spiel.tanke(TankList{1}).pos);
+            enemyDist2 = norm(enemy.pos-spiel.tanke(TankList{2}).pos);
+        elseif numel(TankList) == 1
+            enemyDist1 = norm(enemy.pos-spiel.tanke(TankList{1}).pos);
+        end
+        
+        %ignoreTanke setzen
+        if numel(TankList) > 1
+            if enemyDist1 < enemyDist2 && enemyDist1 < 0.1 && ignoreTanke ~= TankList{1}
                 ignoreTanke = TankList{1};
-            elseif norm(enemy.pos-spiel.tanke(TankList{2}).pos) <0.1
+                CreatePathAllTanken();
+            elseif enemyDist2 < enemyDist1 && enemyDist2 < 0.1 && ignoreTanke ~= TankList{2}
                 ignoreTanke = TankList{2};
-            end
-            if norm(enemy.pos-spiel.tanke(TankList{1}).pos) >0.1
-                ignoreTanke = 0;
-            elseif norm(enemy.pos-spiel.tanke(TankList{2}).pos) >0.1
-                ignoreTanke = 0;
+                CreatePathAllTanken();
             end
         elseif numel(TankList) == 1
-            if norm(enemy.pos-spiel.tanke(TankList{1}).pos) <0.1
+            if enemyDist1 < 0.1 && ignoreTanke ~= TankList{1}
                 ignoreTanke = TankList{1};
+                CreatePathAllTanken();
             end
-            if norm(enemy.pos-spiel.tanke(TankList{1}).pos) >0.1
+        end
+        
+        %ignoreTanke entfernen
+        if numel(TankList) > 1
+            if enemyDist1 > 0.1 && ignoreTanke == TankList{1}
                 ignoreTanke = 0;
+                CreatePathAllTanken();
+            elseif enemyDist2 > 0.1 && ignoreTanke == TankList{2}
+                ignoreTanke = 0;
+                CreatePathAllTanken();
+            end
+        elseif numel(TankList) == 1
+            if enemyDist1 > 0.1 && ignoreTanke == TankList{1}
+                ignoreTanke = 0;
+                CreatePathAllTanken();
             end
         end
     end
