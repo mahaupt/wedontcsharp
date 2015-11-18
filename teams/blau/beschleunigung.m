@@ -1175,13 +1175,10 @@ function bes = beschleunigung(spiel, farbe)
         end
         
     end
-<<<<<<< HEAD
+
     
  end
-=======
 
-
->>>>>>> refs/remotes/origin/master
 %% Debugging
     %Wegpunkte einzeichnen
     function debugDRAW()
@@ -1253,4 +1250,4 @@ function bes = beschleunigung(spiel, farbe)
         
         disp(str);
     end
-
+end
