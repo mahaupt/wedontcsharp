@@ -121,6 +121,9 @@ function bes = beschleunigung(spiel, farbe)
                 debugDisp('whatToDo: Tanken');
                 CreatePathAllTanken();
             end
+            
+            doesEnemyGetTanke();
+        
         end
     end
 
@@ -161,10 +164,6 @@ function bes = beschleunigung(spiel, farbe)
             CreatePathAllTanken();
             currentNumberOfTank = numel(spiel.tanke);
         end
-        
-        doesEnemyGetTanke();
-        
-        competitionMode();
         
         debugDrawCircle(0, 0, 0, true);
         
@@ -375,7 +374,7 @@ function bes = beschleunigung(spiel, farbe)
             waypointList(1) = [];
             if tankeCompetition
                 tankeCompetition = false;
-                debugDisp('competitionMode deaktivated');
+                debugDisp('competitionMode deactivated');
                 CreatePathAllTanken();
             end
             debugDRAW();
@@ -806,8 +805,14 @@ function bes = beschleunigung(spiel, farbe)
                 TankenToChooseFrom(ignoreTanke) = [];
             end
             TankList = esc_find_tanke(spiel.mine, TankenToChooseFrom, me.pos, me.ges, enemy.pos, enemy.ges);
+            %%Durch Löschen müssen Indexe aktualisiert werden:
+            for i=1:numel(TankList)
+                if TankList{i} >= ignoreTanke && ignoreTanke > 0
+                    TankList{i} = TankList{i}+1;
+                end
+            end
             TankList = fliplr(TankList);
-            debugDisp('calculating Path between Tanken');
+            debugDisp('Tanken: calculating Path');
             
             if (numel(TankList) > 0)
                 waypointList = findPath(me.pos,spiel.tanke(TankList{1}).pos);
@@ -820,49 +825,29 @@ function bes = beschleunigung(spiel, farbe)
     end
 
     function doesEnemyGetTanke()
-        if numel(TankList) > 1
-            enemyDist1 = norm(enemy.pos-spiel.tanke(TankList{1}).pos);
-            enemyDist2 = norm(enemy.pos-spiel.tanke(TankList{2}).pos);
-        elseif numel(TankList) == 1
-            enemyDist1 = norm(enemy.pos-spiel.tanke(TankList{1}).pos);
-        end
-        
-        %ignoreTanke setzen
-        if numel(TankList) > 1
-            if enemyDist1 < enemyDist2 && enemyDist1 < 0.1 && ignoreTanke ~= TankList{1}
-                ignoreTanke = TankList{1};
-                CreatePathAllTanken();
-            elseif enemyDist2 < enemyDist1 && enemyDist2 < 0.1 && ignoreTanke ~= TankList{2}
-                ignoreTanke = TankList{2};
-                CreatePathAllTanken();
-            end
-        elseif numel(TankList) == 1
-            if enemyDist1 < 0.1 && ignoreTanke ~= TankList{1}
-                ignoreTanke = TankList{1};
-                CreatePathAllTanken();
+        %ignoreTanke setzen:
+        if numel(spiel.tanke) > 1
+            for i=1:numel(spiel.tanke)
+                timeEnemyToTanke = norm(enemy.pos-spiel.tanke(i).pos);
+                if timeEnemyToTanke < 0.1 && i ~= ignoreTanke
+                    debugDisp('EnemyTank: ignoriere Tanke:');
+                    debugDisp(i);
+                    ignoreTanke = i;
+                    CreatePathAllTanken;
+                end
             end
         end
         
-        %ignoreTanke entfernen
-        if numel(TankList) > 1
-            if enemyDist1 > 0.1 && ignoreTanke == TankList{1}
-                ignoreTanke = 0;
-                CreatePathAllTanken();
-            elseif enemyDist2 > 0.1 && ignoreTanke == TankList{2}
-                ignoreTanke = 0;
-                CreatePathAllTanken();
-            end
-        elseif numel(TankList) == 1
-            if enemyDist1 > 0.1 && ignoreTanke == TankList{1}
+        %ignoreTanke entfernen:
+        if (ignoreTanke > 0 && ignoreTanke < numel(spiel.tanke))
+            if norm(spiel.tanke(ignoreTanke).pos-enemy.pos) > 0.1 || norm(spiel.tanke(ignoreTanke).pos-enemy.pos) < 0.005 || numel(spiel.tanke) == 1
+                debugDisp('EnemyTank: ignorierte Tanke entfernt');
                 ignoreTanke = 0;
                 CreatePathAllTanken();
             end
         end
     end
 
-    function competitionMode()
-        return;
-    end
 
 
 %% Angriff
