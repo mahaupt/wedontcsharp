@@ -71,7 +71,7 @@ public:
         enemyPen = - ((enemyPos-tankPos).magnitude() + getTimeToAlignVelocity(enemyGes, (tankPos - enemyPos).norm()));
         
         //mexPrintf("dist: %f, dir: %f, coll: %f, enemy: %f\n", distPen, dirPen / 50, collPen, enemyPen);
-        return distPen + dirPen / 40 + collPen + enemyPen;
+        return distPen + dirPen / 60 + collPen + enemyPen;
     }
     
     float getTimeToAlignVelocity(Vector2 vel1, Vector2 vec) {

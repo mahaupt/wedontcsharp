@@ -99,7 +99,7 @@ function bes = beschleunigung(spiel, farbe)
             %Wenn wir mehr als die Hälfte der Tanken haben oder nahe des Gegners sind und mehr getankt haben - Angriff!
             attackEnemy();
             
-        elseif (enemy.getankt > StartNumberOfTank*0.5 || (thit <= 0.5 && me.getankt<enemy.getankt && ~corridorColliding(me.pos, enemy.pos, constNavSecurity)) && ~tankeCompetition)
+        elseif (enemy.getankt > StartNumberOfTank*0.5 || (thit <= 0.3 && me.getankt<enemy.getankt && ~corridorColliding(me.pos, enemy.pos, constNavSecurity)) && ~tankeCompetition)
             if (dispWhatToDo ~= 2)
                 %vorher: tanken
                 if (dispWhatToDo == 3)
@@ -826,21 +826,45 @@ function bes = beschleunigung(spiel, farbe)
 
     function doesEnemyGetTanke()
         %ignoreTanke setzen:
-        if numel(spiel.tanke) > 1
+        if numel(spiel.tanke) >= 1
             for i=1:numel(spiel.tanke)
-                timeEnemyToTanke = norm(enemy.pos-spiel.tanke(i).pos);
-                if timeEnemyToTanke < 0.1 && i ~= ignoreTanke
-                    debugDisp('EnemyTank: ignoriere Tanke:');
-                    debugDisp(i);
-                    ignoreTanke = i;
-                    CreatePathAllTanken;
+                %wie lange braucht der Gegner zu den Tankstellen?
+                enemyPath = spiel.tanke(i).pos - enemy.pos;
+                timeEnemyToTanke = norm(enemyPath) / projectVectorNorm(enemy.ges, enemyPath);
+                if timeEnemyToTanke < 0
+                    timeEnemyToTanke = inf;
+                end
+                %liegt noch eine Mine zwischen Gegner und Tanke?
+                enemyColliding = corridorColliding(enemy.pos, spiel.tanke(i).pos, spiel.spaceball_radius);
+                ownColliding = corridorColliding(me.pos, spiel.tanke(i).pos, spiel.spaceball_radius);
+                
+                if (timeEnemyToTanke < 0.2 && i ~= ignoreTanke && ~enemyColliding)
+                    if ((i == TankList{1} && norm(spiel.tanke(i).pos-me.pos) < 0.2) || (numel(spiel.tanke) == 1) && ~ownColliding) && ~tankeCompetition
+                        debugDisp('Competition Mode aktiviert!');
+                        tankeCompetition = true;
+                        accpos = getAccPos(spiel.tanke(i).pos);
+                        waypointList = [];
+                        waypointList{1} = spiel.tanke(i).pos;
+                        waypointList{2} = accpos;
+                        debugDRAW();
+                    else
+                        debugDisp('EnemyTank: ignoriere Tanke:');
+                        debugDisp(i);
+                        ignoreTanke = i;
+                        CreatePathAllTanken;
+                    end
                 end
             end
         end
         
         %ignoreTanke entfernen:
         if (ignoreTanke > 0 && ignoreTanke < numel(spiel.tanke))
-            if norm(spiel.tanke(ignoreTanke).pos-enemy.pos) > 0.1 || norm(spiel.tanke(ignoreTanke).pos-enemy.pos) < 0.005 || numel(spiel.tanke) == 1
+            enemyPath = spiel.tanke(ignoreTanke).pos - enemy.pos;
+            timeEnemyToTanke = norm(enemyPath) / projectVectorNorm(enemy.ges, enemyPath);
+            if timeEnemyToTanke < 0
+                timeEnemyToTanke = inf;
+            end
+            if timeEnemyToTanke > 0.2 || numel(spiel.tanke) == 1
                 debugDisp('EnemyTank: ignorierte Tanke entfernt');
                 ignoreTanke = 0;
                 CreatePathAllTanken();
