@@ -4,7 +4,7 @@ mex -setup C++   % C++ compiler aktivieren
 %% 1.) Statistik über beliebige Zufallswerte
 
 clc
-Durchgaenge = 1;
+Durchgaenge = 10;
 stats(Durchgaenge, 'blau', 2);
 
 
