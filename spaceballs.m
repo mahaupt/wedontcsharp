@@ -1,23 +1,13 @@
 %% Initialisierung
 
-<<<<<<< HEAD
 clear variables
 close all
 clc
 
 rng shuffle
 r = round(rand(1)*1000000)
-rng(944652);
+rng(r);
 
-=======
-% clear variables
-% close all
-% clc
-% 
-% % rng shuffle
-% r = round(rand(1)*1000000)
-% rng(r);
->>>>>>> master
 
 %% Konstanten definieren
 

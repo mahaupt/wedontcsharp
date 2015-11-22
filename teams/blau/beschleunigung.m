@@ -160,7 +160,7 @@ function bes = beschleunigung(spiel, farbe)
 
         %TankListe beim Verschwinden einer Tanke aktualisieren:
         
-        if currentNumberOfTank ~= numel(spiel.tanke)
+        if currentNumberOfTank ~= numel(spiel.tanke) && dispWhatToDo == 3
             CreatePathAllTanken();
             currentNumberOfTank = numel(spiel.tanke);
         end
