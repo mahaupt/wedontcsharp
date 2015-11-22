@@ -65,13 +65,14 @@ public:
         float collPen = 0;
         float enemyPen = 0;
         if (corridorColliding(tankPos, prevPos, constNavSecurity)) {
-            collPen = 0.75;
+            collPen = 1.5;
+            
         }
         
         enemyPen = - ((enemyPos-tankPos).magnitude() + getTimeToAlignVelocity(enemyGes, (tankPos - enemyPos).norm()));
         
-        //mexPrintf("dist: %f, dir: %f, coll: %f, enemy: %f\n", distPen, dirPen / 50, collPen, enemyPen);
-        return distPen + dirPen / 40 + collPen + enemyPen;
+        //mexPrintf("dist: %f, dir: %f, coll: %f, enemy: %f\n", distPen, dirPen * dirPen, collPen, enemyPen);
+        return dirPen;
     }
     
     float getTimeToAlignVelocity(Vector2 vel1, Vector2 vec) {
