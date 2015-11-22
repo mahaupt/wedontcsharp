@@ -1251,7 +1251,7 @@ function bes = beschleunigung(spiel, farbe)
 %            waitForEnemy = true;
 %         
 %         end
-%     end
+    end
 
 
 
