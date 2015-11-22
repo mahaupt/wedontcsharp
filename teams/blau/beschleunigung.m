@@ -1244,6 +1244,17 @@ function bes = beschleunigung(spiel, farbe)
         end
     end
 
+%     function waitDrawn() 
+%         
+%         if currentNumberOfTank == 0 && enemy.getankt == me.getankt
+%            center = [0.5, 0.5];
+%            waypointList = appendToArray(waypointList, findPath(me.pos, center));
+%            
+%            waitForEnemy = true;
+%         
+%         end
+%     end
+
 
 %% Debugging
     %Wegpunkte einzeichnen
