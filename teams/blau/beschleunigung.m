@@ -826,6 +826,7 @@ function bes = beschleunigung(spiel, farbe)
     end
 
     function doesEnemyGetTanke()
+        persistent ClosestEnemyTanke;
         %ignoreTanke setzen:
         if numel(spiel.tanke) >= 1
             
@@ -844,7 +845,7 @@ function bes = beschleunigung(spiel, farbe)
             enemyColliding = corridorColliding(enemy.pos, spiel.tanke(ClosestEnemyTanke).pos, spiel.spaceball_radius);
             ownColliding = corridorColliding(me.pos, spiel.tanke(ClosestEnemyTanke).pos, spiel.spaceball_radius);
             
-            if (EnemyTimeToClosestTanke < 0.2 && ClosestEnemyTanke ~= ignoreTanke && ~enemyColliding)
+            if (EnemyTimeToClosestTanke < 0.2 && ClosestEnemyTanke ~= ignoreTanke && ~enemyColliding) && numel(TankList) > 0
                 myPath = spiel.tanke(ClosestEnemyTanke).pos - me.pos;
                 timeMeToTanke = norm(myPath) / projectVectorNorm(me.ges, myPath);
                 if timeMeToTanke < 0
@@ -861,7 +862,7 @@ function bes = beschleunigung(spiel, farbe)
                     waypointList{1} = spiel.tanke(ClosestEnemyTanke).pos;
                     waypointList{2} = accpos;
                     debugDRAW();
-                else
+                elseif numel(spiel.tanke) > 1
                     debugDisp('EnemyTank: ignoriere Tanke:');
                     debugDisp(ClosestEnemyTanke);
                     ignoreTanke = ClosestEnemyTanke;
