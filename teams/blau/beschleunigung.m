@@ -38,7 +38,7 @@ function bes = beschleunigung(spiel, farbe)
     
     %DEBUG MODE
     %true: ermöglicht ausgabe von Text und Zeichnen von gizmos
-    constDebugMode = true;
+    constDebugMode = false;
     
     %statische Variablen definieren
     persistent waypointList;
@@ -160,7 +160,7 @@ function bes = beschleunigung(spiel, farbe)
 
         %TankListe beim Verschwinden einer Tanke aktualisieren:
         
-        if currentNumberOfTank ~= numel(spiel.tanke)
+        if currentNumberOfTank ~= numel(spiel.tanke) && dispWhatToDo == 3
             CreatePathAllTanken();
             currentNumberOfTank = numel(spiel.tanke);
         end
@@ -826,6 +826,7 @@ function bes = beschleunigung(spiel, farbe)
     end
 
     function doesEnemyGetTanke()
+        persistent ClosestEnemyTanke;
         %ignoreTanke setzen:
         if numel(spiel.tanke) >= 1
             
@@ -844,7 +845,7 @@ function bes = beschleunigung(spiel, farbe)
             enemyColliding = corridorColliding(enemy.pos, spiel.tanke(ClosestEnemyTanke).pos, spiel.spaceball_radius);
             ownColliding = corridorColliding(me.pos, spiel.tanke(ClosestEnemyTanke).pos, spiel.spaceball_radius);
             
-            if (EnemyTimeToClosestTanke < 0.2 && ClosestEnemyTanke ~= ignoreTanke && ~enemyColliding)
+            if (EnemyTimeToClosestTanke < 0.2 && ClosestEnemyTanke ~= ignoreTanke && ~enemyColliding) && numel(TankList) > 0
                 myPath = spiel.tanke(ClosestEnemyTanke).pos - me.pos;
                 timeMeToTanke = norm(myPath) / projectVectorNorm(me.ges, myPath);
                 if timeMeToTanke < 0
@@ -861,7 +862,7 @@ function bes = beschleunigung(spiel, farbe)
                     waypointList{1} = spiel.tanke(ClosestEnemyTanke).pos;
                     waypointList{2} = accpos;
                     debugDRAW();
-                else
+                elseif numel(spiel.tanke) > 1
                     debugDisp('EnemyTank: ignoriere Tanke:');
                     debugDisp(ClosestEnemyTanke);
                     ignoreTanke = ClosestEnemyTanke;
@@ -1243,6 +1244,18 @@ function bes = beschleunigung(spiel, farbe)
             end
         end
     end
+  
+%     function waitDrawn() 
+%         
+%         if currentNumberOfTank == 0 && enemy.getankt == me.getankt
+%            center = [0.5, 0.5];
+%            waypointList = appendToArray(waypointList, findPath(me.pos, center));
+%            
+%            waitForEnemy = true;
+%         
+%         end
+%     end
+
 
 
 %% Debugging
@@ -1316,6 +1329,4 @@ function bes = beschleunigung(spiel, farbe)
         
         disp(str);
     end
-
-
 end
