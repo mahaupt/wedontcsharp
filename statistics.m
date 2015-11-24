@@ -3,7 +3,7 @@
 % 1. Bitte in spaceballs.m die Initialisierung komplett auskommentieren
 % 2. In spaceballs.m "spiel.zeitraffer_checkbox_anfangswert" auf true setzen
 
-%% Voreinstellungen
+%% 1.) Statistik über beliebige Zufallswerte   &   Voreinstellungen
 
 % A.) Bitte hier die eigene Farbe angeben:
 meineFarbe = 'blau';
@@ -14,8 +14,6 @@ Durchgaenge = 3;
 % C.) Zuerst Teil 1 über Strg+Enter (bzw. cmd+Enter) ausführen
 %    nach getätigten Änderungen je nach Präferenz Teil 2 oder Teil 3 über Strg+Enter (bzw. cmd+Enter) ausführen
 
-
-%% 1.) Statistik über beliebige Zufallswerte
 clc
 stats(Durchgaenge, meineFarbe, 2);
 
