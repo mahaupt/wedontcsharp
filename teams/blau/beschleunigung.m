@@ -38,7 +38,7 @@ function bes = beschleunigung(spiel, farbe)
     
     %DEBUG MODE
     %true: ermöglicht ausgabe von Text und Zeichnen von gizmos
-    constDebugMode = true;
+    constDebugMode = false;
     
     %statische Variablen definieren
     persistent waypointList;
@@ -858,7 +858,7 @@ function bes = beschleunigung(spiel, farbe)
                 %Ist diese Tanke unsere nächste Tanke und brauchen wir nicht mehr lange dorthin?
                 %oder ist nur noch eine Tanke da und keine Mine im Weg
                 %UND wir sind noch nicht im compMode
-                if ((ClosestEnemyTanke == TankList{1} && timeMeToTanke < 0.3) || numel(spiel.tanke) == 1 && ~ownColliding) && ~tankeCompetition
+                if ((ClosestEnemyTanke == TankList{1} && timeMeToTanke < 0.2) || numel(spiel.tanke) == 1 && ~ownColliding) && ~tankeCompetition
                     debugDisp('Competition Mode aktiviert!');
                     tankeCompetition = true;
                     accpos = getAccPos(spiel.tanke(ClosestEnemyTanke).pos);
@@ -900,37 +900,7 @@ function bes = beschleunigung(spiel, farbe)
             debugDisp('Competition Mode deaktiviert, da Gegner Tanke erreicht hat');
             CreatePathAllTanken();
         end
-        
-        %competitionMode abbrechen
-%         if (tankeCompetition && (norm(enemy.pos - waypointList{1}) - norm(me.pos - waypointList{1}) < 0.05)) || cancelCompMode
-%             %Zeit von uns + Zeit des Gegners berechnen
-%             myPath = waypointList{1} - me.pos;
-%             timeMeToTanke = norm(myPath) / projectVectorNorm(me.ges, myPath);
-%             if timeMeToTanke < 0
-%                 timeMeToTanke = inf;
-%             end
-%             enemyPath = waypointList{1} - enemy.pos;
-%             timeEnemyToTanke = norm(enemyPath) / projectVectorNorm(enemy.ges, enemyPath);
-%             if timeEnemyToTanke < 0
-%                 timeEnemyToTanke = inf;
-%             end
-%             
-%             if timeMeToTanke - timeEnemyToTanke < 0.05
-%                 debugDisp('Competition Mode Abbrechen!');
-%                 tankeCompetition = false;
-%                 cancelCompMode = true;
-%                 waypointList = [];
-%                 waypointList{1} = enemy.pos;
-%                 debugDRAW();
-%             end
-%             
-%             if cancelCompMode && timeEnemyToTanke - timeMeToTanke < 0.5
-%                 debugDisp('Abbruch abgeschlossen');
-%                 cancelCompMode = false;
-%             end
-%         end
     end
-
 
 
 %% Angriff
