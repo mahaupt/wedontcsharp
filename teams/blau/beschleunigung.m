@@ -38,7 +38,7 @@ function bes = beschleunigung(spiel, farbe)
     
     %DEBUG MODE
     %true: ermöglicht ausgabe von Text und Zeichnen von gizmos
-    constDebugMode = true;
+    constDebugMode = false;
     
     %statische Variablen definieren
     persistent waypointList;
@@ -99,7 +99,7 @@ function bes = beschleunigung(spiel, farbe)
             %Wenn wir mehr als die Hälfte der Tanken haben oder nahe des Gegners sind und mehr getankt haben - Angriff!
             attackEnemy();
             
-        elseif (enemy.getankt > StartNumberOfTank*0.5 || (thit <= 0.3 && me.getankt<enemy.getankt && ~corridorColliding(me.pos, enemy.pos, constNavSecurity)) && ~tankeCompetition)
+        elseif (enemy.getankt > StartNumberOfTank*0.5 || (thit <= 0.3 && me.getankt<enemy.getankt && ~corridorColliding(me.pos, enemy.pos, constNavSecurity)) && ~tankeCompetition) || (numel(spiel.tanke) == 1 && me.getankt <= enemy.getankt && norm(me.pos-spiel.tanke(1).pos) - norm(enemy.pos-spiel.tanke(1).pos) > 0.2)
             if (dispWhatToDo ~= 2)
                 %vorher: tanken
                 if (dispWhatToDo == 3)
@@ -160,7 +160,7 @@ function bes = beschleunigung(spiel, farbe)
 
         %TankListe beim Verschwinden einer Tanke aktualisieren:
         
-        if currentNumberOfTank ~= numel(spiel.tanke)
+        if currentNumberOfTank ~= numel(spiel.tanke) && dispWhatToDo == 3
             CreatePathAllTanken();
             currentNumberOfTank = numel(spiel.tanke);
         end
@@ -375,7 +375,9 @@ function bes = beschleunigung(spiel, farbe)
             if tankeCompetition
                 tankeCompetition = false;
                 debugDisp('competitionMode deactivated');
+                waypointList = [];
                 CreatePathAllTanken();
+                debugDRAW();
             end
             debugDRAW();
             
@@ -829,31 +831,34 @@ function bes = beschleunigung(spiel, farbe)
         %ignoreTanke setzen:
         if numel(spiel.tanke) >= 1
             
+            %Zeit berechnen, die der Gegner zu allen Tanken benötigt
             for i=1:numel(spiel.tanke)
                 enemyPath = spiel.tanke(i).pos - enemy.pos;
                 EnemyTimeToTankList(i) = norm(enemyPath) / projectVectorNorm(enemy.ges, enemyPath);
+                %liegt die Tanke hinter dem Gegner (Zeit < 0) - auf inf setzen
                 if EnemyTimeToTankList(i) < 0
                     EnemyTimeToTankList(i) = inf;
                 end
             end
-            
-            %Wie lange braucht der Gegner zu seiner dichtesten Tanke und
-            %welche ist das?
+            %Wie lange braucht der Gegner zu seiner dichtesten Tanke und welche ist das?
             [EnemyTimeToClosestTanke,ClosestEnemyTanke] = min(EnemyTimeToTankList);
-            %liegt noch eine Mine zwischen Gegner und Tanke?
+            
+            %liegt noch eine Mine zwischen Gegner / uns und Tanke?
             enemyColliding = corridorColliding(enemy.pos, spiel.tanke(ClosestEnemyTanke).pos, spiel.spaceball_radius);
             ownColliding = corridorColliding(me.pos, spiel.tanke(ClosestEnemyTanke).pos, spiel.spaceball_radius);
             
-            if (EnemyTimeToClosestTanke < 0.2 && ClosestEnemyTanke ~= ignoreTanke && ~enemyColliding)
+            %Gegner schnell bei Tanke, Tanke noch nicht ignoriert, keine Mine dazwischen UND noch Tanken in der TankList
+            if (EnemyTimeToClosestTanke < 0.2 && ClosestEnemyTanke ~= ignoreTanke && ~enemyColliding) && numel(TankList) > 0
+                %wie lange brauchen wir zu der am Gegner dichtesten Tanke?
                 myPath = spiel.tanke(ClosestEnemyTanke).pos - me.pos;
                 timeMeToTanke = norm(myPath) / projectVectorNorm(me.ges, myPath);
                 if timeMeToTanke < 0
                     timeMeToTanke = inf;
                 end
+                %Ist diese Tanke unsere nächste Tanke und brauchen wir nicht mehr lange dorthin?
+                %oder ist nur noch eine Tanke da und keine Mine im Weg
+                %UND wir sind noch nicht im compMode
                 if ((ClosestEnemyTanke == TankList{1} && timeMeToTanke < 0.2) || numel(spiel.tanke) == 1 && ~ownColliding) && ~tankeCompetition
-                    for j=1:numel(spiel.tanke)
-                        debugDisp(spiel.tanke(j).pos);
-                    end
                     debugDisp('Competition Mode aktiviert!');
                     tankeCompetition = true;
                     accpos = getAccPos(spiel.tanke(ClosestEnemyTanke).pos);
@@ -861,7 +866,8 @@ function bes = beschleunigung(spiel, farbe)
                     waypointList{1} = spiel.tanke(ClosestEnemyTanke).pos;
                     waypointList{2} = accpos;
                     debugDRAW();
-                else
+                %sonst, ist noch mehr als 1 Tanke vorhanden - ignorieren,
+                elseif numel(spiel.tanke) > 1
                     debugDisp('EnemyTank: ignoriere Tanke:');
                     debugDisp(ClosestEnemyTanke);
                     ignoreTanke = ClosestEnemyTanke;
@@ -871,12 +877,16 @@ function bes = beschleunigung(spiel, farbe)
         end
         
         %ignoreTanke entfernen:
+        
+        %existiert die ignorierte Tanke?
         if (ignoreTanke > 0 && ignoreTanke <= numel(spiel.tanke))
+            %wie lange braucht der Gegner zu dieser Tanke?
             enemyPath = spiel.tanke(ignoreTanke).pos - enemy.pos;
             timeEnemyToTanke = norm(enemyPath) / projectVectorNorm(enemy.ges, enemyPath);
             if timeEnemyToTanke < 0
                 timeEnemyToTanke = inf;
             end
+            %braucht er lange oder ist nur noch eine Tanke da - entfernen
             if timeEnemyToTanke > 0.2 || numel(spiel.tanke) == 1
                 debugDisp('EnemyTank: ignorierte Tanke entfernt');
                 ignoreTanke = 0;
@@ -885,14 +895,12 @@ function bes = beschleunigung(spiel, farbe)
         end
         
         %CompetitionMode beenden, wenn Gegner Tanke erreicht
-        if tankeCompetition && norm(enemy.pos - waypointList{1}) < 0.05
+        if tankeCompetition && norm(enemy.pos - waypointList{1}) < 0.01
             tankeCompetition = false;
             debugDisp('Competition Mode deaktiviert, da Gegner Tanke erreicht hat');
             CreatePathAllTanken();
         end
-        
     end
-
 
 
 %% Angriff
