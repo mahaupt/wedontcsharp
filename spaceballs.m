@@ -20,9 +20,9 @@ spiel.n_mine = 12; % Muss gerade sein! (Default: 12)
 spiel.n_tanke = 9; % Muss ungerade sein! (Default: 9)
 
 spiel.kreis_radius = 0.075;
-spiel.mine_radius = 0.05;
+spiel.mine_radius = 0.05; % Default: 0.05
 spiel.tanke_radius = 0.01;
-spiel.spaceball_radius = 0.01;
+spiel.spaceball_radius = 0.01; % Default: 0.01
 
 spiel.bes = 0.1;
 
