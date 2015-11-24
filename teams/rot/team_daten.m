@@ -1,6 +1,6 @@
 function team = team_daten
 
-team.name = 'We don''t C#, we MethLab ';
+team.name = 'mit Enemy Pen ';
 
 team.mitarbeiter(1).name = 'Christopher Muth';
 team.mitarbeiter(1).aufgabe = 'Master Of Desaster';
