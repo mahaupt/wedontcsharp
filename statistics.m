@@ -1,5 +1,9 @@
 % Statistikprogramm 
 
+% Wichtig:
+% Initialisierung komplett auskommentieren!
+% In spaceballs.m "spiel.zeitraffer_checkbox_anfangswert" auf true setzen!
+
 mex -setup C++   % C++ compiler aktivieren
 %% 1.) Statistik über beliebige Zufallswerte
 
