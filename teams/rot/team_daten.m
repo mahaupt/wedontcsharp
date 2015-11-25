@@ -1,6 +1,6 @@
 function team = team_daten
 
-team.name = 'mit Enemy Pen ';
+team.name = 'Distance only';
 
 team.mitarbeiter(1).name = 'Christopher Muth';
 team.mitarbeiter(1).aufgabe = 'Master Of Desaster';
