@@ -1730,6 +1730,44 @@ function bes = beschleunigung(spiel, farbe)
 
 %% Verteidigung
     %Verteidigung
+    %define a Matrix that contains all corner positions
+    cornerNodes = [0.015,0.985,0;0.985,0.985,0;0.015,0.015,0;0.985,0.015,0];
+    function [ angle ] = vecAngle(ges, pos)
+%       Richtungs und Entfernungsvektor zu den 4 Ecken berechnen  
+        for i=1:4
+        vecPosEcke(i,1:2) = pos - cornerNodes(i,1:2)
+        end
+%       Winkel berechnen für 4 Ecken
+        vecAngle(i,1) = acos((ges*vecPosEcke)/(norm(ges)*norm(vecPosEcke(i,1:2)))) 
+    end
+
+% WINKEL + ZEIT + ABSTAND für Gegner bestimmen und subtrahieren.     
+
+
+    function [ time ] = cornerTime(ges, pos)
+%       Richtungs und Entfernungsvektor zu den 4 Ecken berechnen    
+        for i=1:4
+        vecPosEcke(i,1:2) = pos - cornerNodes(i,1:2)
+        end
+%       Zeit berechnen für alle 4 Ecken
+        for (i=1:4)
+        if vecAngle(i,1) <= 90
+            for i=1:4
+            tEcke(i,1) == sqrt ((2*norm(vecPosEcke(i,1:2)))/spiel.ges) - (ges*cosd(vecAngle(i,1))/norm(vecPosEcke(i,1:2)))
+            end            
+        else
+            for i=1:4
+            tEcke(i,1) == sqrt ((2*norm(vecPosEcke(i,1:2)))/spiel.ges) - (ges*cosd(vecAngle(i,1))/spiel.bes)
+            end
+        end
+        end
+    
+        bestCorner = sortrows(tEcke, [3 2 1]); % oder
+        bestCorner = sort(tEcke) 
+        
+       
+   
+       
     function fleeEnemy()
 %         if  NumberOfTank <= 0
             cornerTricking();
@@ -1741,8 +1779,7 @@ function bes = beschleunigung(spiel, farbe)
     
     function cornerTricking()
         
-        %define a Matrix that contains all corner positions
-        cornerNodes = [0.015,0.985,0;0.985,0.985,0;0.015,0.015,0;0.985,0.015,0];
+        
         if waitForEnemy == false
             debugDisp('cornerTricking: Pt1');
             %get nearest corner, go there and wait
