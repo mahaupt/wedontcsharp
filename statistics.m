@@ -6,10 +6,10 @@
 %% 1.) Statistik über beliebige Zufallswerte   &   Voreinstellungen
 
 % A.) Bitte hier die eigene Farbe angeben:
-meineFarbe = 'blau';
+meineFarbe = 'rot';
 
 % B.) Bitte hier die Anzahl der gewünschten Durchgänge angeben:
-Durchgaenge = 3;
+Durchgaenge =3;
 
 % C.) Zuerst Teil 1 über Strg+Enter (bzw. cmd+Enter) ausführen
 %    nach getätigten Änderungen je nach Präferenz Teil 2 oder Teil 3 über Strg+Enter (bzw. cmd+Enter) ausführen
