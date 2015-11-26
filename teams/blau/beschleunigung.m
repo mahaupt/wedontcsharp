@@ -11,11 +11,11 @@ function bes = beschleunigung(spiel, farbe)
     %Korridorbreite für simplifyPath
     constNavSecurity = 0.02;
     %0.4 je größer der Winkel zum nächsten Wegpunkt, desto höheres Bremsen. Faktor.
-    constCornerBreaking = 0.55; 
+    constCornerBreaking = 0.55;
     %Faktor für Seitwärtsbbeschleunigungen fürs Emergencybreaking
     constEmrBrkAccFac = 0.2; 
     %Faktor für Geschwindigkeit fürs Emergencybreaking
-    constEmrBrkVelFac = 1.2; 
+    constEmrBrkVelFac = 1.2;
     %simplifyPath umgehen
     constSkipSimplifyPath = false;
     %Mine proximity radius
@@ -38,7 +38,7 @@ function bes = beschleunigung(spiel, farbe)
     
     %DEBUG MODE
     %true: ermöglicht ausgabe von Text und Zeichnen von gizmos
-    constDebugMode = false;
+    constDebugMode = true;
     
     %statische Variablen definieren
     persistent waypointList;
@@ -797,19 +797,9 @@ function bes = beschleunigung(spiel, farbe)
 
     function CreatePathAllTanken()
         if ~tankeCompetition
-            TankenToChooseFrom = spiel.tanke;
-            if ignoreTanke <= spiel.n_tanke && ignoreTanke > 0
-                TankenToChooseFrom(ignoreTanke) = [];
-            end
-            TankList = esc_find_tanke(spiel.mine, TankenToChooseFrom, me.pos, me.ges, enemy.pos, enemy.ges);
-            %%Durch Löschen müssen Indexe aktualisiert werden:
-            if ignoreTanke > 0
-                for i=1:numel(TankList)
-                    if TankList{i} >= ignoreTanke
-                        TankList{i} = TankList{i}+1;
-                    end
-                end
-            end
+            
+            TankList = esc_find_tanke(spiel.mine, spiel.tanke, me.pos, me.ges, enemy.pos, enemy.ges, ignoreTanke);
+            
             TankList = fliplr(TankList);
             debugDisp('Tanken: calculating Path');
             if (numel(TankList) > 0)
@@ -1245,17 +1235,6 @@ function bes = beschleunigung(spiel, farbe)
             end
         end
     end
-  
-%     function waitDrawn() 
-%         
-%         if currentNumberOfTank == 0 && enemy.getankt == me.getankt
-%            center = [0.5, 0.5];
-%            waypointList = appendToArray(waypointList, findPath(me.pos, center));
-%            
-%            waitForEnemy = true;
-%         
-%         end
-%     end
 
 
 
