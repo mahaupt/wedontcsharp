@@ -1732,7 +1732,7 @@ function bes = beschleunigung(spiel, farbe)
     %Verteidigung
     %define a Matrix that contains all corner positions
     cornerNodes = [0.015,0.985,0;0.985,0.985,0;0.015,0.015,0;0.985,0.015,0];
-    function [ angle ] = vecAngle(ges, pos)
+    function vecAngle(ges, pos)
 %       Richtungs und Entfernungsvektor zu den 4 Ecken berechnen  
         for i=1:4
         vecPosEcke(i,1:2) = pos - cornerNodes(i,1:2)
@@ -1744,7 +1744,7 @@ function bes = beschleunigung(spiel, farbe)
 % WINKEL + ZEIT + ABSTAND für Gegner bestimmen und subtrahieren.     
 
 
-    function [ time ] = cornerTime(ges, pos)
+    function cornerTime(ges, pos)
 %       Richtungs und Entfernungsvektor zu den 4 Ecken berechnen    
         for i=1:4
         vecPosEcke(i,1:2) = pos - cornerNodes(i,1:2)
@@ -1753,18 +1753,19 @@ function bes = beschleunigung(spiel, farbe)
         for (i=1:4)
         if vecAngle(i,1) <= 90
             for i=1:4
-            tEcke(i,1) == sqrt ((2*norm(vecPosEcke(i,1:2)))/spiel.ges) - (ges*cosd(vecAngle(i,1))/norm(vecPosEcke(i,1:2)))
+            tEcke(i,1) == sqrt ((2*norm(vecPosEcke(i,1:2)))/spiel.ges) - (ges*cosd(vecAngle(ges,pos))/norm(vecPosEcke(i,1:2)))
             end            
         else
             for i=1:4
-            tEcke(i,1) == sqrt ((2*norm(vecPosEcke(i,1:2)))/spiel.ges) - (ges*cosd(vecAngle(i,1))/spiel.bes)
+            tEcke(i,1) == sqrt ((2*norm(vecPosEcke(i,1:2)))/spiel.ges) - (ges*cosd(vecAngle(ges,pos))/spiel.bes)
             end
-        end
-        end
-    
-        bestCorner = sortrows(tEcke, [3 2 1]); % oder
-        bestCorner = sort(tEcke) 
+       end
+    end
+ end
         
+    bestCorner = sort(cornerTime(me.ges, me.pos) - cornerTime(enemy.ges, enemy.pos))
+    
+    
        
    
        
@@ -1782,14 +1783,16 @@ function bes = beschleunigung(spiel, farbe)
         
         if waitForEnemy == false
             debugDisp('cornerTricking: Pt1');
-            %get nearest corner, go there and wait
-            for i=1:4 % checking every corner
-                % calculating distance to each corner
-                cornerNodes(i,3)=norm(cornerNodes(i,1:2)-me.pos-enemy.pos*2);   
-            end
-            nearestCorner = sortrows(cornerNodes, [3 2 1]); % finding the best corner 
-            % add nodes of nearest corner to wplist 
-            waypointList = appendToArray(waypointList, findPath(me.pos, nearestCorner(1,1:2))); 
+           
+%             %get nearest corner, go there and wait
+%             for i=1:4 % checking every corner
+%                 % calculating distance to each corner
+%                 cornerNodes(i,3)=norm(cornerNodes(i,1:2)-me.pos-enemy.pos*2);   
+%             end
+%             nearestCorner = sortrows(cornerNodes, [3 2 1]); % finding the best corner 
+%             % add nodes of nearest corner to wplist 
+           
+            waypointList = appendToArray(waypointList, findPath(me.pos, bestCorner(1,1:2))); 
             waitForEnemy = true; 
             %waiting for the enemy
         else
