@@ -879,7 +879,7 @@ function bes = beschleunigung(spiel, farbe)
         end
         
         %CompetitionMode beenden, wenn Gegner Tanke erreicht
-        if tankeCompetition && norm(enemy.pos - waypointList{1}) < 0.01
+        if tankeCompetition && norm(enemy.pos - waypointList{1}) < 0.02
             tankeCompetition = false;
             debugDisp('Tanken: compMode deactivated, since enemy reached Tanke');
             CreatePathAllTanken();
