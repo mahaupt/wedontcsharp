@@ -6,7 +6,7 @@
 %% 1.) Statistik über beliebige Zufallswerte   &   Voreinstellungen
 
 % A.) Bitte hier die eigene Farbe angeben:
-meineFarbe = 'rot';
+meineFarbe = 'blau';
 
 % B.) Bitte hier die Anzahl der gewünschten Durchgänge angeben:
 Durchgaenge =3;

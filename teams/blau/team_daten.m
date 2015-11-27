@@ -1,6 +1,6 @@
 function team = team_daten
 
-team.name = 'Direction only';
+team.name = 'We don´t C#, we Methlab';
 
 team.mitarbeiter(1).name = 'Christopher Muth';
 team.mitarbeiter(1).aufgabe = 'Master Of Desaster';
