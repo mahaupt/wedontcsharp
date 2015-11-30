@@ -1,0 +1,294 @@
+#LyX 2.1 created this file. For more info see http://www.lyx.org/
+\lyxformat 474
+\begin_document
+\begin_header
+\textclass article
+\use_default_options true
+\maintain_unincluded_children false
+\language english
+\language_package default
+\inputencoding auto
+\fontencoding global
+\font_roman default
+\font_sans default
+\font_typewriter default
+\font_math auto
+\font_default_family default
+\use_non_tex_fonts false
+\font_sc false
+\font_osf false
+\font_sf_scale 100
+\font_tt_scale 100
+\graphics default
+\default_output_format default
+\output_sync 0
+\bibtex_command default
+\index_command default
+\paperfontsize default
+\use_hyperref false
+\papersize default
+\use_geometry false
+\use_package amsmath 1
+\use_package amssymb 1
+\use_package cancel 1
+\use_package esint 1
+\use_package mathdots 1
+\use_package mathtools 1
+\use_package mhchem 1
+\use_package stackrel 1
+\use_package stmaryrd 1
+\use_package undertilde 1
+\cite_engine basic
+\cite_engine_type default
+\biblio_style plain
+\use_bibtopic false
+\use_indices false
+\paperorientation portrait
+\suppress_date false
+\justification true
+\use_refstyle 1
+\index Index
+\shortcut idx
+\color #008000
+\end_index
+\secnumdepth 3
+\tocdepth 3
+\paragraph_separation indent
+\paragraph_indentation default
+\quotes_language english
+\papercolumns 1
+\papersides 1
+\paperpagestyle default
+\tracking_changes false
+\output_changes false
+\html_math_output 0
+\html_css_as_file 0
+\html_be_strict false
+\end_header
+
+\begin_body
+
+\begin_layout Subsection
+Funktion esc_find_path
+\end_layout
+
+\begin_layout Subsubsection
+Syntax
+\end_layout
+
+\begin_layout LyX-Code
+
+\shape italic
+CellArray
+\shape default
+ waypoints = esc_find_path(
+\shape italic
+StructArray
+\shape default
+ mineList, 
+\shape italic
+Vector
+\shape default
+ startpoint, 
+\shape italic
+Vector
+\shape default
+ endpoint)
+\end_layout
+
+\begin_layout Subsubsection
+Beschreibung
+\end_layout
+
+\begin_layout Standard
+Diese Funktion nutzt den A* Algorithmus, um Wegpunkte vom Startpunkt zum
+ Zielpunkt um die Minen herum zu finden.
+ Dazu wird erst mithilfe der Minen ein Grid auf dem Spielfeld erzeugt, das
+ Informationen über die Begehbarkeit der einzelnen Spielfeldkoordinaten
+ enthält.
+ Dann wird der optimale Weg zwischen Startpunkt und Zielpunkt gefunden.
+ Ale Rückgabewert erhält man die Wegpunkte vom Start zum Ziel.
+\end_layout
+
+\begin_layout Subsubsection
+Parameter
+\end_layout
+
+\begin_layout Paragraph
+StructArray mineList
+\end_layout
+
+\begin_layout Standard
+Das Structarray spiel.mine, um die Minen an das Nodegrid zu übergeben
+\end_layout
+
+\begin_layout Paragraph
+Vector startpoint
+\end_layout
+
+\begin_layout Standard
+Der Startpunkt
+\end_layout
+
+\begin_layout Paragraph*
+Vector endpoint
+\end_layout
+
+\begin_layout Standard
+Der Endpunkt oder das Ziel
+\end_layout
+
+\begin_layout Subsubsection
+Rückgabewert
+\end_layout
+
+\begin_layout Paragraph*
+CellArray waypoints
+\end_layout
+
+\begin_layout Standard
+Die Wegpunkte vom Start zum Ziel um die Minen herum.
+ Die Wegpunkte sind sehr nah beieinander.
+ Durch SimplifyPath lässt sich die Wegpunktliste auf das Wesentliche kürzen.
+\end_layout
+
+\begin_layout LyX-Code
+
+\end_layout
+
+\begin_layout Subsection
+Funktion esc_find_tanke
+\end_layout
+
+\begin_layout Subsubsection
+Syntax
+\end_layout
+
+\begin_layout LyX-Code
+
+\shape italic
+CellArray
+\shape default
+ tankList = esc_find_tanke(
+\shape italic
+StructArray
+\shape default
+ mineList, 
+\shape italic
+StructArray
+\shape default
+ tankList, 
+\shape italic
+Vector2
+\shape default
+ mepos, 
+\shape italic
+Vector2
+\shape default
+ meges, 
+\shape italic
+Vector2
+\shape default
+ enemypos, 
+\shape italic
+Vector2
+\shape default
+ enemyges, 
+\shape italic
+double
+\shape default
+ ignoreTanke)
+\end_layout
+
+\begin_layout Subsubsection
+Beschreibung
+\end_layout
+
+\begin_layout Standard
+Diese Funktion findet über einen Bruteforcealgorithmus die beste Tankreihenfolge.
+ Berücksichtigt werden eigene sowie gegnerische Position und Geschwindigkeit,
+ als auch die Minen als Hindernisse zwischen den einzelnen Tankstellen.
+ Als Basis für unsere Berechnung verwenden wir den MinMax Algorithmus ohne
+ Spielerwechsel.
+ Als Rückgabewert erhält man die Tankliste als IDs der Tankstellen
+\end_layout
+
+\begin_layout Subsubsection
+Parameter
+\end_layout
+
+\begin_layout Paragraph
+StructArray mineList
+\end_layout
+
+\begin_layout Standard
+Das Structarray spiel.mine
+\end_layout
+
+\begin_layout Paragraph
+StructArray tankList
+\end_layout
+
+\begin_layout Standard
+Das Structarray spiel.tanke
+\end_layout
+
+\begin_layout Paragraph*
+Vector mepos
+\end_layout
+
+\begin_layout Standard
+Die Position des eigenen Spaceballs
+\end_layout
+
+\begin_layout Paragraph*
+Vector meges
+\end_layout
+
+\begin_layout Standard
+Die Geschwindigkeit des eigenen Spaceballs
+\end_layout
+
+\begin_layout Paragraph*
+Vector enemypos
+\end_layout
+
+\begin_layout Standard
+Die Position des gegnerischen Spaceballs
+\end_layout
+
+\begin_layout Paragraph*
+Vector enemyges
+\end_layout
+
+\begin_layout Standard
+Die Geschwindigkeit des gegnerischen Spaceballs
+\end_layout
+
+\begin_layout Paragraph*
+double ignoreTanke
+\end_layout
+
+\begin_layout Standard
+Der Index der Tankstelle, die ignoriert werden soll
+\end_layout
+
+\begin_layout Subsubsection
+Rückgabewert
+\end_layout
+
+\begin_layout Paragraph*
+CellArray tankList
+\end_layout
+
+\begin_layout Standard
+Die Liste der Arrayschlüssel von spiel.tanke in der Reihenfolge, in der das
+ Abfahren der Tankstellen optimal ist.
+\end_layout
+
+\begin_layout LyX-Code
+
+\end_layout
+
+\end_body
+\end_document
