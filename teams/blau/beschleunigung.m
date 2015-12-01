@@ -40,6 +40,10 @@ function bes = beschleunigung(spiel, farbe)
     %true: ermöglicht ausgabe von Text und Zeichnen von gizmos
     constDebugMode = true;
     
+    %COMPILING
+    %true = force compiling, false = not compiling
+    constCompiling = true;
+    
     %statische Variablen definieren
     persistent waypointList;
     persistent ArrayOfMines; %Zur Bestimmung des Minenverschwindens benötigt
@@ -50,6 +54,7 @@ function bes = beschleunigung(spiel, farbe)
     persistent ignoreTanke; %diese Tanke ignorieren!
     persistent waitForEnemy; %benötigt, um auf den Gegner warten zu können
     persistent dispWhatToDo;
+    persistent mexHandle; %handle of mex functions
     
     %%Farbe prüfen und zuweisen
     if strcmp (farbe, 'rot')
@@ -141,12 +146,21 @@ function bes = beschleunigung(spiel, farbe)
         
         %compile mex files
         if strcmp (farbe, 'rot')
-            mex teams/rot/source/esc_find_path.cpp
-            mex teams/rot/source/esc_find_tanke.cpp
+            cd teams/rot
         else
-            mex teams/blau/source/esc_find_path.cpp
-            mex teams/blau/source/esc_find_tanke.cpp
+            cd teams/blau
         end
+        
+        if (constCompiling)
+            mex source/esc_find_path.cpp
+            mex source/esc_find_tanke.cpp
+        end
+        
+        %set handles
+        mexHandle.esc_find_path = @esc_find_path;
+        mexHandle.esc_find_tanke = @esc_find_tanke;
+
+        cd ../../
     end
 
     %registriert Änderungen im Spielfeld und handelt entsprechend
@@ -560,7 +574,7 @@ function bes = beschleunigung(spiel, farbe)
 %% Pathfinder
     %Wegpunkte finden
     function waypoints = findPath(startp, endp)
-        waypoints = simplifyPath(esc_find_path(spiel.mine, startp, endp));
+        waypoints = simplifyPath(mexHandle.esc_find_path(spiel.mine, startp, endp));
     end
    
     %clamps value between min and max
@@ -798,7 +812,7 @@ function bes = beschleunigung(spiel, farbe)
     function CreatePathAllTanken()
         if ~tankeCompetition
             
-            TankList = esc_find_tanke(spiel.mine, spiel.tanke, me.pos, me.ges, enemy.pos, enemy.ges, ignoreTanke);
+            TankList = mexHandle.esc_find_tanke(spiel.mine, spiel.tanke, me.pos, me.ges, enemy.pos, enemy.ges, ignoreTanke);
             
             TankList = fliplr(TankList);
             debugDisp('Tanken: calculating Path');
