@@ -1732,38 +1732,55 @@ function bes = beschleunigung(spiel, farbe)
     %Verteidigung
     %define a Matrix that contains all corner positions
     cornerNodes = [0.015,0.985,0;0.985,0.985,0;0.015,0.015,0;0.985,0.015,0];
-    function vecAngle(ges, pos)
-%       Richtungs und Entfernungsvektor zu den 4 Ecken berechnen  
-        for i=1:4
-        vecPosEcke(i,1:2) = pos - cornerNodes(i,1:2)
-        end
-%       Winkel berechnen für 4 Ecken
-        vecAngle(i,1) = acos((ges*vecPosEcke)/(norm(ges)*norm(vecPosEcke(i,1:2)))) 
-    end
+%     function vecAngle(ges, pos)
+% %       Richtungs und Entfernungsvektor zu den 4 Ecken berechnen  
+%         for i=1:4
+%             vecPosEcke(i,1:2) = pos - cornerNodes(i,1:2)
+%         end
+% %       Winkel berechnen für 4 Ecken
+%         vecAngle(i,1) = acos((ges*vecPosEcke)/(norm(ges)*norm(vecPosEcke(i,1:2)))) 
+%     end
 
 % WINKEL + ZEIT + ABSTAND für Gegner bestimmen und subtrahieren.     
+%  for i=1:4
+%             vecPosEckeMe(i,1:2) = abs(me.pos - cornerNodes(i,1:2));
+%             vecPosEckeEnemy(i,1:2) = abs(enemy.pos - cornerNodes(i,1:2));
+% end 
 
-
-    function cornerTime(ges, pos)
+    function tEcke = cornerTime()
 %       Richtungs und Entfernungsvektor zu den 4 Ecken berechnen    
         for i=1:4
-        vecPosEcke(i,1:2) = pos - cornerNodes(i,1:2)
-        end
-%       Zeit berechnen für alle 4 Ecken
-        for (i=1:4)
-        if vecAngle(i,1) <= 90
-            for i=1:4
-            tEcke(i,1) == sqrt ((2*norm(vecPosEcke(i,1:2)))/spiel.ges) - (ges*cosd(vecAngle(ges,pos))/norm(vecPosEcke(i,1:2)))
-            end            
-        else
-            for i=1:4
-            tEcke(i,1) == sqrt ((2*norm(vecPosEcke(i,1:2)))/spiel.ges) - (ges*cosd(vecAngle(ges,pos))/spiel.bes)
+            vecPosEckeMe(i,1:2) = abs(me.pos - cornerNodes(i,1:2));
+            vecPosEckeEnemy(i,1:2) = abs(enemy.pos - cornerNodes(i,1:2));
+        end 
+            if acosd((dot(me.ges,vecPosEckeMe(i,1:2)))/(norm(me.ges)*norm(vecPosEckeMe(i,1:2)))) <= 90
+                for j=1:4
+                    tEckeMe(j,1) = sqrt(sqrt(((2*norm(abs(vecPosEckeMe(j,1:2))))/spiel.bes)^2) - (norm(me.ges)*(acosd((dot(me.ges,abs(vecPosEckeMe(j,1:2)))/(norm(me.ges)*norm(abs(vecPosEckeMe(j,1:2)))))/norm(abs(vecPosEckeMe(j,1:2)))))));
+                end            
+            else
+                for k=1:4
+                    tEckeMe(k,1) = sqrt(sqrt(2*norm(abs(vecPosEckeMe(k,1:2)))/spiel.bes)^2) + (norm(me.ges)*(acosd((dot(me.ges,abs(vecPosEckeMe(k,1:2)))/(norm(me.ges)*norm(abs(vecPosEckeMe(k,1:2)))))))/spiel.bes);
+                end
             end
-       end
-    end
- end
+            if acosd((dot(me.ges,vecPosEckeMe(i,1:2)))/(norm(me.ges)*norm(vecPosEckeMe(i,1:2)))) <= 90
+                for l=1:4
+                    tEckeEnemy(l,1) = sqrt(sqrt((2*norm(abs(vecPosEckeEnemy(l,1:2))))/spiel.bes)^2) - (norm(enemy.ges)*(acosd((dot(me.ges,abs(vecPosEckeMe(l,1:2)))/(norm(enemy.ges)*norm(abs(vecPosEckeEnemy(l,1:2)))))/norm(abs(vecPosEckeEnemy(l,1:2))))));
+                end            
+            else
+                for m=1:4
+                    tEckeEnemy(m,1) = sqrt(sqrt((2*norm(abs(vecPosEckeEnemy(m,1:2))))/spiel.bes)^2) + (norm(enemy.ges)*(acosd(dot(me.ges,abs(vecPosEckeMe(m,1:2)))/(norm(enemy.ges)*norm(abs(vecPosEckeEnemy(m,1:2))))))/spiel.bes);
+                end
+            end
+            
+            tEcke = tEckeMe - tEckeEnemy;
         
-    bestCorner = sort(cornerTime(me.ges, me.pos) - cornerTime(enemy.ges, enemy.pos))
+    end
+        
+if spiel.i_t >= 30
+ cornerTime 
+end
+
+getTimeToAlignVelocity(vel1, vecPosEckeMe(i,1:2)) + norm(vecPosEckeMe(i,1:2)/(sqrt(2*norm(abs(vecPosEckeMe(j,1:2))/spiel.bes) - getTimeToAlignVelocity(enemy.ges, vecPosEckeEnemy(i,1:2)) + (norm(vecPosEckeEnemy(i,1:2))/(sqrt(2*norm(abs(vecPosEckeEnemy(j,1:2))))/spiel.bes))
     
     
        
@@ -1830,37 +1847,6 @@ function bes = beschleunigung(spiel, farbe)
     end
 end
 
-        
-%                                       
-                         
-%                        else
-%               
-%                             eva = createTankEvaluation(me.pos);
-%                         
-%                             for i=1:numel(eva)
-%                                 eva(2) = 1/eva(2);
-%                                 eva(4) = eva(2) - eva(3);
-%                             end
-% 
-%                             bestTanke = sort(eva(4));
-% 
-%                             if bestTanke(1) >= 0
-% 
-%                                 waypointList = [];
-%                                 waypointList{1} = nextCorner(2,1:2);  
-% 
-%                             else
-% 
-%                                 createPathToNextTanke();
-% 
-%                                 waypointList = [];
-%                                 waypointList{1} = nextCorner(2,1:2); 
-% 
-%                             end
-%                         end
-%                     end
-%                 end
-%     end
 
     function mineTricking()
         
