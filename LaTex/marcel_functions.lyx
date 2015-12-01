@@ -286,8 +286,1130 @@ Die Liste der Arrayschlüssel von spiel.tanke in der Reihenfolge, in der das
  Abfahren der Tankstellen optimal ist.
 \end_layout
 
+\begin_layout Subsection
+Funktion calculateBES
+\end_layout
+
+\begin_layout Subsubsection
+Syntax
+\end_layout
+
+\begin_layout LyX-Code
+calculateBES(
+\shape italic
+boolean 
+\shape default
+disableMineMode)
+\end_layout
+
+\begin_layout Subsubsection
+Beschreibung
+\end_layout
+
+\begin_layout Standard
+Diese Funktion berechnet die benötigte Beschleunigung um die gegebenen Wegpunkte
+ abzufahren und setzt den berechneten Wert in die Ausgabevariable bes der
+ Funktion 
+\begin_inset Quotes eld
+\end_inset
+
+beschleunigung
+\begin_inset Quotes erd
+\end_inset
+
+.
+ Je nachdem ob der Spaceball gerade um eine Mine herum manövrieren muss,
+ wird der Minenmodus automatisch aktiviert.
+ Eine Dekativierung des Minenmodus erfolgt manuell, indem mal die Funktion
+ mit dem Parameter disableMineMode = false aufruft.
+ Dann findet keine Berechnung statt, es wird lediglich auf den normalen
+ Modus zurück geschaltet.
+\end_layout
+
+\begin_layout Subsubsection
+Parameter
+\end_layout
+
+\begin_layout Paragraph
+boolean disableMineMode
+\end_layout
+
+\begin_layout Standard
+Deaktivierung des Minen Modus
+\end_layout
+
+\begin_layout Subsection
+Funktion calculateMineBes
+\end_layout
+
+\begin_layout Subsubsection
+Syntax
+\end_layout
+
+\begin_layout LyX-Code
+calcMineBes()
+\end_layout
+
+\begin_layout Subsubsection
+Beschreibung
+\end_layout
+
+\begin_layout Standard
+Diese Funktion wird von calculateBes aufgerufen und berechnet die Beschleunigung
+ in Minennähe.
+ Es wird ein Radius berechnet, um diesen der Spaceball um die Mine navigiert.
+ Die nötige Zentripetalbeschlunigung, Korrektutbeschleunigung und Vorwärtsbeschl
+eunigung werden addiert, um das Ergebnis als Momentanbeschleunigung zu verwenden.
+ Da die Zentripetalbeschleunigung durch spiel.bes begrenzt ist, wird ebenfalls
+ darauf geachtet die maximale Kreisbeschleunigung nicht zu überschreiten.
+ Um die Navigation nochmals zu beschleunigen wird die Kreisbahn beim Einfahren
+ tangentiert und rechtzeitig in den Linienbeschleunigungsmodus geschaltet,
+ um nicht unnötig lange im Orbit der Mine zu bleiben.
+\end_layout
+
+\begin_layout Subsection
+Funktion calculateLineBes
+\end_layout
+
+\begin_layout Subsubsection
+Syntax
+\end_layout
+
+\begin_layout LyX-Code
+calcLineBes()
+\end_layout
+
+\begin_layout Subsubsection
+Beschreibung
+\end_layout
+
+\begin_layout Standard
+Diese Funktion wird von calculateBes aufgerufen und berechnet die Beschleunigung
+ auf gerader Strecke.
+ Die Beschleunigung wird so gesteuert, dass der momentane Geschwindigkeitsvektor
+ in Richtung des nächsten Wegpunktes liegt.
+ Die Wegpunkte werden beim Erreichen rechtzeitig gelöscht, um mit einer
+ gleichmäßigen Kurve zum nachfolgenden Wegpunkt zu lenken.
+ Bevor der Wegpunkt erreicht wird, wird die Geschwindigkeit auf ein sicheres
+ Maß reduziert.
+ Zusätzlich werden mit Sicherheitsfunktionen geprüft ob sich der Spaceball
+ auf Kollisionskurs mit einer Bande oder Mine befindet.
+ Diese Funktion ist vor allem dann Notwendig, wenn der Pathfinder umgangen
+ wird.
+\end_layout
+
+\begin_layout Subsection
+Funktion checkIfTooFast
+\end_layout
+
+\begin_layout Subsubsection
+Syntax
+\end_layout
+
 \begin_layout LyX-Code
 
+\shape italic
+boolean
+\shape default
+ tooFast = checkIfTooFast()
+\end_layout
+
+\begin_layout Subsubsection
+Beschreibung
+\end_layout
+
+\begin_layout Standard
+In dieser Funktion wird überprüft, ob der nächste Wegpunkt mit Steuerkorrekturen
+ erreicht werden kann, oder ob der Spaceball abbremsen muss.
+ Diese Funktion ist nötig, wenn sich der Zielwegpunkt z.B.
+ im Angriff ständig bewegt.
+ Ist der Spaceball zu schnell um den nächsten Wegpunkt zu erreichen, gibt
+ die Funktion true zurück.
+\end_layout
+
+\begin_layout Subsubsection
+Rückgabewert
+\end_layout
+
+\begin_layout Paragraph*
+boolean tooFast
+\end_layout
+
+\begin_layout Standard
+Dieser Wert ist true, wenn der Spaceball zu schnell ist und den nächsten
+ Wegpunkt überschießt
+\end_layout
+
+\begin_layout Subsection
+Funktion emergencyBreaking
+\end_layout
+
+\begin_layout Subsubsection
+Syntax
+\end_layout
+
+\begin_layout LyX-Code
+
+\shape italic
+boolean
+\shape default
+ emergency = emergencyBreaking(
+\shape italic
+Vector
+\shape default
+ customv = me.ges, 
+\shape italic
+Vector
+\shape default
+ customa = me.bes)
+\end_layout
+
+\begin_layout Subsubsection
+Beschreibung
+\end_layout
+
+\begin_layout Standard
+In dieser Funktion wird überprüft, ob der Spaceball sich kurz vor einer
+ Kollision befinden und eine Notbremsung durchführen muss.
+ Hierfür wird die Position berechnet, bei der unser Spaceball bei einer
+ sofortigen Notbremsung stehen bleiben würde.
+ Befindet sich diese Position in einer Mine oder in einer Bande, wird der
+ Rückgabewert auf true gesetzt.
+ Die Berechnung wird einmal mit und einmal ohne Transversalbeschleunigung
+ durchgeführt.
+ Zusätzlich werden Beschleunigung und Geschwindigkeit vorher mit einer Konstante
+ multipliziert, um die Empfindlichkeit der Notbremsschaltung einzustellen.
+ Die Geschwindigkeit muss dabei mit einem Wert größer als 1 multipliziert
+ werden.
+ Da die Beschleunigung nur einen geringen Wert für eine Notbremsung spielt,
+ ist hier ein Wert ab 0.1 sinnvoll.
+ Auf Wunsch lassen sich Benutzerdefinierte Beschleunigungs und Geschwindigkeitsw
+erte durch die Parameter eingeben.
+\end_layout
+
+\begin_layout Subsubsection
+Parameter
+\end_layout
+
+\begin_layout Paragraph*
+Vector cuytomv
+\end_layout
+
+\begin_layout Standard
+Benutzerdefinierte Geschwindigkeit (Optional)
+\end_layout
+
+\begin_layout Paragraph*
+Vector customa
+\end_layout
+
+\begin_layout Standard
+Benutzerdefinierte Beschleunigung (Optional)
+\end_layout
+
+\begin_layout Subsubsection
+Rückgabewert
+\end_layout
+
+\begin_layout Paragraph*
+boolean emergency
+\end_layout
+
+\begin_layout Standard
+Dieser Wert ist true, wenn der Spaceball kurz vor einer Kollision steht
+ und Notbremsen muss.
+\end_layout
+
+\begin_layout Subsection
+Funktion calcBreakingEndVel
+\end_layout
+
+\begin_layout Subsubsection
+Syntax
+\end_layout
+
+\begin_layout LyX-Code
+
+\shape italic
+double
+\shape default
+ safeVelocity = calcBreakingEndVel()
+\end_layout
+
+\begin_layout Subsubsection
+Beschreibung
+\end_layout
+
+\begin_layout Standard
+Diese Funktion berechnet die sichere Höchstgeschwindigkeit beim nächsten
+ Wegpunkt.
+ Die Funktion berücksichtigt die Zwischendistanzen und die Winkel aller
+ nachfolgenden Wegpunkte.
+ Die Geschwindigkeit ermöglicht ein Ausrichten der Beschleunigung in einer
+ konstanten vorgegebenen Zeit, um nicht zu weit zu überschießen und nicht
+ jedes mal vollständig abbremsen zu müssen.
+\end_layout
+
+\begin_layout Subsubsection
+Rückgabewert
+\end_layout
+
+\begin_layout Paragraph*
+double safeVelocity
+\end_layout
+
+\begin_layout Standard
+Die sichere Höchstgeschwindigkeit beim nächsten Wegpunkt
+\end_layout
+
+\begin_layout Subsection
+Funktion calcBreakDistance
+\end_layout
+
+\begin_layout Subsubsection
+Syntax
+\end_layout
+
+\begin_layout LyX-Code
+
+\shape italic
+double
+\shape default
+ breakDistance = calcBreakDistance(double vel, double endvel)
+\end_layout
+
+\begin_layout Subsubsection
+Beschreibung
+\end_layout
+
+\begin_layout Standard
+Diese Funktion berechnet die Bremsdistanz, um von der Geschwindigkeit vel
+ auf die Geschwindigkeit endvel abzubremsen.
+\end_layout
+
+\begin_layout Subsubsection
+Parameter
+\end_layout
+
+\begin_layout Paragraph*
+double vel
+\end_layout
+
+\begin_layout Standard
+die Anfangsgeschwindigkeit
+\end_layout
+
+\begin_layout Paragraph*
+double endvel
+\end_layout
+
+\begin_layout Standard
+die gewünschte Endgeschwindigkeit
+\end_layout
+
+\begin_layout Subsubsection
+Rückgabewert
+\end_layout
+
+\begin_layout Paragraph*
+double breakDistance
+\end_layout
+
+\begin_layout Standard
+der benötigte Bremsweg
+\end_layout
+
+\begin_layout Subsection
+Funktion calcWaypointReachedRadius
+\end_layout
+
+\begin_layout Subsubsection
+Syntax
+\end_layout
+
+\begin_layout LyX-Code
+
+\shape italic
+double
+\shape default
+ radius = calcWaypointReachedRadius(
+\shape italic
+double
+\shape default
+ endvel)
+\end_layout
+
+\begin_layout Subsubsection
+Beschreibung
+\end_layout
+
+\begin_layout Standard
+Diese Funktion berechnet den Radius, in dem ein Wegpunkt als erreicht markiert
+ werden soll.
+ Der Radius wird anhand der Geschwindigkeit dynamisch berechnet, um eine
+ definierte Kreisbahnkurve beim Ansteuern des nachfolgenden Wegpunktes zu
+ gewährleisten.
+\end_layout
+
+\begin_layout Subsubsection
+Parameter
+\end_layout
+
+\begin_layout Paragraph*
+double endvel
+\end_layout
+
+\begin_layout Standard
+die Geschwindigkeit beim Erreichen des Wegpunktes
+\end_layout
+
+\begin_layout Subsubsection
+Rückgabewert
+\end_layout
+
+\begin_layout Paragraph*
+double radius
+\end_layout
+
+\begin_layout Standard
+der Radius des Wegpunktes
+\end_layout
+
+\begin_layout Subsection
+Funktion findPath
+\end_layout
+
+\begin_layout Subsubsection
+Syntax
+\end_layout
+
+\begin_layout LyX-Code
+
+\shape italic
+CellArray
+\shape default
+ waypoints = findPath(
+\shape italic
+Vector
+\shape default
+ start, 
+\shape italic
+Vector
+\shape default
+ end)
+\end_layout
+
+\begin_layout Subsubsection
+Beschreibung
+\end_layout
+
+\begin_layout Standard
+Diese Funktion berechnet die Wegpunkte mithilfe der Funktion esc_find_path
+ vom Startpunkt 
+\begin_inset Quotes eld
+\end_inset
+
+start
+\begin_inset Quotes erd
+\end_inset
+
+ und Ziel 
+\begin_inset Quotes eld
+\end_inset
+
+end
+\begin_inset Quotes erd
+\end_inset
+
+ und vereinfacht die Wegpunkte mit der Funktion simplifyPath.
+ Als Rückgabewert erhält man die auf ein minimum redizierten Wegpunkte,
+ die man anschließend an die Wegpunktliste anfügen kann
+\end_layout
+
+\begin_layout Subsubsection
+Parameter
+\end_layout
+
+\begin_layout Paragraph*
+Vector start
+\end_layout
+
+\begin_layout Standard
+die Startposition
+\end_layout
+
+\begin_layout Paragraph*
+Vector end
+\end_layout
+
+\begin_layout Standard
+das Ziel
+\end_layout
+
+\begin_layout Subsubsection
+Rückgabewert
+\end_layout
+
+\begin_layout Paragraph*
+CellArray waypoints
+\end_layout
+
+\begin_layout Standard
+die auf ein minimum reduzierten Wegpunkte
+\end_layout
+
+\begin_layout Subsection
+Funktion clamp
+\end_layout
+
+\begin_layout Subsubsection
+Syntax
+\end_layout
+
+\begin_layout LyX-Code
+
+\shape italic
+mixed 
+\shape default
+value = clamp(
+\shape italic
+mixed
+\shape default
+ startvalue, 
+\shape italic
+double
+\shape default
+ min, double max)
+\end_layout
+
+\begin_layout Subsubsection
+Beschreibung
+\end_layout
+
+\begin_layout Standard
+Mit der Funktion clamp lässt sich ein Wert (Skalat oder Vektor) zwischen
+ min und max zuschneiden.
+ Ist der Wert über max, wird er zu max gesetzt.
+ Ist der Wert unter min, wird er zu min gesetzt.
+\end_layout
+
+\begin_layout Subsubsection
+Parameter
+\end_layout
+
+\begin_layout Paragraph*
+mixed startvalue
+\end_layout
+
+\begin_layout Standard
+der Ursprungswert
+\end_layout
+
+\begin_layout Paragraph*
+double min
+\end_layout
+
+\begin_layout Standard
+das Minimum des Ausgabewertes
+\end_layout
+
+\begin_layout Paragraph*
+double max
+\end_layout
+
+\begin_layout Standard
+das Maximum des Ausgabewertes
+\end_layout
+
+\begin_layout Subsubsection
+Rückgabewert
+\end_layout
+
+\begin_layout Paragraph*
+mixed value
+\end_layout
+
+\begin_layout Standard
+der beschnittene Wert
+\end_layout
+
+\begin_layout Subsection
+Funktion simplifyPath
+\end_layout
+
+\begin_layout Subsubsection
+Syntax
+\end_layout
+
+\begin_layout LyX-Code
+
+\shape italic
+CellArray 
+\shape default
+waypoints = simplifyPath(
+\shape italic
+CellArray
+\shape default
+ inwaypoints)
+\end_layout
+
+\begin_layout Subsubsection
+Beschreibung
+\end_layout
+
+\begin_layout Standard
+Diese Funktion reduziert alle unnötigen Wegpunkte in inwaypoints und gibt
+ die auf ein minimum reduzierten Punkte als Cellarray aus.
+ Dafür führt diese Funktion einen Kollisionscheck durch, um zu schaun ob
+ jeder Wegpunkt nötig ist, um nicht gegen eine Bande oder Mine zu fahren.
+ So geht diese Funktion vor: Falls zwischen zwei Wegpunkten kein Hindernis
+ liegt, löscht diese Funktion alle Wegpunkte, die zwischen den beiden Wegpunkten
+ liegen.
+ Diese Prüfung wird für jeden Wegpunkt midestens einmal durchgeführt.
+ 
+\end_layout
+
+\begin_layout Subsubsection
+Parameter
+\end_layout
+
+\begin_layout Paragraph*
+CellArray inwaypoints
+\end_layout
+
+\begin_layout Standard
+die Wegpunkte die durch den Pathfinder generiert wurden
+\end_layout
+
+\begin_layout Subsubsection
+Rückgabewert
+\end_layout
+
+\begin_layout Paragraph*
+CellArray waypoints
+\end_layout
+
+\begin_layout Standard
+der auf ein minimum reduzierten Wegpunkte
+\end_layout
+
+\begin_layout Subsection
+Funktion resimplifyWaypoints
+\end_layout
+
+\begin_layout Subsubsection
+Syntax
+\end_layout
+
+\begin_layout LyX-Code
+
+\shape italic
+CellArray 
+\shape default
+waypoints = resimplifyWaypoints()
+\end_layout
+
+\begin_layout Subsubsection
+Beschreibung
+\end_layout
+
+\begin_layout Standard
+Nach dem Verschwinden einer Mine reduziert diese Funktion unnötig gesetzte
+ Wegpunkte.
+ Hierfür wird als erster Wegpunkt die momentane Spaceballposition eingefügt
+ und anschließend simplifyPath() auf die Wegpunktliste angewendet.
+ Das Resultat erhält man als Rückgabewert.
+\end_layout
+
+\begin_layout Subsubsection
+Rückgabewert
+\end_layout
+
+\begin_layout Paragraph*
+CellArray waypoints
+\end_layout
+
+\begin_layout Standard
+der auf ein minimum reduzierten Wegpunkte
+\end_layout
+
+\begin_layout Subsection
+Funktion attackEnemy
+\end_layout
+
+\begin_layout Subsubsection
+Syntax
+\end_layout
+
+\begin_layout LyX-Code
+attackEnemy()
+\end_layout
+
+\begin_layout Subsubsection
+Beschreibung
+\end_layout
+
+\begin_layout Standard
+Diese Funktion wählt aus, welcher Angriffsmodus gewählt werden soll.
+ Sind noch Minen im Weg zwischen unserem Spaceball und dem gegner, so wird
+ die Extrapolierende Angriffsmethode ausgewählt.
+ Ist der Weg frei so wird der Lockon Angriff gewählt.
+\end_layout
+
+\begin_layout Subsection
+Funktion directAttack
+\end_layout
+
+\begin_layout Subsubsection
+Syntax
+\end_layout
+
+\begin_layout LyX-Code
+directAttack()
+\end_layout
+
+\begin_layout Subsubsection
+Beschreibung
+\end_layout
+
+\begin_layout Standard
+Diese Funktion setzt Wegpunkte manuell, um bestmöglich und schnellstmöglich
+ zum Gegner zu kommen.
+ Die Position des Gegners wird extrapoliert und auf diese Position wird
+ entweder bei freiem Weg ein Wegpunkt direkt gesetzt oder bei Hindernissen
+ mithilfe des Pathfinders als Weg gefunden.
+ Um nicht direkt vor dem Gegner abzubremsen wird die Zielposition um eine
+ kleine Strecke in Fahrtrichtung unseres Spaceballs soweit wie es die umliegende
+n Hindernisse zulassen verlängert.
+ Für die Extrapolationsberechnungen wird die Zeit abgeschätzt, die gebraucht
+ wird um mit dem gegner zu kollidieren.
+ Anschließend wird auf der allgemeinen Bewegungsgleichung und der geschätzten
+ Kollisionszeit die extrapolierte Position berechnet.
+ 
+\end_layout
+
+\begin_layout Subsection
+Funktion lockonAttack
+\end_layout
+
+\begin_layout Subsubsection
+Syntax
+\end_layout
+
+\begin_layout LyX-Code
+lockonAttack()
+\end_layout
+
+\begin_layout Subsubsection
+Beschreibung
+\end_layout
+
+\begin_layout Standard
+Auf diese Funktion sind wir besonders stolz.
+ Das Ziel dieser Funktion ist es die eigene Spaceballgeschwindigkeit an
+ die des Gegners anzugleichen und zusätzlich eine Geschwindigkeitskomponente
+ in Richtung des Gegners zu erzeugen.
+ Wenn keine Minen oder Banden mehr im Weg sind ist es dem gegnerischen Spaceball
+ nicht mehr möglich auszuweichen, da die Beschleunigung des Gegners einfach
+ kopiert wird.
+ Gegen die Verteidigungsmethode in Ecken zu warten bis der gegnerische Spaceball
+ ankommt um dann schnell zu einer anderen Ecke zu flüchten ist diese Angriffsmet
+hode höchst effizient.
+ Leider hat diese Methode den Nachteil dass je nach Strategie des Gegners
+ lange gebraucht wird um die Geschwindigkeit anzugleichen.
+ Außerdem muss der Weg zwischen beiden Spaceballs frei von Hindernissen
+ sein.
+\end_layout
+
+\begin_layout Subsection
+Funktion calcEnemyHitPosition
+\end_layout
+
+\begin_layout Subsubsection
+Syntax
+\end_layout
+
+\begin_layout LyX-Code
+
+\shape italic
+Vector
+\shape default
+ extrapPos = calcEnemyHitPosition(
+\shape italic
+double
+\shape default
+ interpolationMode)
+\end_layout
+
+\begin_layout Subsubsection
+Beschreibung
+\end_layout
+
+\begin_layout Standard
+Diese Funktion berechnet die extrapolierte gegnerische Position, auf die
+ beim Angriff zugesteuert werden soll.
+ Anhand der Variable interpolationMode wird eingestellt, ob bei dieser Berechnun
+g Beschleunigungswerte berücksichtigt werden sollen.
+ Da sich die Beschleunigung oft und schnell ändert, ist es gegebenfalls
+ bei einigen Anwendungen klüger, darauf zu verzichten.
+ Die Extrapolation wird dafür leider ungenauer, schwankt aber nicht so stark.
+\end_layout
+
+\begin_layout Subsubsection
+Parameter
+\end_layout
+
+\begin_layout Paragraph*
+double interpolationMode
+\end_layout
+
+\begin_layout Standard
+dieser Parameter stellt den Berechnungsmodus um:
+\end_layout
+
+\begin_layout Itemize
+0 : normale Berechnung mit Berücksichtigung der Beschleunigung
+\end_layout
+
+\begin_layout Itemize
+1 : nur Berechnung anhand der Geschwindigkeiten
+\end_layout
+
+\begin_layout Subsubsection
+Rückgabewerte
+\end_layout
+
+\begin_layout Paragraph*
+Vector extraPos
+\end_layout
+
+\begin_layout Standard
+die extrapolierte Position des Gegners
+\end_layout
+
+\begin_layout Subsection
+Funktion getAccPos
+\end_layout
+
+\begin_layout Subsubsection
+Syntax
+\end_layout
+
+\begin_layout LyX-Code
+
+\shape italic
+Vector
+\shape default
+ accPos = getAccPos(
+\shape italic
+Vector
+\shape default
+ extrapolPos)
+\end_layout
+
+\begin_layout Subsubsection
+Beschreibung
+\end_layout
+
+\begin_layout Standard
+Diese Funktion versetzt die gegebene Position nach 
+\begin_inset Quotes eld
+\end_inset
+
+hinten
+\begin_inset Quotes erd
+\end_inset
+
+, um mit voller Geschwindigkeit zu dieser Position zu gelangen und den Spaceball
+ erst nach Erreichen dieser Position abbremsen zu lassen.
+ 
+\begin_inset Quotes eld
+\end_inset
+
+Hinten
+\begin_inset Quotes erd
+\end_inset
+
+ bezieht sich dabei auf der Geraden die auf der gegebenen Position und unserem
+ Spaceball liegt.
+ Die Funktion setzt den gegebenen Punkt so weit nach hinten, wie es die
+ Hindernisse zulassen, maximal jedoch um 0.2 Längeneinheiten.
+\end_layout
+
+\begin_layout Subsubsection
+Parameter
+\end_layout
+
+\begin_layout Paragraph*
+Vector extrapolPos
+\end_layout
+
+\begin_layout Standard
+die gegebene Position auf die zugesteuert werden soll
+\end_layout
+
+\begin_layout Subsubsection
+Rückgabewerte
+\end_layout
+
+\begin_layout Paragraph*
+Vector extraPos
+\end_layout
+
+\begin_layout Standard
+die Position die als Wegpunkt gesetzt werden kann.
+\end_layout
+
+\begin_layout Subsection
+Funktion getSmoothedAccelerationValues
+\end_layout
+
+\begin_layout Subsubsection
+Syntax
+\end_layout
+
+\begin_layout LyX-Code
+[
+\shape italic
+Vector
+\shape default
+ meacc, 
+\shape italic
+Vector
+\shape default
+ enemyacc] = getSmoothedAccelerationValues()
+\end_layout
+
+\begin_layout Subsubsection
+Beschreibung
+\end_layout
+
+\begin_layout Standard
+Diese Funktion mittelt die einzelnen Beschleunigungswerte vom eigenen und
+ gegnerischen Spaceball über eine per Konstante festgelegte Anzahl an Durchläufe
+n und gibt die gemittelten Beschleunigungswerte aus.
+ Da sich die direkten Beschleunigungswerte oft und stark ändern, ist es
+ sinnvoll bei Extrapolationsberechnungen oder Abschätzungen gemittelte Beschleun
+igungswerte zu verwenden.
+\end_layout
+
+\begin_layout Subsubsection
+Rückgabewerte
+\end_layout
+
+\begin_layout Paragraph*
+Vector meacc
+\end_layout
+
+\begin_layout Standard
+der gemittelte Beschleunigungswert des eigenen Spaceballs
+\end_layout
+
+\begin_layout Paragraph*
+Vector enemyacc
+\end_layout
+
+\begin_layout Standard
+der gemittelte Beschleunigungswert des gegnerischen Spaceballs
+\end_layout
+
+\begin_layout Subsection
+Funktion calculateSmoothHitTime
+\end_layout
+
+\begin_layout Subsubsection
+Syntax
+\end_layout
+
+\begin_layout LyX-Code
+
+\shape italic
+double
+\shape default
+ time = calculateSmoothHitTime(
+\shape italic
+boolean
+\shape default
+ includeAcceleration)
+\end_layout
+
+\begin_layout Subsubsection
+Beschreibung
+\end_layout
+
+\begin_layout Standard
+Diese Funktion mittelt die geschätzte Abfangzeit die der eigene Spaceball
+ braucht, um mit dem gegnerischen Spaceball zu kollidieren.
+ Über den Parameter lässt sich einstellen, ob in der Berechnung Beschleunigungsw
+erte einbezogen werden sollen.
+\end_layout
+
+\begin_layout Subsubsection
+Parameter
+\end_layout
+
+\begin_layout Paragraph*
+boolean includeAcceleration
+\end_layout
+
+\begin_layout Standard
+Dieser Wert wird auf true gesetzt, falls die Beschleunigung in der Berechnung
+ betrachtet werden soll.
+ Andernfalls wird dieser Parameter auf false gesetzt.
+\end_layout
+
+\begin_layout Subsubsection
+Rückgabewerte
+\end_layout
+
+\begin_layout Paragraph*
+double time
+\end_layout
+
+\begin_layout Standard
+die voraussichtliche Abfangzeit
+\end_layout
+
+\begin_layout Subsection
+Funktion debugDRAW
+\end_layout
+
+\begin_layout Subsubsection
+Syntax
+\end_layout
+
+\begin_layout LyX-Code
+debugDRAW()
+\end_layout
+
+\begin_layout Subsubsection
+Beschreibung
+\end_layout
+
+\begin_layout Standard
+Diese Funktion dient dem Debugging und zeichnet alle Wegpunkte als kleine
+ Punkte ein.
+ Wird die Wegpunktliste geändert muss diese Funktion erneut aufgerufen werden.
+\end_layout
+
+\begin_layout Subsection
+Funktion debugDrawCircle
+\end_layout
+
+\begin_layout Subsubsection
+Syntax
+\end_layout
+
+\begin_layout LyX-Code
+debugDrawCircle(
+\shape italic
+double
+\shape default
+ index, 
+\shape italic
+Vector
+\shape default
+ pos, 
+\shape italic
+double
+\shape default
+ rad, 
+\shape italic
+boolean
+\shape default
+ clearall = false)
+\end_layout
+
+\begin_layout Subsubsection
+Beschreibung
+\end_layout
+
+\begin_layout Standard
+Diese Funktion dient dem Debugging und zeichnet einen Kreis mit dem gegebenen
+ Radius an der gegebenen Position.
+ Um mehrere Kreise gleichzeitig zeichnen zu können muss der Index des Kreises
+ bestimmt werden.
+ Jede Spielrunde werden die Kreise entfernt und müssen erneut gezeichnet
+ werden.
+\end_layout
+
+\begin_layout Subsubsection
+Parameter
+\end_layout
+
+\begin_layout Paragraph*
+double index
+\end_layout
+
+\begin_layout Standard
+der Index des Kreises, jeder Kreis braucht einen unterschiedlichen Index
+\end_layout
+
+\begin_layout Paragraph*
+double rad
+\end_layout
+
+\begin_layout Standard
+der Radius des Kreises
+\end_layout
+
+\begin_layout Paragraph*
+Vector pos
+\end_layout
+
+\begin_layout Standard
+die Position des Kreises
+\end_layout
+
+\begin_layout Paragraph*
+boolean clearall
+\end_layout
+
+\begin_layout Standard
+beim Setzen dieser Variablen auf true wird kein Kreis gezeichnet.
+ Stattdessen werden alle Kreise gelöscht und die Handles werden freigegeben.
+\end_layout
+
+\begin_layout Subsection
+Funktion debugDisp
+\end_layout
+
+\begin_layout Subsubsection
+Syntax
+\end_layout
+
+\begin_layout LyX-Code
+ debugDisp(
+\shape italic
+string str
+\shape default
+)
+\end_layout
+
+\begin_layout Subsubsection
+Beschreibung
+\end_layout
+
+\begin_layout Standard
+Diese Funktion dient dem Debugging und schreibt einen String in die Konsole.
+ Im Gegensatz zur gewöhnlichen disp() Funktion lässt sich die Ausgaben mit
+ der Konstanten 
+\shape italic
+constDebugMode
+\shape default
+ ein und aus schalten.
+\end_layout
+
+\begin_layout Subsubsection
+Parameter
+\end_layout
+
+\begin_layout Paragraph*
+string str
+\end_layout
+
+\begin_layout Standard
+der String der in der Konsole dargestellt werden soll
 \end_layout
 
 \end_body
