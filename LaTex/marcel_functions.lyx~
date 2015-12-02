@@ -1391,12 +1391,13 @@ Beschreibung
 \end_layout
 
 \begin_layout Standard
-Diese Funktion dient dem Debugging und zeichnet einen Kreis mit dem gegebenen
- Radius an der gegebenen Position.
- Um mehrere Kreise gleichzeitig zeichnen zu können muss der Index des Kreises
- bestimmt werden.
- Jede Spielrunde werden die Kreise entfernt und müssen erneut gezeichnet
- werden.
+Diese Funktion dient dem Debugging und schreibt einen String in die Konsole.
+ Im Gegensatz zur gewöhnlichen disp() Funktion lässt sich die Ausgaben mit
+ der Konstanten 
+\shape italic
+constDebugMode
+\shape default
+ ein und aus schalten.
 \end_layout
 
 \begin_layout Subsubsection
@@ -1404,19 +1405,899 @@ Parameter
 \end_layout
 
 \begin_layout Paragraph*
-double index
+string str
 \end_layout
 
 \begin_layout Standard
-der Index des Kreises, jeder Kreis braucht einen unterschiedlichen Index
+der String der in der Konsole dargestellt werden soll
+\end_layout
+
+\begin_layout Subsection
+Funktion vecNorm
+\end_layout
+
+\begin_layout Subsubsection
+Syntax
+\end_layout
+
+\begin_layout LyX-Code
+ 
+\shape italic
+Vector
+\shape default
+ erg = vecNorm(
+\shape italic
+Vector 
+\shape default
+input)
+\end_layout
+
+\begin_layout Subsubsection
+Beschreibung
+\end_layout
+
+\begin_layout Standard
+Diese Funktion macht den Vektor 
+\begin_inset Quotes eld
+\end_inset
+
+input
+\begin_inset Quotes erd
+\end_inset
+
+ zum Einheitsvektor mit der Länge eins und der Richtung von 
+\begin_inset Quotes eld
+\end_inset
+
+input
+\begin_inset Quotes erd
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Subsubsection
+Parameter
 \end_layout
 
 \begin_layout Paragraph*
-double rad
+Vector input
 \end_layout
 
 \begin_layout Standard
-der Radius des Kreises
+der Eingangsvektor
+\end_layout
+
+\begin_layout Subsubsection
+Rückgabewerte
+\end_layout
+
+\begin_layout Paragraph*
+Vektor erg
+\end_layout
+
+\begin_layout Standard
+der Einheitsvektor von 
+\begin_inset Quotes eld
+\end_inset
+
+input
+\begin_inset Quotes erd
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsection
+Funktion appendToArray
+\end_layout
+
+\begin_layout Subsubsection
+Syntax
+\end_layout
+
+\begin_layout LyX-Code
+ 
+\shape italic
+CellArray
+\shape default
+ ergarray = appendToArray(
+\shape italic
+CellArray 
+\shape default
+array1, 
+\shape italic
+CellArray
+\shape default
+ array2)
+\end_layout
+
+\begin_layout Subsubsection
+Beschreibung
+\end_layout
+
+\begin_layout Standard
+Diese Funktion fügt die Arrays array1 und array2 hintereinander zusammen
+ und gibt das resultierende Array als ergarray aus.
+\end_layout
+
+\begin_layout Subsubsection
+Parameter
+\end_layout
+
+\begin_layout Paragraph*
+CellArray array1
+\end_layout
+
+\begin_layout Standard
+das erste Array
+\end_layout
+
+\begin_layout Paragraph*
+CellArray array2
+\end_layout
+
+\begin_layout Standard
+das zweite Array
+\end_layout
+
+\begin_layout Subsubsection
+Rückgabewerte
+\end_layout
+
+\begin_layout Paragraph*
+Cellarray ergarray
+\end_layout
+
+\begin_layout Standard
+das Zusammengefügte Array
+\end_layout
+
+\begin_layout Subsection
+Funktion corridorColliding
+\end_layout
+
+\begin_layout Subsubsection
+Syntax
+\end_layout
+
+\begin_layout LyX-Code
+ 
+\shape italic
+boolean
+\shape default
+ colliding = corridorColliding(
+\shape italic
+Vector 
+\shape default
+startp, 
+\shape italic
+Vector
+\shape default
+ endp, 
+\shape italic
+double
+\shape default
+ radius)
+\end_layout
+
+\begin_layout Subsubsection
+Beschreibung
+\end_layout
+
+\begin_layout Standard
+Diese Überprüft eine Linie zwischen 
+\begin_inset Quotes eld
+\end_inset
+
+startp
+\begin_inset Quotes erd
+\end_inset
+
+ und 
+\begin_inset Quotes eld
+\end_inset
+
+endp
+\begin_inset Quotes erd
+\end_inset
+
+ mit dem Radius 
+\begin_inset Quotes eld
+\end_inset
+
+radius
+\begin_inset Quotes erd
+\end_inset
+
+ auf Hindernisfreiheit.
+ Liegen Hindernisse im gegebenen Bereich gibt diese Funktion true zurück.
+ Ansonsten erhält man false.
+\end_layout
+
+\begin_layout Subsubsection
+Parameter
+\end_layout
+
+\begin_layout Paragraph*
+Vector startp
+\end_layout
+
+\begin_layout Standard
+Startpunkt
+\end_layout
+
+\begin_layout Paragraph*
+Vector endp
+\end_layout
+
+\begin_layout Standard
+Endpunkt
+\end_layout
+
+\begin_layout Paragraph*
+double radius
+\end_layout
+
+\begin_layout Standard
+Prüfungsradius
+\end_layout
+
+\begin_layout Subsubsection
+Rückgabewerte
+\end_layout
+
+\begin_layout Paragraph*
+boolean colliding
+\end_layout
+
+\begin_layout Standard
+true wenn im gegebenen Bereich Kollisionsobjekte sind - andernfalls false
+\end_layout
+
+\begin_layout Subsection
+Funktion lineColliding
+\end_layout
+
+\begin_layout Subsubsection
+Syntax
+\end_layout
+
+\begin_layout LyX-Code
+ 
+\shape italic
+boolean
+\shape default
+ colliding = lineColliding(
+\shape italic
+Vector 
+\shape default
+startp, 
+\shape italic
+Vector
+\shape default
+ endp, 
+\shape italic
+double
+\shape default
+ radius)
+\end_layout
+
+\begin_layout Subsubsection
+Beschreibung
+\end_layout
+
+\begin_layout Standard
+Diese Überprüft den Abstand aller Minen zur gegebenen Linie zwischen 
+\begin_inset Quotes eld
+\end_inset
+
+startp
+\begin_inset Quotes erd
+\end_inset
+
+ und 
+\begin_inset Quotes eld
+\end_inset
+
+endp
+\begin_inset Quotes erd
+\end_inset
+
+.
+ Liegt eine Mine näher zur Linie als 
+\begin_inset Quotes eld
+\end_inset
+
+radius
+\begin_inset Quotes erd
+\end_inset
+
+, wird true zurückgegeben.
+ Andernfalls erhält man false.
+ Ähnlich zu 
+\begin_inset Quotes eld
+\end_inset
+
+corridorColliding
+\begin_inset Quotes erd
+\end_inset
+
+, nur dass corridorColliding die Punkte startp und endp entlang der Geraden
+ mit dem Betrag Radius auseinander setzt.
+\end_layout
+
+\begin_layout Subsubsection
+Parameter
+\end_layout
+
+\begin_layout Paragraph*
+Vector startp
+\end_layout
+
+\begin_layout Standard
+Startpunkt
+\end_layout
+
+\begin_layout Paragraph*
+Vector endp
+\end_layout
+
+\begin_layout Standard
+Endpunkt
+\end_layout
+
+\begin_layout Paragraph*
+double radius
+\end_layout
+
+\begin_layout Standard
+Prüfungsradius
+\end_layout
+
+\begin_layout Subsubsection
+Rückgabewerte
+\end_layout
+
+\begin_layout Paragraph*
+boolean colliding
+\end_layout
+
+\begin_layout Standard
+true wenn im gegebenen Bereich Kollisionsobjekte sind - andernfalls false
+\end_layout
+
+\begin_layout Subsection
+Funktion distanceLinePoint
+\end_layout
+
+\begin_layout Subsubsection
+Syntax
+\end_layout
+
+\begin_layout LyX-Code
+ 
+\shape italic
+double
+\shape default
+ distance = distanceLinePoint(
+\shape italic
+Vector 
+\shape default
+startp, 
+\shape italic
+Vector
+\shape default
+ endp, 
+\shape italic
+Vector
+\shape default
+ point)
+\end_layout
+
+\begin_layout Subsubsection
+Beschreibung
+\end_layout
+
+\begin_layout Standard
+Berechnet den Abstand eines Punktes 
+\begin_inset Quotes eld
+\end_inset
+
+point
+\begin_inset Quotes erd
+\end_inset
+
+ zur gegebenen Linie zwischen 
+\begin_inset Quotes eld
+\end_inset
+
+startp
+\begin_inset Quotes erd
+\end_inset
+
+ und 
+\begin_inset Quotes eld
+\end_inset
+
+endp
+\begin_inset Quotes erd
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Subsubsection
+Parameter
+\end_layout
+
+\begin_layout Paragraph*
+Vector startp
+\end_layout
+
+\begin_layout Standard
+Startpunkt
+\end_layout
+
+\begin_layout Paragraph*
+Vector endp
+\end_layout
+
+\begin_layout Standard
+Endpunkt
+\end_layout
+
+\begin_layout Paragraph*
+Vector point
+\end_layout
+
+\begin_layout Standard
+zu überprüfender Punkt
+\end_layout
+
+\begin_layout Subsubsection
+Rückgabewerte
+\end_layout
+
+\begin_layout Paragraph*
+double distance
+\end_layout
+
+\begin_layout Standard
+die Distanz des Punktes 
+\begin_inset Quotes eld
+\end_inset
+
+point
+\begin_inset Quotes erd
+\end_inset
+
+ zur gegebenen Linie zwischen 
+\begin_inset Quotes eld
+\end_inset
+
+startp
+\begin_inset Quotes erd
+\end_inset
+
+ und 
+\begin_inset Quotes eld
+\end_inset
+
+endp
+\begin_inset Quotes erd
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsection
+Funktion getPerpend
+\end_layout
+
+\begin_layout Subsubsection
+Syntax
+\end_layout
+
+\begin_layout LyX-Code
+ 
+\shape italic
+Vector
+\shape default
+ norm = getPerpend(
+\shape italic
+Vector 
+\shape default
+vec)
+\end_layout
+
+\begin_layout Subsubsection
+Beschreibung
+\end_layout
+
+\begin_layout Standard
+Berechnet einen rechtwinkligen Vektor zu 
+\begin_inset Quotes eld
+\end_inset
+
+vec
+\begin_inset Quotes erd
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Subsubsection
+Parameter
+\end_layout
+
+\begin_layout Paragraph*
+Vector vec
+\end_layout
+
+\begin_layout Standard
+Eingangsvektor
+\end_layout
+
+\begin_layout Subsubsection
+Rückgabewerte
+\end_layout
+
+\begin_layout Paragraph*
+Vector norm
+\end_layout
+
+\begin_layout Standard
+ein Vektor, der rechtwinklig zu 
+\begin_inset Quotes eld
+\end_inset
+
+vec
+\begin_inset Quotes erd
+\end_inset
+
+ ist.
+\end_layout
+
+\begin_layout Subsection
+Funktion projectVectorNorm
+\end_layout
+
+\begin_layout Subsubsection
+Syntax
+\end_layout
+
+\begin_layout LyX-Code
+ 
+\shape italic
+double
+\shape default
+ proj = projectVectorNorm(
+\shape italic
+Vector 
+\shape default
+vec1, 
+\shape italic
+Vector
+\shape default
+ vec2)
+\end_layout
+
+\begin_layout Subsubsection
+Beschreibung
+\end_layout
+
+\begin_layout Standard
+Berechnet den Betrag der Projektion von 
+\begin_inset Quotes eld
+\end_inset
+
+vec1
+\begin_inset Quotes erd
+\end_inset
+
+ auf 
+\begin_inset Quotes eld
+\end_inset
+
+vec2
+\begin_inset Quotes erd
+\end_inset
+
+.
+ Falls sich die Richtungen von 
+\begin_inset Quotes eld
+\end_inset
+
+vec1
+\begin_inset Quotes erd
+\end_inset
+
+ und 
+\begin_inset Quotes eld
+\end_inset
+
+vec2
+\begin_inset Quotes erd
+\end_inset
+
+ um mehr als 90 Grad unterscheiden, ist der Rückgabewert negativ!
+\end_layout
+
+\begin_layout Subsubsection
+Parameter
+\end_layout
+
+\begin_layout Paragraph*
+Vector vec1
+\end_layout
+
+\begin_layout Standard
+Eingangsvektor
+\end_layout
+
+\begin_layout Paragraph*
+Vector vec2
+\end_layout
+
+\begin_layout Standard
+Vektor, auf den Projeziert werden soll
+\end_layout
+
+\begin_layout Subsubsection
+Rückgabewerte
+\end_layout
+
+\begin_layout Paragraph*
+Vector norm
+\end_layout
+
+\begin_layout Standard
+ein Vektor, der rechtwinklig zu 
+\begin_inset Quotes eld
+\end_inset
+
+vec
+\begin_inset Quotes erd
+\end_inset
+
+ ist.
+\end_layout
+
+\begin_layout Subsection
+Funktion getTimeToAlignVelocity
+\end_layout
+
+\begin_layout Subsubsection
+Syntax
+\end_layout
+
+\begin_layout LyX-Code
+ 
+\shape italic
+double
+\shape default
+ time = getTimeToAlignVelocity(
+\shape italic
+Vector 
+\shape default
+vel1, 
+\shape italic
+Vector
+\shape default
+ vec)
+\end_layout
+
+\begin_layout Subsubsection
+Beschreibung
+\end_layout
+
+\begin_layout Standard
+Berechnet die Zeit, die benötigt wird, um den Geschwindigkeitsvektor 
+\begin_inset Quotes eld
+\end_inset
+
+vel1
+\begin_inset Quotes erd
+\end_inset
+
+ auf den Vektor 
+\begin_inset Quotes eld
+\end_inset
+
+vec
+\begin_inset Quotes erd
+\end_inset
+
+ mit dem selben Geschwindigkeitsbetrag auszurichten.
+ Hierfür wird angenommen, dass der Geschwindigkeitsvektor auf einer Kreisbahn
+ mit der konstanten Beschleunigung spiel.bes geändert wird.
+ Die dafür benötigte Zeit wird als Rückgabewert ausgegeben.
+\end_layout
+
+\begin_layout Subsubsection
+Parameter
+\end_layout
+
+\begin_layout Paragraph*
+Vector vel1
+\end_layout
+
+\begin_layout Standard
+Geschwingigkeitsvektor
+\end_layout
+
+\begin_layout Paragraph*
+Vector vec
+\end_layout
+
+\begin_layout Standard
+neue Geschwindigkeitsrichtung
+\end_layout
+
+\begin_layout Subsubsection
+Rückgabewerte
+\end_layout
+
+\begin_layout Paragraph*
+double time
+\end_layout
+
+\begin_layout Standard
+die Zeit, die benötigt wird, um den Geschwindigkeitsvektor 
+\begin_inset Quotes eld
+\end_inset
+
+vel1
+\begin_inset Quotes erd
+\end_inset
+
+ auf den Vektor 
+\begin_inset Quotes eld
+\end_inset
+
+vec
+\begin_inset Quotes erd
+\end_inset
+
+ mit dem selben Geschwindigkeitsbetrag auszurichten
+\end_layout
+
+\begin_layout Subsection
+Funktion getMaxVelocityToAlignInTime
+\end_layout
+
+\begin_layout Subsubsection
+Syntax
+\end_layout
+
+\begin_layout LyX-Code
+ 
+\shape italic
+double
+\shape default
+ vel = getMaxVelocityToAlignInTime(
+\shape italic
+Vector 
+\shape default
+vec1, 
+\shape italic
+Vector
+\shape default
+ vec2, 
+\shape italic
+double
+\shape default
+ time)
+\end_layout
+
+\begin_layout Subsubsection
+Beschreibung
+\end_layout
+
+\begin_layout Standard
+Berechnet die maximale Geschwindigkeit auf Grundlage von getTimeToAlignVelocity(
+), die ein Spaceball noch haben darf um die Geschwindigkeitsrichtung von
+ vec1 auf vec2 in der vorgeschriebenen Zeit time zu ändern.
+ Diese Funktion ermittelt die sichere Geschwindigkeit beim Erreichen eines
+ Wegpunktes.
+\end_layout
+
+\begin_layout Subsubsection
+Parameter
+\end_layout
+
+\begin_layout Paragraph*
+Vector vec1
+\end_layout
+
+\begin_layout Standard
+anfänglicher Geschwingigkeitsvektor
+\end_layout
+
+\begin_layout Paragraph*
+Vector vec2
+\end_layout
+
+\begin_layout Standard
+Zielgeschwingigkeitsvektor
+\end_layout
+
+\begin_layout Paragraph*
+double time
+\end_layout
+
+\begin_layout Standard
+die Zeit, die für die Beschleunigung zur Verfügung steht
+\end_layout
+
+\begin_layout Subsubsection
+Rückgabewerte
+\end_layout
+
+\begin_layout Paragraph*
+double vel
+\end_layout
+
+\begin_layout Standard
+die maximal erlaubte Geschwindigkeit
+\end_layout
+
+\begin_layout Subsection
+Funktion safeDeleteWaypoints
+\end_layout
+
+\begin_layout Subsubsection
+Syntax
+\end_layout
+
+\begin_layout LyX-Code
+ safeDeleteWaypoints()
+\end_layout
+
+\begin_layout Subsubsection
+Beschreibung
+\end_layout
+
+\begin_layout Standard
+Diese Funktion löscht alle Wegpunkte.
+ Um zu verhindern dass der Spaceball durch Ausbremsen und Erhalten neuer
+ Wegpunkte in ein Hindernis fährt, wird zusätzlich ein Wegpunkt erstellt,
+ bei dem der Spaceball auf eine sichere Geschwindigkeit abgebremst hat.
+ Somit bremst der Spaceball erst ab, um dann einer neue Route zu folgen.
+\end_layout
+
+\begin_layout Subsection
+Funktion getNearestMineId
+\end_layout
+
+\begin_layout Subsubsection
+Syntax
+\end_layout
+
+\begin_layout LyX-Code
+ 
+\shape italic
+double
+\shape default
+ id = getNearestMineId(
+\shape italic
+Vector
+\shape default
+ pos)
+\end_layout
+
+\begin_layout Subsubsection
+Beschreibung
+\end_layout
+
+\begin_layout Standard
+Sucht in spiel.mine nach der nächsten Mine an der gegebenen Position.
+ Als Ergebnis erhält man den Arrayindex der Mine.
+\end_layout
+
+\begin_layout Subsubsection
+Parameter
 \end_layout
 
 \begin_layout Paragraph*
@@ -1424,16 +2305,19 @@ Vector pos
 \end_layout
 
 \begin_layout Standard
-die Position des Kreises
+die Referenzposition
+\end_layout
+
+\begin_layout Subsubsection
+Rückgabewerte
 \end_layout
 
 \begin_layout Paragraph*
-boolean clearall
+double id
 \end_layout
 
 \begin_layout Standard
-beim Setzen dieser Variablen auf true wird kein Kreis gezeichnet.
- Stattdessen werden alle Kreise gelöscht und die Handles werden freigegeben.
+die Minen-Id
 \end_layout
 
 \end_body
