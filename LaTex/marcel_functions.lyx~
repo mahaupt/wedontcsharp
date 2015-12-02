@@ -2320,5 +2320,71 @@ double id
 die Minen-Id
 \end_layout
 
+\begin_layout Subsection
+Funktion isWalkable
+\end_layout
+
+\begin_layout Subsubsection
+Syntax
+\end_layout
+
+\begin_layout LyX-Code
+ 
+\shape italic
+boolean
+\shape default
+ walkable = isWalkable(
+\shape italic
+Vector
+\shape default
+ pos, 
+\shape italic
+double
+\shape default
+ radius)
+\end_layout
+
+\begin_layout Subsubsection
+Beschreibung
+\end_layout
+
+\begin_layout Standard
+Prüft, ob diese Position mit dem Radius von einem Spaceball ohne Kollision
+ begehbar ist.
+\end_layout
+
+\begin_layout Subsubsection
+Parameter
+\end_layout
+
+\begin_layout Paragraph*
+Vector pos
+\end_layout
+
+\begin_layout Standard
+die Referenzposition
+\end_layout
+
+\begin_layout Paragraph*
+double radius
+\end_layout
+
+\begin_layout Standard
+Überprüfungsradius
+\end_layout
+
+\begin_layout Subsubsection
+Rückgabewerte
+\end_layout
+
+\begin_layout Paragraph*
+boolean walkable
+\end_layout
+
+\begin_layout Standard
+ist true, wenn sich keine Kollisionsobjekte im gegebenen Bereich befinden
+ - ansonsten false
+\end_layout
+
 \end_body
 \end_document
