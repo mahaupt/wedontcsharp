@@ -368,7 +368,7 @@ function bes = beschleunigung(spiel, farbe)
         end
         
         %emergencyBreaking
-        if (emergencyBreaking())
+        if (emergencyBreaking() && ~Verteidigung)
             bes = -me.ges;
         end
         
@@ -740,9 +740,13 @@ function bes = beschleunigung(spiel, farbe)
             erg = 0;
             return;
         end
+        if(norm(vec) <= 0.00001)
+            erg = 0;
+            return;
+        end
         
         dotp = dot(vecNorm(vel1), vecNorm(vec));
-        angle = acos(dotp);
+        angle = clamp(acos(dotp), -1, 1);
         if dotp < 0
             angle = angle + pi/2;
         end
@@ -1216,6 +1220,29 @@ function bes = beschleunigung(spiel, farbe)
     %Verteidigung
     %define a Matrix that contains all corner positions
     
+    
+    function time = defCornerTime(pos)
+        edgepos = pos;
+        meToEdge = edgepos - me.pos;
+        enemyToEdge = edgepos - enemy.pos;
+
+        metime = getTimeToAlignVelocity(me.ges, vecNorm(meToEdge)) + norm(meToEdge)/(norm(me.ges) + spiel.bes);
+        enemytime = getTimeToAlignVelocity(enemy.ges, vecNorm(enemyToEdge)) + norm(enemyToEdge)/(norm(enemy.ges) + spiel.bes);
+        
+        
+        time = enemytime - metime;
+        
+        if (dot(vecNorm(meToEdge), vecNorm(enemy.pos-me.pos)) > 0.6 && norm(meToEdge) > 0.06)
+            
+            time = time - 100;
+            
+            if (dot(vecNorm(meToEdge), vecNorm(enemy.pos-me.pos)) > 0.9)
+                time = time - 100;
+            end
+        end
+        
+        
+    end
 
     function tEcke = bestDefCorner() 
         cornerNodes = {[0.015,0.985], [0.985,0.985], [0.015,0.015], [0.985,0.015]};
@@ -1223,16 +1250,11 @@ function bes = beschleunigung(spiel, farbe)
         savetime = -Inf;
         
         for i=1:4
-            edgepos = cornerNodes{i};
-            meToEdge = edgepos - me.pos;
-            enemyToEdge = edgepos - enemy.pos;
+            checktime = defCornerTime(cornerNodes{i});
             
-            metime = timeToAlignVelocity(me.ges, vecNorm(meToEdge)) + norm(meToEdge)/(norm(me.ges)+spiel.bes*norm(meToEdge)/2);
-            enemytime = timeToAlignVelocity(enemy.ges, vecNorm(enemyToEdge)) + norm(enemyToEdge)/(norm(enemy.ges)+spiel.bes*norm(enemyToEdge)/2);
-            
-            if (savetime < enemytime - metime)
-                tEcke = edgepos;
-                savetime = enemytime - metime;
+            if (savetime < checktime)
+                tEcke = cornerNodes{i};
+                savetime = checktime;
             end
         end
     end
@@ -1248,7 +1270,7 @@ function bes = beschleunigung(spiel, farbe)
 
     
     function cornerTricking()
-        cornerNodes = [0.015,0.985,0; 0.985,0.985,0; 0.015,0.015,0; 0.985,0.015,0];
+        cornerNodes = {[0.015,0.985], [0.985,0.985], [0.015,0.015], [0.985,0.015]};
         
         if waitForEnemy == false
             debugDisp('cornerTricking: Pt1');
@@ -1259,36 +1281,39 @@ function bes = beschleunigung(spiel, farbe)
             debugDRAW();
             %waiting for the enemy
         else
-            if checkIfTooFastE () == true || norm(me.pos-enemy.pos) <= 0.15
+            if (checkIfTooFastE () == true || norm(me.pos-enemy.pos) <= 0.15) && numel(waypointList) <= 0
                 
-                nextCorner = sortrows(cornerNodes, [3 2 1]);
-                
-                if checkIfTooFastECrash() == true && norm(me.pos - enemy.pos) < 0.5 && (norm(me.ges)^2)/spiel.bes < norm (me.pos - nextCorner(1,1:2))+ spiel.spaceball_radius && norm (me.pos - nextCorner(1,1:2)) < 0.2 && corridorColliding(me.pos, nextCorner(3,1:2), spiel.mine_radius*2) == false
-
-                    Verteidigung = false 
-                    debugDisp('cornerTricking. Pt3');
-                    for i=1:4
-                        cornerNodes(i,3)=norm(cornerNodes(i,1:2)-me.pos-enemy.pos);
-                    end
-
-                    nextCorner = sortrows(cornerNodes, [3 2 1]);
-
-                    waypointList = [];
-                    waypointList{1} = nextCorner(3,1:2);
-                else
-                    Verteidigung = true  
+%                 nextCorner = sortrows(cornerNodes, [3 2 1]);
+%                 
+%                 if checkIfTooFastECrash() == true && norm(me.pos - enemy.pos) < 0.5 && (norm(me.ges)^2)/spiel.bes < norm (me.pos - nextCorner(1,1:2))+ spiel.spaceball_radius && norm (me.pos - nextCorner(1,1:2)) < 0.2 && corridorColliding(me.pos, nextCorner(3,1:2), spiel.mine_radius*2) == false
+% 
+%                     Verteidigung = false 
+%                     debugDisp('cornerTricking. Pt3');
+%                     for i=1:4
+%                         cornerNodes(i,3)=norm(cornerNodes(i,1:2)-me.pos-enemy.pos);
+%                     end
+% 
+%                     nextCorner = sortrows(cornerNodes, [3 2 1]);
+% 
+%                     waypointList = [];
+%                     waypointList{1} = nextCorner(3,1:2);
+%                 else
+                    Verteidigung = true;  
                     debugDisp('cornerTricking: Pt2');
                         
                     %sort all corners based on the direction the enemy is coming from and their distance to us
+                    edges = zeros(4,2);
                     for i=1:4
-                        cornerNodes(i,3)=norm(cornerNodes(i,1:2)-me.pos-enemy.pos);
+                        edges(i, 1) = defCornerTime(cornerNodes{i}); %Berechnet Zeit für Ecke 1-4
+                        edges(i, 2) = i;
                     end
 
-                    nextCorner = sortrows(cornerNodes, [3 2 1]);
-
+                    nextCorner = sortrows(edges, [1 2]); %Sortiert Ecken nach den Werten der ersten Zeile
+                    
                     waypointList = [];
-                    waypointList{1} = nextCorner(2,1:2);
-                end
+                    waypointList{1} = cornerNodes{nextCorner(3, 2)}; %Setzt das 3. Element von nextCorner als WP 
+                    debugDRAW();
+                %end
             end
         end
     end
