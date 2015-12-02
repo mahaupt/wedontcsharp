@@ -1731,62 +1731,27 @@ function bes = beschleunigung(spiel, farbe)
 %% Verteidigung
     %Verteidigung
     %define a Matrix that contains all corner positions
-    cornerNodes = [0.015,0.985,0;0.985,0.985,0;0.015,0.015,0;0.985,0.015,0];
-%     function vecAngle(ges, pos)
-% %       Richtungs und Entfernungsvektor zu den 4 Ecken berechnen  
-%         for i=1:4
-%             vecPosEcke(i,1:2) = pos - cornerNodes(i,1:2)
-%         end
-% %       Winkel berechnen für 4 Ecken
-%         vecAngle(i,1) = acos((ges*vecPosEcke)/(norm(ges)*norm(vecPosEcke(i,1:2)))) 
-%     end
+    
 
-% WINKEL + ZEIT + ABSTAND für Gegner bestimmen und subtrahieren.     
-%  for i=1:4
-%             vecPosEckeMe(i,1:2) = abs(me.pos - cornerNodes(i,1:2));
-%             vecPosEckeEnemy(i,1:2) = abs(enemy.pos - cornerNodes(i,1:2));
-% end 
-
-    function tEcke = cornerTime()
-%       Richtungs und Entfernungsvektor zu den 4 Ecken berechnen    
+    function tEcke = bestDefCorner() 
+        cornerNodes = {[0.015,0.985], [0.985,0.985], [0.015,0.015], [0.985,0.015]};
+        tEcke = [0, 0];
+        savetime = -Inf;
+        
         for i=1:4
-            vecPosEckeMe(i,1:2) = abs(me.pos - cornerNodes(i,1:2));
-            vecPosEckeEnemy(i,1:2) = abs(enemy.pos - cornerNodes(i,1:2));
-        end 
-            if acosd((dot(me.ges,vecPosEckeMe(i,1:2)))/(norm(me.ges)*norm(vecPosEckeMe(i,1:2)))) <= 90
-                for j=1:4
-                    tEckeMe(j,1) = sqrt(sqrt(((2*norm(abs(vecPosEckeMe(j,1:2))))/spiel.bes)^2) - (norm(me.ges)*(acosd((dot(me.ges,abs(vecPosEckeMe(j,1:2)))/(norm(me.ges)*norm(abs(vecPosEckeMe(j,1:2)))))/norm(abs(vecPosEckeMe(j,1:2)))))));
-                end            
-            else
-                for k=1:4
-                    tEckeMe(k,1) = sqrt(sqrt(2*norm(abs(vecPosEckeMe(k,1:2)))/spiel.bes)^2) + (norm(me.ges)*(acosd((dot(me.ges,abs(vecPosEckeMe(k,1:2)))/(norm(me.ges)*norm(abs(vecPosEckeMe(k,1:2)))))))/spiel.bes);
-                end
-            end
-            if acosd((dot(me.ges,vecPosEckeMe(i,1:2)))/(norm(me.ges)*norm(vecPosEckeMe(i,1:2)))) <= 90
-                for l=1:4
-                    tEckeEnemy(l,1) = sqrt(sqrt((2*norm(abs(vecPosEckeEnemy(l,1:2))))/spiel.bes)^2) - (norm(enemy.ges)*(acosd((dot(me.ges,abs(vecPosEckeMe(l,1:2)))/(norm(enemy.ges)*norm(abs(vecPosEckeEnemy(l,1:2)))))/norm(abs(vecPosEckeEnemy(l,1:2))))));
-                end            
-            else
-                for m=1:4
-                    tEckeEnemy(m,1) = sqrt(sqrt((2*norm(abs(vecPosEckeEnemy(m,1:2))))/spiel.bes)^2) + (norm(enemy.ges)*(acosd(dot(me.ges,abs(vecPosEckeMe(m,1:2)))/(norm(enemy.ges)*norm(abs(vecPosEckeEnemy(m,1:2))))))/spiel.bes);
-                end
-            end
+            edgepos = cornerNodes{i};
+            meToEdge = edgepos - me.pos;
+            enemyToEdge = edgepos - enemy.pos;
             
-            tEcke = tEckeMe - tEckeEnemy;
-        
+            metime = timeToAlignVelocity(me.ges, vecNorm(meToEdge)) + norm(meToEdge)/(norm(me.ges)+spiel.bes*norm(meToEdge)/2);
+            enemytime = timeToAlignVelocity(enemy.ges, vecNorm(enemyToEdge)) + norm(enemyToEdge)/(norm(enemy.ges)+spiel.bes*norm(enemyToEdge)/2);
+            
+            if (savetime < enemytime - metime)
+                tEcke = edgepos;
+                savetime = enemytime - metime;
+            end
+        end
     end
-        
-if spiel.i_t >= 30
- cornerTime 
-end
-
-getTimeToAlignVelocity(vel1, vecPosEckeMe(i,1:2)) +...
-norm(vecPosEckeMe(i,1:2))/(sqrt(2*norm(abs(vecPosEckeMe(i,1:2)))/spiel.bes)) -...
-getTimeToAlignVelocity(enemy.ges, vecPosEckeEnemy(i,1:2)) +...
-norm(vecPosEckeEnemy(i,1:2))/(sqrt(2*norm(abs(vecPosEckeEnemy(i,1:2)))/spiel.bes))
-    
-    
-       
    
        
     function fleeEnemy()
@@ -1799,21 +1764,15 @@ norm(vecPosEckeEnemy(i,1:2))/(sqrt(2*norm(abs(vecPosEckeEnemy(i,1:2)))/spiel.bes
 
     
     function cornerTricking()
-        
+        cornerNodes = [0.015,0.985,0; 0.985,0.985,0; 0.015,0.015,0; 0.985,0.015,0];
         
         if waitForEnemy == false
             debugDisp('cornerTricking: Pt1');
            
-%             %get nearest corner, go there and wait
-%             for i=1:4 % checking every corner
-%                 % calculating distance to each corner
-%                 cornerNodes(i,3)=norm(cornerNodes(i,1:2)-me.pos-enemy.pos*2);   
-%             end
-%             nearestCorner = sortrows(cornerNodes, [3 2 1]); % finding the best corner 
-%             % add nodes of nearest corner to wplist 
-           
-            waypointList = appendToArray(waypointList, findPath(me.pos, bestCorner(1,1:2))); 
-            waitForEnemy = true; 
+            safeDeleteWaypoints();
+            waypointList = appendToArray(waypointList, findPath(me.pos, bestDefCorner())); 
+            waitForEnemy = true;
+            debugDRAW();
             %waiting for the enemy
         else
             if checkIfTooFastE () == true || norm(me.pos-enemy.pos) <= 0.15
@@ -1824,9 +1783,9 @@ norm(vecPosEckeEnemy(i,1:2))/(sqrt(2*norm(abs(vecPosEckeEnemy(i,1:2)))/spiel.bes
 
                     Verteidigung = false 
                     debugDisp('cornerTricking. Pt3');
-                        for i=1:4
-                            cornerNodes(i,3)=norm(cornerNodes(i,1:2)-me.pos-enemy.pos);
-                        end
+                    for i=1:4
+                        cornerNodes(i,3)=norm(cornerNodes(i,1:2)-me.pos-enemy.pos);
+                    end
 
                     nextCorner = sortrows(cornerNodes, [3 2 1]);
 
@@ -1835,20 +1794,20 @@ norm(vecPosEckeEnemy(i,1:2))/(sqrt(2*norm(abs(vecPosEckeEnemy(i,1:2)))/spiel.bes
                 else
                     Verteidigung = true  
                     debugDisp('cornerTricking: Pt2');
+                        
+                    %sort all corners based on the direction the enemy is coming from and their distance to us
+                    for i=1:4
+                        cornerNodes(i,3)=norm(cornerNodes(i,1:2)-me.pos-enemy.pos);
+                    end
 
-                        %sort all corners based on the direction the enemy is coming from and their distance to us
-                        for i=1:4
-                            cornerNodes(i,3)=norm(cornerNodes(i,1:2)-me.pos-enemy.pos);
-                        end
+                    nextCorner = sortrows(cornerNodes, [3 2 1]);
 
-                        nextCorner = sortrows(cornerNodes, [3 2 1]);
-
-                        waypointList = [];
-                        waypointList{1} = nextCorner(2,1:2);
+                    waypointList = [];
+                    waypointList{1} = nextCorner(2,1:2);
                 end
+            end
         end
     end
-end
 
 
     function mineTricking()
