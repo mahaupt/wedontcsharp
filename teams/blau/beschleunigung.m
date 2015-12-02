@@ -1780,7 +1780,10 @@ if spiel.i_t >= 30
  cornerTime 
 end
 
-getTimeToAlignVelocity(vel1, vecPosEckeMe(i,1:2)) + norm(vecPosEckeMe(i,1:2)/(sqrt(2*norm(abs(vecPosEckeMe(j,1:2))/spiel.bes) - getTimeToAlignVelocity(enemy.ges, vecPosEckeEnemy(i,1:2)) + (norm(vecPosEckeEnemy(i,1:2))/(sqrt(2*norm(abs(vecPosEckeEnemy(j,1:2))))/spiel.bes))
+getTimeToAlignVelocity(vel1, vecPosEckeMe(i,1:2)) +...
+norm(vecPosEckeMe(i,1:2))/(sqrt(2*norm(abs(vecPosEckeMe(i,1:2)))/spiel.bes)) -...
+getTimeToAlignVelocity(enemy.ges, vecPosEckeEnemy(i,1:2)) +...
+norm(vecPosEckeEnemy(i,1:2))/(sqrt(2*norm(abs(vecPosEckeEnemy(i,1:2)))/spiel.bes))
     
     
        
