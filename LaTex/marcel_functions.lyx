@@ -68,6 +68,10 @@
 
 \begin_body
 
+\begin_layout Section
+Funktionsdokumentation
+\end_layout
+
 \begin_layout Subsection
 Funktion esc_find_path
 \end_layout
