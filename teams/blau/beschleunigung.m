@@ -55,6 +55,7 @@ function bes = beschleunigung(spiel, farbe)
     persistent waitForEnemy; %benötigt, um auf den Gegner warten zu können
     persistent dispWhatToDo;
     persistent mexHandle; %handle of mex functions
+    persistent Verteidigung;
     
     %%Farbe prüfen und zuweisen
     if strcmp (farbe, 'rot')
@@ -71,18 +72,13 @@ function bes = beschleunigung(spiel, farbe)
     end
 
     
-%% zum debuggen (einfach nen Breakpoint bei "return" setzen)
-%    if spiel.i_t==50
-%        return;
-%    end
-    
     
 %% Veränderungen des Spielfeldes bemerken und dementsprechend handeln
     gameChangeHandler()
 
-    
-%% Entscheidungen fällen und Beschleunigung berechnen
-    %Entscheidung über Angriff/Verteidigung/Tanken
+
+%% Entscheidungen fÃ¤llen und Beschleunigung berechnen
+    %Entscheidung Ã¼ber Angriff/Verteidigung/Tanken
     whatToDo();
     
     %Beschleunigung berechnen:
@@ -118,7 +114,7 @@ function bes = beschleunigung(spiel, farbe)
             
             %%Erst wenn alle Tanken weg sind und wir weniger haben, als der Gegner - Fliehen!
             fleeEnemy();
-            
+           
         else
             
             if (dispWhatToDo ~= 3)
@@ -128,7 +124,6 @@ function bes = beschleunigung(spiel, farbe)
             end
             
             doesEnemyGetTanke();
-        
         end
     end
 
@@ -143,6 +138,7 @@ function bes = beschleunigung(spiel, farbe)
         tankeCompetition = false;
         ignoreTanke = 0;
         waitForEnemy = false;
+        Verteidigung = false;
         
         %compile mex files
         if strcmp (farbe, 'rot')
@@ -218,7 +214,7 @@ function bes = beschleunigung(spiel, farbe)
             toMine1 = norm(spiel.mine(mineID).pos - me.pos);
             toMine2 = norm(spiel.mine(mineID).pos - waypointList{1});
             
-            if (toMine1 < constMineProxRadius && toMine2 < constMineProxRadius && checkMineID == mineID)
+            if (toMine1 < constMineProxRadius && toMine2 < constMineProxRadius && checkMineID == mineID && ~Verteidigung ) 
                 besCalculationMode = 1;
                 besMineID = mineID;
             end
@@ -418,7 +414,7 @@ function bes = beschleunigung(spiel, farbe)
                     end
                 end
                 debugDRAW();
-            elseif (corridorColliding(me.pos, waypointList{1}, spiel.spaceball_radius) && dispWhatToDo ~= 3)
+            elseif (corridorColliding(me.pos, waypointList{1}, spiel.spaceball_radius) && dispWhatToDo ~= 3 && ~Verteidigung)
                 %sonst
                 debugDisp('calculateBES: Stuck - recalculating');
                 waypointList = appendToArray(findPath(me.pos, waypointList{1}), waypointList(2:end));
@@ -470,11 +466,26 @@ function bes = beschleunigung(spiel, farbe)
     %check if enemy is too fast 
     function erg = checkIfTooFastE ()
         
-%         enemyPath = me.pos-enemy.pos;
+        enemyPath = me.pos-enemy.pos;
               
-        if  (norm(me.pos-enemy.pos) < ((norm(enemy.ges))^2)/(norm(enemy.bes)*2)+0.03)
+
+          if  (norm(enemyPath)) < (((norm(enemy.ges))^2)/(norm(enemy.bes)*2)+0.03);
             erg = true;
-        else 
+            
+          else 
+            erg = false;
+        end
+    end
+
+   function erg = checkIfTooFastECrash ()
+        
+        enemyPath = me.pos-enemy.pos;
+              
+
+          if  (norm(enemyPath)) < (((norm(enemy.ges))^2)/(norm(enemy.bes)*2));
+            erg = true;
+            
+          else 
             erg = false;
         end
     end
@@ -777,13 +788,11 @@ function bes = beschleunigung(spiel, farbe)
             erg = 0;
             return;
         end
-        
-        erg = 1;
         for i=1:spiel.n_mine
-            if (norm(spiel.mine(i).pos-pos) < norm(spiel.mine(erg).pos - pos))
-                erg = i;
-            end
+            mineList(i).dist = norm(pos - spiel.mine(i).pos);
         end
+        [minValue,index] = min([mineList.dist]);
+        erg=index;
     end
 
     %check if node is a collider (mine, border)
@@ -1205,52 +1214,99 @@ function bes = beschleunigung(spiel, farbe)
 
 %% Verteidigung
     %Verteidigung
-    function fleeEnemy()
-        if numel(waypointList) == 0
-            cornerTricking();
+    %define a Matrix that contains all corner positions
+    
+
+    function tEcke = bestDefCorner() 
+        cornerNodes = {[0.015,0.985], [0.985,0.985], [0.015,0.015], [0.985,0.015]};
+        tEcke = [0, 0];
+        savetime = -Inf;
+        
+        for i=1:4
+            edgepos = cornerNodes{i};
+            meToEdge = edgepos - me.pos;
+            enemyToEdge = edgepos - enemy.pos;
+            
+            metime = timeToAlignVelocity(me.ges, vecNorm(meToEdge)) + norm(meToEdge)/(norm(me.ges)+spiel.bes*norm(meToEdge)/2);
+            enemytime = timeToAlignVelocity(enemy.ges, vecNorm(enemyToEdge)) + norm(enemyToEdge)/(norm(enemy.ges)+spiel.bes*norm(enemyToEdge)/2);
+            
+            if (savetime < enemytime - metime)
+                tEcke = edgepos;
+                savetime = enemytime - metime;
+            end
         end
     end
+   
+       
+    function fleeEnemy()
+%         if  NumberOfTank <= 0
+            cornerTricking();
+%         else
+%             mineTricking();
+%         end
+    end
 
+    
     function cornerTricking()
+        cornerNodes = [0.015,0.985,0; 0.985,0.985,0; 0.015,0.015,0; 0.985,0.015,0];
         
-        %define a Matrix that contains all corner positions
-        cornerNodes = [0.01,0.99,0;0.99,0.99,0;0.01,0.01,0;0.99,0.01,0];
         if waitForEnemy == false
-            debugDisp('Verteidigung: cornerTricking, Pt1');
-%             get nearest corner, go there and wait
-            if waitForEnemy == false
-                for i=1:4
-                    cornerNodes(i,3)=norm(cornerNodes(i,1:2)-me.pos);
-                end
-                nearestCorner = sortrows(cornerNodes, [3 2 1]);
-                waypointList = appendToArray(waypointList, findPath(me.pos,nearestCorner(1,1:2)));
-                waitForEnemy = true;
-            end
-        %waiting for the enemy
-        elseif waitForEnemy == true
-            %calculate vector between us and enemy
-            %enemyPath = me.pos-enemy.pos;
-            %the time, enemy needs to get to our position
-            %tenemy  = norm(enemyPath)/projectVectorNorm(enemy.ges, enemyPath);
-            %check if there is a mine on the enemy's path towards us
-            %enemyColliding = corridorColliding(enemy.pos, me.pos, spiel.spaceball_radius);
+            debugDisp('cornerTricking: Pt1');
+           
+            safeDeleteWaypoints();
+            waypointList = appendToArray(waypointList, findPath(me.pos, bestDefCorner())); 
+            waitForEnemy = true;
+            debugDRAW();
+            %waiting for the enemy
+        else
+            if checkIfTooFastE () == true || norm(me.pos-enemy.pos) <= 0.15
+                
+                nextCorner = sortrows(cornerNodes, [3 2 1]);
+                
+                if checkIfTooFastECrash() == true && norm(me.pos - enemy.pos) < 0.5 && (norm(me.ges)^2)/spiel.bes < norm (me.pos - nextCorner(1,1:2))+ spiel.spaceball_radius && norm (me.pos - nextCorner(1,1:2)) < 0.2 && corridorColliding(me.pos, nextCorner(3,1:2), spiel.mine_radius*2) == false
 
-            
-            if checkIfTooFastE () == true %|| tenemy < 0.0001
-                debugDisp('Verteidigung: cornerTricking, Pt2');
+                    Verteidigung = false 
+                    debugDisp('cornerTricking. Pt3');
+                    for i=1:4
+                        cornerNodes(i,3)=norm(cornerNodes(i,1:2)-me.pos-enemy.pos);
+                    end
+
+                    nextCorner = sortrows(cornerNodes, [3 2 1]);
+
+                    waypointList = [];
+                    waypointList{1} = nextCorner(3,1:2);
+                else
+                    Verteidigung = true  
+                    debugDisp('cornerTricking: Pt2');
+                        
                     %sort all corners based on the direction the enemy is coming from and their distance to us
                     for i=1:4
-                        cornerNodes(i,3)=norm(cornerNodes(i,1:2)-me.pos-enemy.ges);
+                        cornerNodes(i,3)=norm(cornerNodes(i,1:2)-me.pos-enemy.pos);
                     end
-                nextCorner = sortrows(cornerNodes, [3 2 1]);
-                %go to the second corner, since the first one is on our current position
-                waypointList = appendToArray(waypointList, findPath(me.pos, nextCorner(2,1:2)));
-                waitForEnemy = false;
+
+                    nextCorner = sortrows(cornerNodes, [3 2 1]);
+
+                    waypointList = [];
+                    waypointList{1} = nextCorner(2,1:2);
+                end
             end
         end
     end
 
 
+    function mineTricking()
+        
+        ClosestMine = getNearestMineId(me.pos);
+        enemyDist = spiel.mine(ClosestMine).pos - enemy.pos
+      
+        if numel(waypointList) <= 0 
+            waypointList{1} =  spiel.mine(ClosestMine).pos + vecNorm(enemyDist)*spiel.mine_radius + constSafeBorder*vecNorm(enemyDist) + spiel.spaceball_radius*vecNorm(enemyDist)*1.2 
+            besCalculationMode = 1;
+            calcMineBes();
+        end
+        
+        debugDRAW();
+    end
 
 %% Debugging
     %Wegpunkte einzeichnen
