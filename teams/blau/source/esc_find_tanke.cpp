@@ -32,6 +32,7 @@ void mexFunction(int outCount,mxArray *outVars[],int inCount,const mxArray *inVa
     Vector2 enemyGes = Vector2(inVars[5]);
     double dignoreTanke = *mxGetPr(inVars[6]);
     int ignoreTanke = (int)dignoreTanke;
+    double ebenen = *mxGetPr(inVars[7]);
     
     /*for (int i=0; i<mineList.size(); i++) {
         mexPrintf("mine: r: %f, pos: [%f, %f]\n", mineList[i].radius, mineList[i].pos.x, mineList[i].pos.y);
@@ -54,7 +55,7 @@ void mexFunction(int outCount,mxArray *outVars[],int inCount,const mxArray *inVa
     //do calculations
     vector<int> wps = vector<int>();
     Tankfinder tf = Tankfinder(mineList, enemyPos, enemyGes);
-    tf.findTanke(wps, 0, tankListP, mePos, meGes, 5);
+    tf.findTanke(wps, 0, tankListP, mePos, meGes, ebenen);
     
     duration = ( std::clock() - start ) / (double) CLOCKS_PER_SEC;
     //mexPrintf("TankList (%d nodes from %d) found in %f s\n", wps.size(), tankListP.size(), duration);

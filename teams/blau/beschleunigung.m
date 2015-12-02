@@ -824,8 +824,11 @@ function bes = beschleunigung(spiel, farbe)
 
     function CreatePathAllTanken()
         if ~tankeCompetition
-            
-            TankList = mexHandle.esc_find_tanke(spiel.mine, spiel.tanke, me.pos, me.ges, enemy.pos, enemy.ges, ignoreTanke);
+            ebenen = round(StartNumberOfTank/2)-me.getankt;
+            if me.getankt >= round(StartNumberOfTank/2)
+                ebenen = spiel.n_tanke;
+            end
+            TankList = mexHandle.esc_find_tanke(spiel.mine, spiel.tanke, me.pos, me.ges, enemy.pos, enemy.ges, ignoreTanke, ebenen);
             
             TankList = fliplr(TankList);
             debugDisp('Tanken: calculating Path');
@@ -870,7 +873,7 @@ function bes = beschleunigung(spiel, farbe)
                 %Ist diese Tanke unsere nächste Tanke und brauchen wir nicht mehr lange dorthin?
                 %oder ist nur noch eine Tanke da und keine Mine im Weg
                 %UND wir sind noch nicht im compMode
-                if ((ClosestEnemyTanke == TankList{1} && timeMeToTanke < 0.2) || spiel.n_tanke == 1 && ~ownColliding) && ~tankeCompetition
+                if ((ClosestEnemyTanke == TankList{1} && timeMeToTanke < 0.25) || spiel.n_tanke == 1 && ~ownColliding) && ~tankeCompetition
                     debugDisp('Tanken: compMode activated!');
                     tankeCompetition = true;
                     accpos = getAccPos(spiel.tanke(ClosestEnemyTanke).pos);
@@ -883,6 +886,14 @@ function bes = beschleunigung(spiel, farbe)
                     debugDisp('Tanken: ignore Tanke');
                     ignoreTanke = ClosestEnemyTanke;
                     CreatePathAllTanken;
+                end
+                
+                %comMode mit Vollbremsung abbrechen:
+                if tankeCompetition
+                    if timeMeToTanke <= norm(me.ges) * (-spiel.bes)
+                        debugDisp('Tanken: compMode canceled!');
+                        safeDeleteWaypoints();
+                    end
                 end
             end
         end
@@ -903,13 +914,6 @@ function bes = beschleunigung(spiel, farbe)
                 ignoreTanke = 0;
                 CreatePathAllTanken();
             end
-        end
-        
-        %CompetitionMode beenden, wenn Gegner Tanke erreicht
-        if tankeCompetition && norm(enemy.pos - waypointList{1}) < 0.02
-            tankeCompetition = false;
-            debugDisp('Tanken: compMode deactivated, since enemy reached Tanke');
-            CreatePathAllTanken();
         end
     end
 
