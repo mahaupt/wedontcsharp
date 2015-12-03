@@ -231,16 +231,16 @@ save seedsAll.mat seedsAll Farbe zw
 % Auswertung 
 time = horzcat('Gesamtrechenzeit: ', num2str(round(totalTime/60,1)), ' Minuten');
 Gegner = horzcat(myName, '  VS  ', enemyName);
-SatzA = horzcat('Von ', num2str(Durchgaenge), ' Spielen wurden ', num2str(sumWins), ' gewonnen');
+SatzA = horzcat('Von ', num2str(Durchgaenge), ' Spielen wurden keine gewonnen :-(');
 SatzAB = horzcat('Von ', num2str(Durchgaenge), ' Spielen wurden ', num2str(sumWins), ' in durchschnittlich ', num2str(medianTime), ' Sekunden gewonnen.');
-Quote1 = horzcat('Gewonnen: ', num2str(sumWins/Durchgaenge*100),' %');
-Quote2 = horzcat('   davon den Gegner erwischt: ', num2str(gegErwischt/sumWins*100),' %');
-Quote3 = horzcat('Verloren: ', num2str(sumLose/Durchgaenge*100),' %');
-Quote4 = horzcat('   davon in Mine gefahren: ', num2str(MineGetr/sumLose*100),' %');
-Quote5 = horzcat('   davon in Bande gefahren: ', num2str(BandeGetr/sumLose*100),' %');
-Quote6 = horzcat('Unentschieden im Angriff: ', num2str(sumAttack/Durchgaenge*100),' %');
-Quote7 = horzcat('Unentschieden in der Verteidigung: ', num2str(sumDefense/Durchgaenge*100),' %');
-Quote8 = horzcat('Error: ', num2str(sumERROR/Durchgaenge*100),' %');
+Quote1 = horzcat('Gewonnen: ', num2str(round(sumWins/Durchgaenge*100,0)),' %');
+Quote2 = horzcat('   davon den Gegner erwischt: ', num2str(round(gegErwischt/sumWins*100,0)),' %');
+Quote3 = horzcat('Verloren: ', num2str(round(sumLose/Durchgaenge*100,0)),' %');
+Quote4 = horzcat('   davon in Mine gefahren: ', num2str(round(MineGetr/sumLose*100,0)),' %');
+Quote5 = horzcat('   davon in Bande gefahren: ', num2str(round(BandeGetr/sumLose*100,0)),' %');
+Quote6 = horzcat('Unentschieden im Angriff: ', num2str(round(sumAttack/Durchgaenge*100,0)),' %');
+Quote7 = horzcat('Unentschieden in der Verteidigung: ', num2str(round(sumDefense/Durchgaenge*100,0)),' %');
+Quote8 = horzcat('Error: ', num2str(round(sumERROR/Durchgaenge*100,0)),' %');
 
 Statistische_Erhebung = data(:,1:5);
 clc

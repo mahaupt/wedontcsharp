@@ -4,9 +4,10 @@ clear variables
 close all
 clc
 
+
 rng shuffle
 r = round(rand(1)*1000000)
-rng(r);
+rng(r);%335426 349891 937951
 
 
 %% Konstanten definieren

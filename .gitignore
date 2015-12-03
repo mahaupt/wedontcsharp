@@ -1,7 +1,9 @@
 #matlab
 *.asv
 *.m~
+<<<<<<< HEAD
 *.avi
-*.mex*
 *.cpp~
 *.h~
+=======
+>>>>>>> jw
