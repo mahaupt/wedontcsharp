@@ -11,7 +11,7 @@ public:
         enemyGes = _enemyGes;
     }
     
-    float findTanke(vector<int> &tList, float pathPenalty, vector<Tanke*> &tankList, Vector2 prevPos, Vector2 prevPath, int thisTankID = 0) {
+    float findTanke(vector<int> &tList, float pathPenalty, vector<Tanke*> &tankList, Vector2 prevPos, Vector2 prevPath, int ebene, int thisTankID = 0) {
         int tankListSize = 0;
         for (int i = 0; i<tankList.size(); i++) {
             if (tankList[i] != 0) {
@@ -19,7 +19,7 @@ public:
             }
         }
         
-        if (tankListSize <= 0) {
+        if (tankListSize <= 0 || ebene <= 0) { //
             if (thisTankID > 0) {
                 tList.push_back(thisTankID);
             }
@@ -39,7 +39,7 @@ public:
             tankList[i] = 0;
             
             vector<int> erg2 = vector<int>();
-            float erg1 = findTanke(erg2, pen + pathPenalty, tankList, tmp->pos, tmp->pos-prevPos, i+1);
+            float erg1 = findTanke(erg2, pen + pathPenalty, tankList, tmp->pos, tmp->pos-prevPos, ebene-1, i+1);
             
             //add tanke i to list
             tankList[i] = tmp;
@@ -72,13 +72,17 @@ public:
         enemyPen = - ((enemyPos-tankPos).magnitude() + getTimeToAlignVelocity(enemyGes, (tankPos - enemyPos).norm()));
         
         //mexPrintf("dist: %f, dir: %f, coll: %f, enemy: %f\n", distPen, dirPen * dirPen, collPen, enemyPen);
-        return dirPen;
+        return distPen + dirPen / 80 + collPen;
     }
     
     float getTimeToAlignVelocity(Vector2 vel1, Vector2 vec) {
         if(vel1.magnitude() <= 0.00001) {
             return 0;
         }
+        if(vec.magnitude() <= 0.00001) {
+            return 0;
+        }
+        
         
         float dotp = vel1.norm().dot(vec.norm());
         float angle = acos(dotp);

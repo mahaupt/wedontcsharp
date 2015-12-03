@@ -69,7 +69,7 @@ public:
     Vector2 norm() {
         float mag = magnitude();
         
-        if (mag > 0) {
+        if (mag > 0.00001f) {
             return Vector2(x,y)/mag;
         } else {
             return Vector2(0, 0);
