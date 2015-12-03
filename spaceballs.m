@@ -27,7 +27,7 @@ spiel.spaceball_radius = 0.01;
 
 spiel.bes = 0.1;
 
-spiel.rot.getankt = 2;
+spiel.rot.getankt = 0;
 spiel.blau.getankt = 0;
 
 spiel.rot.punkte = 0;
