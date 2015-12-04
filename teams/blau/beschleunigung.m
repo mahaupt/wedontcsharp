@@ -33,8 +33,6 @@ function bes = beschleunigung(spiel, farbe)
     %sinnvoll für präzise Manöver ohne Waypoints
     %ACHTUNG: jegliche Kollisionssicherung wird umgangen
     overrideBesCalculation = false;
-    %Maximale Anzahl an Minen, bei der auf lockOnAttack geschaltet werden
-    %kann wenn der Weg frei ist
     
     %DEBUG MODE
     %true: ermöglicht ausgabe von Text und Zeichnen von gizmos
@@ -45,17 +43,17 @@ function bes = beschleunigung(spiel, farbe)
     constCompiling = true;
     
     %statische Variablen definieren
-    persistent waypointList;
+    persistent waypointList; %Liste mit Wegpunkten. Werden automatisch nacheinander abgefahren
     persistent ArrayOfMines; %Zur Bestimmung des Minenverschwindens benötigt
-    persistent StartNumberOfTank; %Zur Entscheidung über Angriff und Tanken benötigt
+    persistent StartNumberOfTank; %Anzahl der Tanstellen zu Spielbeginn
     persistent currentNumberOfTank; %aktuelle Anzahl an Tanken
-    persistent TankList; %%Indizies der Tanken, die wir anfahren.
+    persistent TankList; %Liste mit Index-Nummern der Tanken, die wir anfahren.
     persistent tankeCompetition; %ist CompetitionMode aktiviert?
     persistent ignoreTanke; %diese Tanke ignorieren!
     persistent waitForEnemy; %benötigt, um auf den Gegner warten zu können
-    persistent dispWhatToDo;
+    persistent dispWhatToDo; %Was tun wir gerade? 1=Angriff, 2=Verteidigung, 3=Tanken
     persistent mexHandle; %handle of mex functions
-    persistent Verteidigung;
+    persistent Verteidigung; %
     
     %%Farbe prüfen und zuweisen
     if strcmp (farbe, 'rot')
@@ -70,7 +68,6 @@ function bes = beschleunigung(spiel, farbe)
     if spiel.i_t==1
         initSpaceball();
     end
-
     
     
 %% Veränderungen des Spielfeldes bemerken und dementsprechend handeln
@@ -94,7 +91,7 @@ function bes = beschleunigung(spiel, farbe)
         if ((spiel.n_tanke == 0 && me.getankt > enemy.getankt) || (thit <= 0.5 && me.getankt>enemy.getankt && ~corridorColliding(me.pos, enemy.pos, constNavSecurity))) && ~tankeCompetition
             if (dispWhatToDo ~= 1)
                 dispWhatToDo = 1;
-                debugDisp('whatToDo: ANGRIFF');
+                debugDisp('whatToDo: ATTACK');
             end
             
             %Wenn wir mehr als die Hälfte der Tanken haben oder nahe des Gegners sind und mehr getankt haben - Angriff!
@@ -109,7 +106,7 @@ function bes = beschleunigung(spiel, farbe)
                 end
                 
                 dispWhatToDo = 2;
-                debugDisp('whatToDo: VERTEIDIGUNG');
+                debugDisp('whatToDo: DEFENCE');
             end
             
             %%Erst wenn alle Tanken weg sind und wir weniger haben, als der Gegner - Fliehen!
@@ -119,7 +116,7 @@ function bes = beschleunigung(spiel, farbe)
             
             if (dispWhatToDo ~= 3)
                 dispWhatToDo = 3;
-                debugDisp('whatToDo: TANKEN');
+                debugDisp('whatToDo: REFUEL');
                 CreatePathAllTanken();
             end
             
@@ -465,28 +462,20 @@ function bes = beschleunigung(spiel, farbe)
 
     %check if enemy is too fast 
     function erg = checkIfTooFastE ()
-        
         enemyPath = me.pos-enemy.pos;
-              
-
-          if  (norm(enemyPath)) < (((norm(enemy.ges))^2)/(norm(enemy.bes)*2)+0.03);
-            erg = true;
-            
-          else 
-            erg = false;
+        if  (norm(enemyPath)) < (((norm(enemy.ges))^2)/(norm(enemy.bes)*2)+0.03);
+        erg = true;
+        else 
+        erg = false;
         end
     end
 
-   function erg = checkIfTooFastECrash ()
-        
+    function erg = checkIfTooFastECrash () 
         enemyPath = me.pos-enemy.pos;
-              
-
-          if  (norm(enemyPath)) < (((norm(enemy.ges))^2)/(norm(enemy.bes)*2));
-            erg = true;
-            
-          else 
-            erg = false;
+        if  (norm(enemyPath)) < (((norm(enemy.ges))^2)/(norm(enemy.bes)*2));
+        erg = true;
+        else 
+        erg = false;
         end
     end
 
@@ -1222,10 +1211,9 @@ function bes = beschleunigung(spiel, farbe)
 
 %% Verteidigung
     %Verteidigung
-    %define a Matrix that contains all corner positions
-    
     
     function time = defCornerTime(pos)
+        %define a Matrix that contains all corner positions
         edgepos = pos;
         meToEdge = edgepos - me.pos;
         enemyToEdge = edgepos - enemy.pos;
@@ -1269,13 +1257,12 @@ function bes = beschleunigung(spiel, farbe)
             cornerTricking();
         end
     end
-    
+
     function cornerTricking()
         cornerNodes = {[0.02,0.98], [0.98,0.98], [0.02,0.02], [0.98,0.02]};
         
         if waitForEnemy == false
-            debugDisp('cornerTricking: Pt1');
-           
+            debugDisp('Defence: cornerTricking 1');
             safeDeleteWaypoints();
             waypointList = appendToArray(waypointList, findPath(me.pos, bestDefCorner())); 
             waitForEnemy = true;
@@ -1300,7 +1287,7 @@ function bes = beschleunigung(spiel, farbe)
 %                     waypointList{1} = nextCorner(3,1:2);
 %                 else
                     Verteidigung = true;  
-                    debugDisp('cornerTricking: Pt2');
+                    debugDisp('Defence: cornerTricking 2');
                         
                     %sort all corners based on the direction the enemy is coming from and their distance to us
                     edges = zeros(4,2);
@@ -1324,12 +1311,14 @@ function bes = beschleunigung(spiel, farbe)
         ClosestMine = getNearestMineId(me.pos);
         enemyDist = spiel.mine(ClosestMine).pos - enemy.pos;
       
-        if numel(waypointList) <= 0 
+        if numel(waypointList) <= 0
+            debugDisp('Defence: mineTricking');
             waypointList{1} =  spiel.mine(ClosestMine).pos + vecNorm(enemyDist)*spiel.mine_radius + constSafeBorder*vecNorm(enemyDist) + spiel.spaceball_radius*vecNorm(enemyDist)*1.2;
         end
         
         debugDRAW();
     end
+
 
 %% Debugging
     %Wegpunkte einzeichnen
@@ -1402,4 +1391,6 @@ function bes = beschleunigung(spiel, farbe)
         
         disp(str);
     end
+
+
 end
