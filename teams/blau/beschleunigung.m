@@ -1233,7 +1233,6 @@ function bes = beschleunigung(spiel, farbe)
         metime = getTimeToAlignVelocity(me.ges, vecNorm(meToEdge)) + norm(meToEdge)/(norm(me.ges) + spiel.bes);
         enemytime = getTimeToAlignVelocity(enemy.ges, vecNorm(enemyToEdge)) + norm(enemyToEdge)/(norm(enemy.ges) + spiel.bes);
         
-        
         time = enemytime - metime;
         
         if (dot(vecNorm(meToEdge), vecNorm(enemy.pos-me.pos)) > 0.6 && norm(meToEdge) > 0.06)
@@ -1262,7 +1261,6 @@ function bes = beschleunigung(spiel, farbe)
             end
         end
     end
-   
        
     function fleeEnemy()
         if  spiel.n_tanke > 0
@@ -1271,7 +1269,6 @@ function bes = beschleunigung(spiel, farbe)
             cornerTricking();
         end
     end
-
     
     function cornerTricking()
         cornerNodes = {[0.02,0.98], [0.98,0.98], [0.02,0.02], [0.98,0.02]};
@@ -1321,7 +1318,6 @@ function bes = beschleunigung(spiel, farbe)
             end
         end
     end
-
 
     function mineTricking()
         
