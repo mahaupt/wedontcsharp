@@ -1249,7 +1249,7 @@ function bes = beschleunigung(spiel, farbe)
     end
 
     function tEcke = bestDefCorner() 
-        cornerNodes = {[0.015,0.985], [0.985,0.985], [0.015,0.015], [0.985,0.015]};
+        cornerNodes = {[0.02,0.98], [0.98,0.98], [0.02,0.02], [0.98,0.02]};
         tEcke = [0, 0];
         savetime = -Inf;
         
@@ -1265,16 +1265,16 @@ function bes = beschleunigung(spiel, farbe)
    
        
     function fleeEnemy()
-%         if  NumberOfTank <= 0
+        if  spiel.n_tanke > 0
+            mineTricking;
+        else
             cornerTricking();
-%         else
-%             mineTricking();
-%         end
+        end
     end
 
     
     function cornerTricking()
-        cornerNodes = {[0.015,0.985], [0.985,0.985], [0.015,0.015], [0.985,0.015]};
+        cornerNodes = {[0.02,0.98], [0.98,0.98], [0.02,0.02], [0.98,0.02]};
         
         if waitForEnemy == false
             debugDisp('cornerTricking: Pt1');
@@ -1326,12 +1326,10 @@ function bes = beschleunigung(spiel, farbe)
     function mineTricking()
         
         ClosestMine = getNearestMineId(me.pos);
-        enemyDist = spiel.mine(ClosestMine).pos - enemy.pos
+        enemyDist = spiel.mine(ClosestMine).pos - enemy.pos;
       
         if numel(waypointList) <= 0 
-            waypointList{1} =  spiel.mine(ClosestMine).pos + vecNorm(enemyDist)*spiel.mine_radius + constSafeBorder*vecNorm(enemyDist) + spiel.spaceball_radius*vecNorm(enemyDist)*1.2 
-            besCalculationMode = 1;
-            calcMineBes();
+            waypointList{1} =  spiel.mine(ClosestMine).pos + vecNorm(enemyDist)*spiel.mine_radius + constSafeBorder*vecNorm(enemyDist) + spiel.spaceball_radius*vecNorm(enemyDist)*1.2;
         end
         
         debugDRAW();
