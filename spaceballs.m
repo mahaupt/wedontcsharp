@@ -7,7 +7,7 @@ clc
 
 rng shuffle
 r = round(rand(1)*1000000)
-rng(r);%335426 349891 937951
+rng(r);
 
 
 %% Konstanten definieren
@@ -18,7 +18,7 @@ spiel.n_t = round (spiel.t_end/spiel.dt);
 spiel.i_t = 0;
 
 spiel.n_mine = 12; % Muss gerade sein! (Default: 12)
-spiel.n_tanke = 1; % Muss ungerade sein! (Default: 9)
+spiel.n_tanke = 9; % Muss ungerade sein! (Default: 9)
 
 spiel.kreis_radius = 0.075;
 spiel.mine_radius = 0.05;
@@ -27,8 +27,8 @@ spiel.spaceball_radius = 0.01;
 
 spiel.bes = 0.1;
 
-spiel.rot.getankt = 5;
-spiel.blau.getankt = 4;
+spiel.rot.getankt = 0;
+spiel.blau.getankt = 0;
 
 spiel.rot.punkte = 0;
 spiel.blau.punkte = 0;
