@@ -9,7 +9,7 @@
 meineFarbe = 'blau';
 
 % B.) Bitte hier die Anzahl der gewünschten Durchgänge angeben:
-Durchgaenge =15;
+Durchgaenge =5;
 
 % C.) Zuerst Teil 1 über Strg+Enter (bzw. cmd+Enter) ausführen
 %    nach getätigten Änderungen je nach Präferenz Teil 2 oder Teil 3 über Strg+Enter (bzw. cmd+Enter) ausführen
