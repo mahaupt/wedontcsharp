@@ -1221,19 +1221,19 @@ function bes = beschleunigung(spiel, farbe)
     %define a Matrix that contains all corner positions
     
     
-    function time = defCornerTime(pos)
+    function time = defCornerTime(pos) %Berechnet die Zeit von unserem/vom gegnerischen Standort in Ecke X 
         edgepos = pos;
         meToEdge = edgepos - me.pos;
         enemyToEdge = edgepos - enemy.pos;
 
-        metime = getTimeToAlignVelocity(me.ges, vecNorm(meToEdge)) + norm(meToEdge)/(norm(me.ges) + spiel.bes);
+        metime = getTimeToAlignVelocity(me.ges, vecNorm(meToEdge)) + norm(meToEdge)/(norm(me.ges) + spiel.bes); %Zeit um Geschwindigkeitsvektor auszurichten + s/v + spiel.bes als const. damit nicht = 0 
         enemytime = getTimeToAlignVelocity(enemy.ges, vecNorm(enemyToEdge)) + norm(enemyToEdge)/(norm(enemy.ges) + spiel.bes);
         
         
-        time = enemytime - metime;
+        time = enemytime - metime; %Differenz berechnen, je größer der Wert desto besser 
         
-        if (dot(vecNorm(meToEdge), vecNorm(enemy.pos-me.pos)) > 0.6 && norm(meToEdge) > 0.06)
-            
+        if (dot(vecNorm(meToEdge), vecNorm(enemy.pos-me.pos)) > 0.6 && norm(meToEdge) > 0.06)  
+            %Wenn in Richtung der Ecke + ca 25° zu jeder Seite der Gegner ist und wir uns im Radius von 0.06 vom WP befinden -> 100 Strafsekunden
             time = time - 100;
             
             if (dot(vecNorm(meToEdge), vecNorm(enemy.pos-me.pos)) > 0.9)
@@ -1250,22 +1250,22 @@ function bes = beschleunigung(spiel, farbe)
         savetime = -Inf;
         
         for i=1:4
-            checktime = defCornerTime(cornerNodes{i});
+            checktime = defCornerTime(cornerNodes{i}); %Zeitdiff. für alle Ecken berechnen 
             
-            if (savetime < checktime)
-                tEcke = cornerNodes{i};
+            if (savetime < checktime) %Zeit für Ecke 1 überschreibt savetime und wir als neue savetime gespeichert. Die neue Savetime wird nur von größeren Zeitdiffs überschrieben. 
+                tEcke = cornerNodes{i}; %Ecke von Zeit X wird als beste Ecke festgelegt und ggf. wieder überschrieben 
                 savetime = checktime;
             end
         end
     end
    
        
-    function fleeEnemy()
-%         if  NumberOfTank <= 0
+    function fleeEnemy() %Auswahl ob cornerTricking oder mineTricking 
+        if  NumberOfTank <= 0
             cornerTricking();
-%         else
-%             mineTricking();
-%         end
+        else
+            mineTricking();
+        end
     end
 
     
@@ -1276,7 +1276,7 @@ function bes = beschleunigung(spiel, farbe)
             debugDisp('cornerTricking: Pt1');
            
             safeDeleteWaypoints();
-            waypointList = appendToArray(waypointList, findPath(me.pos, bestDefCorner())); 
+            waypointList = appendToArray(waypointList, findPath(me.pos, bestDefCorner())); %Ecke Anfahren 
             waitForEnemy = true;
             debugDRAW();
             %waiting for the enemy
@@ -1301,11 +1301,11 @@ function bes = beschleunigung(spiel, farbe)
                     Verteidigung = true;  
                     debugDisp('cornerTricking: Pt2');
                         
-                    %sort all corners based on the direction the enemy is coming from and their distance to us
+            
                     edges = zeros(4,2);
                     for i=1:4
-                        edges(i, 1) = defCornerTime(cornerNodes{i}); %Berechnet Zeit für Ecke 1-4
-                        edges(i, 2) = i;
+                        edges(i, 1) = defCornerTime(cornerNodes{i}); %Berechnet Zeit für Ecke 1-4 -> Erste Spalte edges 
+                        edges(i, 2) = i; %Nr. der Ecke -> 2. Spalte edges
                     end
 
                     nextCorner = sortrows(edges, [1 2]); %Sortiert Ecken nach den Werten der ersten Zeile
