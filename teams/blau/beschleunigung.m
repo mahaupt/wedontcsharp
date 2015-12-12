@@ -368,7 +368,7 @@ function bes = beschleunigung(spiel, farbe)
         end
         
         %emergencyBreaking
-        if (emergencyBreaking() && ~Verteidigung)
+        if (emergencyBreaking()) % && ~Verteidigung
             bes = -me.ges;
         end
         
@@ -1226,8 +1226,8 @@ function bes = beschleunigung(spiel, farbe)
         meToEdge = edgepos - me.pos;
         enemyToEdge = edgepos - enemy.pos;
 
-        metime = getTimeToAlignVelocity(me.ges, vecNorm(meToEdge)) + norm(meToEdge)/(norm(me.ges) + spiel.bes); %Zeit um Geschwindigkeitsvektor auszurichten + s/v + spiel.bes als const. damit nicht = 0 
-        enemytime = getTimeToAlignVelocity(enemy.ges, vecNorm(enemyToEdge)) + norm(enemyToEdge)/(norm(enemy.ges) + spiel.bes);
+        metime = real(getTimeToAlignVelocity(me.ges, vecNorm([abs(meToEdge(1)), abs(meToEdge(2))]))) + norm(meToEdge)/(norm(me.ges) + spiel.bes); %Zeit um Geschwindigkeitsvektor auszurichten + s/v + spiel.bes als const. damit nicht = 0 
+        enemytime = real(getTimeToAlignVelocity(enemy.ges, vecNorm([abs(enemyToEdge(1)), abs(enemyToEdge(2))]))) + norm(enemyToEdge)/(norm(enemy.ges) + spiel.bes);
         
         
         time = enemytime - metime; %Differenz berechnen, je größer der Wert desto besser 
@@ -1261,7 +1261,7 @@ function bes = beschleunigung(spiel, farbe)
    
        
     function fleeEnemy() %Auswahl ob cornerTricking oder mineTricking 
-        if  NumberOfTank <= 0
+        if  spiel.n_tanke <= 0
             cornerTricking();
         else
             mineTricking();
@@ -1270,7 +1270,7 @@ function bes = beschleunigung(spiel, farbe)
 
     
     function cornerTricking()
-        cornerNodes = {[0.015,0.985], [0.985,0.985], [0.015,0.015], [0.985,0.015]};
+        cornerNodes = {[0.011,0.989], [0.989,0.989], [0.011,0.011], [0.989,0.011]};
         
         if waitForEnemy == false
             debugDisp('cornerTricking: Pt1');
@@ -1308,10 +1308,11 @@ function bes = beschleunigung(spiel, farbe)
                         edges(i, 2) = i; %Nr. der Ecke -> 2. Spalte edges
                     end
 
-                    nextCorner = sortrows(edges, [1 2]); %Sortiert Ecken nach den Werten der ersten Zeile
+                    nextCorner = sortrows(edges, [1 2]) %Sortiert Ecken nach den Werten der ersten Zeile
                     
                     waypointList = [];
                     waypointList{1} = cornerNodes{nextCorner(3, 2)}; %Setzt das 3. Element von nextCorner als WP 
+                    
                     debugDRAW();
                 %end
             end
@@ -1322,10 +1323,10 @@ function bes = beschleunigung(spiel, farbe)
     function mineTricking()
         
         ClosestMine = getNearestMineId(me.pos);
-        enemyDist = spiel.mine(ClosestMine).pos - enemy.pos
+        enemyDist = spiel.mine(ClosestMine).pos - enemy.pos;
       
         if numel(waypointList) <= 0 
-            waypointList{1} =  spiel.mine(ClosestMine).pos + vecNorm(enemyDist)*spiel.mine_radius + constSafeBorder*vecNorm(enemyDist) + spiel.spaceball_radius*vecNorm(enemyDist)*1.2 
+            waypointList{1} =  spiel.mine(ClosestMine).pos + vecNorm(enemyDist)*(spiel.mine_radius + constSafeBorder + spiel.spaceball_radius)*1.2;
             besCalculationMode = 1;
             calcMineBes();
         end
