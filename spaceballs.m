@@ -1,13 +1,13 @@
 %% Initialisierung
-
+% 
 clear variables
 close all
 clc
 
 
-rng shuffle
-r = round(rand(1)*1000000)
-rng(r);%335426 349891 937951
+% rng shuffle
+% r = round(rand(1)*1000000)
+rng(640357);%335426 349891 937951 122529 640357(!!!) 965412 
 
 
 %% Konstanten definieren
@@ -48,7 +48,7 @@ spiel.spur_anfangswert = 1*spiel.n_t;
 spiel.zeitlupe_anfangswert = 0;
 spiel.ges_checkbox_anfangswert = true;
 spiel.bes_checkbox_anfangswert = true;
-spiel.zeitraffer_checkbox_anfangswert = false;
+spiel.zeitraffer_checkbox_anfangswert = true;
 
 spiel.rot.spur(spiel.n_t, 2) = 0;
 spiel.blau.spur(spiel.n_t, 2) = 0;
