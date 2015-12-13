@@ -1262,7 +1262,7 @@ function bes = beschleunigung(spiel, farbe)
     end
 
     function cornerTricking()
-        cornerNodes = {[0.011,0.989], [0.989,0.989], [0.011,0.011], [0.989,0.011]};
+        cornerNodes = {[0.02,0.98], [0.98,0.98], [0.02,0.02], [0.98,0.02]};
         if waitForEnemy == false
             debugDisp('Defence: cornerTricking 1');
             safeDeleteWaypoints();
@@ -1316,7 +1316,10 @@ function bes = beschleunigung(spiel, farbe)
       
         if numel(waypointList) <= 0
             debugDisp('Defence: mineTricking');
-            waypointList{1} =  spiel.mine(ClosestMine).pos + vecNorm(enemyDist)*(spiel.mine_radius + constSafeBorder + spiel.spaceball_radius)*1.2;
+             waypointList{1} =  spiel.mine(ClosestMine).pos + vecNorm(enemyDist)*spiel.mine_radius + constSafeBorder*vecNorm(enemyDist) + spiel.spaceball_radius*vecNorm(enemyDist)*1.2 
+% +            waypointList{1} =  spiel.mine(ClosestMine).pos + vecNorm(enemyDist)*(spiel.mine_radius + constSafeBorder + spiel.spaceball_radius)*1.2;
+             besCalculationMode = 1;
+             calcMineBes();
         end
         
         debugDRAW();
