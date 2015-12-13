@@ -5,11 +5,10 @@ close all
 clc
 
 
+
 % rng shuffle
 % r = round(rand(1)*1000000)
 rng(640357);%335426 349891 937951 122529 640357(!!!) 965412 
-
-
 %% Konstanten definieren
 
 spiel.dt = 1/100;
@@ -27,7 +26,7 @@ spiel.spaceball_radius = 0.01;
 
 spiel.bes = 0.1;
 
-spiel.rot.getankt = 2;
+spiel.rot.getankt = 0;
 spiel.blau.getankt = 0;
 
 spiel.rot.punkte = 0;
