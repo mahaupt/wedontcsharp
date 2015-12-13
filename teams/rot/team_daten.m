@@ -1,6 +1,6 @@
 function team = team_daten
 
-team.name = 'Florians KI';
+team.name = 'Halbwertszeit';
 
 team.mitarbeiter(1).name = 'Gordon Freeman';
 team.mitarbeiter(1).aufgabe = 'Angriff';

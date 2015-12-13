@@ -36,7 +36,7 @@ function bes = beschleunigung(spiel, farbe)
     
     %DEBUG MODE
     %true: ermöglicht ausgabe von Text und Zeichnen von gizmos
-    constDebugMode = false;
+    constDebugMode = true;
     
     %COMPILING
     %true = force compiling, false = not compiling
@@ -49,6 +49,7 @@ function bes = beschleunigung(spiel, farbe)
     persistent currentNumberOfTank; %aktuelle Anzahl an Tanken
     persistent TankList; %Liste mit Index-Nummern der Tanken, die wir anfahren.
     persistent tankeCompetition; %ist CompetitionMode aktiviert?
+    persistent cancelCompetition; %CompetitionMode wird gerade abgebrochen
     persistent ignoreTanke; %diese Tanke ignorieren!
     persistent waitForEnemy; %benötigt, um auf den Gegner warten zu können
     persistent dispWhatToDo; %Was tun wir gerade? 1=Angriff, 2=Verteidigung, 3=Tanken
@@ -91,6 +92,7 @@ function bes = beschleunigung(spiel, farbe)
         if ((spiel.n_tanke == 0 && me.getankt > enemy.getankt) || (thit <= 0.5 && me.getankt>enemy.getankt && ~corridorColliding(me.pos, enemy.pos, constNavSecurity))) && ~tankeCompetition
             if (dispWhatToDo ~= 1)
                 dispWhatToDo = 1;
+                debugDRAW();
                 debugDisp('whatToDo: ATTACK');
             end
             
@@ -110,6 +112,7 @@ function bes = beschleunigung(spiel, farbe)
             end
             
             %%Erst wenn alle Tanken weg sind und wir weniger haben, als der Gegner - Fliehen!
+            
             fleeEnemy();
            
         else
@@ -119,7 +122,6 @@ function bes = beschleunigung(spiel, farbe)
                 debugDisp('whatToDo: REFUEL');
                 CreatePathAllTanken();
             end
-            
             doesEnemyGetTanke();
         end
     end
@@ -133,6 +135,7 @@ function bes = beschleunigung(spiel, farbe)
         StartNumberOfTank = spiel.n_tanke;
         currentNumberOfTank = spiel.n_tanke;
         tankeCompetition = false;
+        cancelCompetition = false;
         ignoreTanke = 0;
         waitForEnemy = false;
         Verteidigung = false;
@@ -812,7 +815,8 @@ function bes = beschleunigung(spiel, farbe)
 %% Tankenfindung
 
     function CreatePathAllTanken()
-        if ~tankeCompetition
+        waitForEnemy = false;
+        if ~tankeCompetition && ~cancelCompetition
             ebenen = round(StartNumberOfTank/2)-me.getankt;
             if me.getankt >= round(StartNumberOfTank/2)
                 ebenen = spiel.n_tanke;
@@ -862,7 +866,7 @@ function bes = beschleunigung(spiel, farbe)
                 %Ist diese Tanke unsere nächste Tanke und brauchen wir nicht mehr lange dorthin?
                 %oder ist nur noch eine Tanke da und keine Mine im Weg
                 %UND wir sind noch nicht im compMode
-                if ((ClosestEnemyTanke == TankList{1} && timeMeToTanke < 0.25) || spiel.n_tanke == 1 && ~ownColliding) && ~tankeCompetition
+                if ((ClosestEnemyTanke == TankList{1} && timeMeToTanke < 0.25) || spiel.n_tanke == 1 && ~ownColliding) && ~tankeCompetition && ~cancelCompetition
                     debugDisp('Tanken: compMode activated!');
                     tankeCompetition = true;
                     accpos = getAccPos(spiel.tanke(ClosestEnemyTanke).pos);
@@ -879,10 +883,20 @@ function bes = beschleunigung(spiel, farbe)
                 
                 %comMode mit Vollbremsung abbrechen:
                 if tankeCompetition
-                    if timeMeToTanke <= norm(me.ges) * (-spiel.bes)
+                    DistanceToStop = norm(me.ges)^2 / (2 * spiel.bes);
+                    DistanceToTanke = norm(me.pos-spiel.tanke(ClosestEnemyTanke).pos)-spiel.tanke_radius;
+                    if DistanceToStop >= DistanceToTanke && timeMeToTanke - EnemyTimeToClosestTanke > 0.0001
                         debugDisp('Tanken: compMode canceled!');
-                        safeDeleteWaypoints();
+                        waypointList = [];
+                        cancelCompetition = true;
+                        tankeCompetition = false;
+                        debugDRAW();
                     end
+                end
+                
+                %CancelComp beenden
+                if cancelCompetition && EnemyTimeToClosestTanke > 0.2
+                    cancelCompetition = false;
                 end
             end
         end
@@ -910,9 +924,10 @@ function bes = beschleunigung(spiel, farbe)
 %% Angriff
     %Angriff
     function attackEnemy()
+        waitForEnemy = false;
+        
         %lockon attack ist nur sicher, wenn sich zwischen Gegner und Mir
         %keine Mine befindet
-
         useLockonAttack = false;
         if (~corridorColliding(me.pos, enemy.pos, spiel.mine_radius*2.5))
             useLockonAttack = true;
@@ -1210,8 +1225,6 @@ function bes = beschleunigung(spiel, farbe)
 
 
 %% Verteidigung
-    %Verteidigung
-    
 
     function time = defCornerTime(pos) %Berechnet die Zeit von unserem/vom gegnerischen Standort in Ecke X 
         edgepos = pos;
@@ -1250,14 +1263,13 @@ function bes = beschleunigung(spiel, farbe)
             end
         end
     end
-       
 
     function fleeEnemy()
-        if  spiel.n_tanke > 0
+        if  spiel.n_tanke > 0 && spiel.n_mine > 0
             mineTricking;
+            %debugDisp('Defence: mineTricking');
         else
             cornerTricking();
-
         end
     end
 
@@ -1298,7 +1310,7 @@ function bes = beschleunigung(spiel, farbe)
                         edges(i, 2) = i; %Nr. der Ecke -> 2. Spalte edges
                     end
 
-                    nextCorner = sortrows(edges, [1 2]) %Sortiert Ecken nach den Werten der ersten Zeile
+                    nextCorner = sortrows(edges, [1 2]); %Sortiert Ecken nach den Werten der ersten Zeile
                     
                     waypointList = [];
                     waypointList{1} = cornerNodes{nextCorner(3, 2)}; %Setzt das 3. Element von nextCorner als WP 
@@ -1310,13 +1322,10 @@ function bes = beschleunigung(spiel, farbe)
     end
 
     function mineTricking()
-        
         ClosestMine = getNearestMineId(me.pos);
         enemyDist = spiel.mine(ClosestMine).pos - enemy.pos;
-      
         if numel(waypointList) <= 0
-            debugDisp('Defence: mineTricking');
-             waypointList{1} =  spiel.mine(ClosestMine).pos + vecNorm(enemyDist)*spiel.mine_radius + constSafeBorder*vecNorm(enemyDist) + spiel.spaceball_radius*vecNorm(enemyDist)*1.2 
+             waypointList{1} =  spiel.mine(ClosestMine).pos + vecNorm(enemyDist)*spiel.mine_radius + constSafeBorder*vecNorm(enemyDist) + spiel.spaceball_radius*vecNorm(enemyDist)*1.2;
 % +            waypointList{1} =  spiel.mine(ClosestMine).pos + vecNorm(enemyDist)*(spiel.mine_radius + constSafeBorder + spiel.spaceball_radius)*1.2;
              besCalculationMode = 1;
              calcMineBes();
