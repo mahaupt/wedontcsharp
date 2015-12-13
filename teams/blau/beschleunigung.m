@@ -920,17 +920,6 @@ function bes = beschleunigung(spiel, farbe)
         end
     end
 
-    function emergencyCompetitionBrake()
-        if tankeCompetition && numel(waypointList) > 0
-            enemyPath = waypointList{1} - enemy.pos;
-            enemyTime = norm(enemyPath) / projectVectorNorm(enemy.ges, enemyPath);
-            ownPath = waypointList{1} - me.pos
-            ownTime = norm(ownPath) / projectVectorNorm(me.ges, ownPath);
-            if abs(enemyTime) - abs(ownTime) < 0.01
-                debugDisp('Tanken: 
-                safeDeleteWaypoints();
-        end
-    end
 
 %% Angriff
     %Angriff

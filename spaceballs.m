@@ -6,11 +6,7 @@ clc
 
 rng shuffle
 r = round(rand(1)*1000000)
-<<<<<<< HEAD
-rng(r);
-=======
 rng(789211);
->>>>>>> Chris-MacBook
 
 %% Konstanten definieren
 
