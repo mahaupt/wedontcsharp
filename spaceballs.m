@@ -4,24 +4,10 @@ clear variables
 close all
 clc
 
-
 rng shuffle
 r = round(rand(1)*1000000)
-rng(r);
-
-
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
- rng shuffle
- r = round(rand(1)*1000000)
 rng(640357);%335426 349891 937951 122529 640357(!!!) 965412 
-=======
->>>>>>> parent of f62611f... Merge branch 'master' into Chris-MacBook
-=======
->>>>>>> parent of f62611f... Merge branch 'master' into Chris-MacBook
-=======
->>>>>>> parent of f62611f... Merge branch 'master' into Chris-MacBook
+
 %% Konstanten definieren
 
 spiel.dt = 1/100;
