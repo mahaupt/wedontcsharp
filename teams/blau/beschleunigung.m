@@ -302,8 +302,24 @@ function bes = beschleunigung(spiel, farbe)
             mineDriveRadius = (minePos(2)+spiel.mine_radius)/2;
         end
         
+        
         %maximal radial velocity
         maxVelSq = spiel.bes*mineDriveRadius;
+        
+        %%enlarge maximal velocity if angle is small
+        %get output wp
+        outwaypt = [0, 0];
+        for i=1:numel(waypointList)
+            if (norm(minePos-waypointList{i}) > constMineProxRadius)
+                outwaypt = waypointList{i};
+                break;
+            end
+        end
+        if (~isequal(outwaypt, [0,0]))
+            if (dot(vecNorm(waypointList{i}-minePos), vecNorm(me.ges)) > 0.86 && i < 3)
+                maxVelSq = maxVelSq * 2;
+            end
+        end
 
         %velocity correction Geschwindigkeitsvektor muss den Kreis
         %Tangieren
@@ -325,7 +341,7 @@ function bes = beschleunigung(spiel, farbe)
         
         %berechne Zentripetalbeschleunigung und addiere darin die
         %Korrektur
-        zentp = clamp(circvel^2/norm(toMine)*(1+corr) + corr*0.1, -spiel.bes, spiel.bes);
+        zentp = clamp(circvel^2/norm(mineDriveRadius)*(1+corr) + corr*0.1, -spiel.bes, spiel.bes);
         
         %Vorwärtsbeschleunigung
         forward = sqrt(spiel.bes^2-zentp^2);
@@ -350,7 +366,7 @@ function bes = beschleunigung(spiel, farbe)
         
         %emergencybreaking
         if (norm(me.ges)^2 > maxVelSq)% || emergencyBreaking())
-           bes = vecNorm(bes)-vecNorm(me.ges);
+           bes = vecNorm(bes)-vecNorm(me.ges)*1.5;
         end
         
         %debug drawing
@@ -906,7 +922,7 @@ function bes = beschleunigung(spiel, farbe)
                 %Ist diese Tanke unsere nächste Tanke und brauchen wir nicht mehr lange dorthin?
                 %oder ist nur noch eine Tanke da und keine Mine im Weg
                 %UND wir sind noch nicht im compMode
-                if ((ClosestEnemyTanke == TankList{1} && timeMeToTanke < constIgnoreTankeTime + 0.5 && timeMeToTanke < EnemyTimeToClosestTanke + 0.1) || spiel.n_tanke == 1 && ~ownColliding) && ~tankeCompetition && ~cancelCompetition
+                if ((ClosestEnemyTanke == TankList{1} && timeMeToTanke < constIgnoreTankeTime + 0.5) || spiel.n_tanke == 1 && ~ownColliding) && ~tankeCompetition && ~cancelCompetition && timeMeToTanke < EnemyTimeToClosestTanke + 0.2
                     debugDisp('Tanken: compMode activated!');
                     tankeCompetition = true;
                     accpos = getAccPos(spiel.tanke(ClosestEnemyTanke).pos);
