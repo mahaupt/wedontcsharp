@@ -34,6 +34,9 @@ function bes = beschleunigung(spiel, farbe)
     %ACHTUNG: jegliche Kollisionssicherung wird umgangen
     overrideBesCalculation = false;
     
+    %REFUEL
+    constIgnoreTankeTime = 0.9;
+    
     %DEBUG MODE
     %true: ermöglicht ausgabe von Text und Zeichnen von gizmos
     constDebugMode = true;
@@ -888,9 +891,12 @@ function bes = beschleunigung(spiel, farbe)
             %liegt noch eine Mine zwischen Gegner / uns und Tanke?
             enemyColliding = corridorColliding(enemy.pos, spiel.tanke(ClosestEnemyTanke).pos, spiel.spaceball_radius);
             ownColliding = corridorColliding(me.pos, spiel.tanke(ClosestEnemyTanke).pos, spiel.spaceball_radius);
+            if spiel.i_t == 150
+                return;
+            end
             
             %Gegner schnell bei Tanke, Tanke noch nicht ignoriert, keine Mine dazwischen UND noch Tanken in der TankList
-            if (EnemyTimeToClosestTanke < 0.2 && ClosestEnemyTanke ~= ignoreTanke && ~enemyColliding) && numel(TankList) > 0
+            if (EnemyTimeToClosestTanke < constIgnoreTankeTime && ClosestEnemyTanke ~= ignoreTanke && ~enemyColliding) && numel(TankList) > 0
                 %wie lange brauchen wir zu der am Gegner dichtesten Tanke?
                 myPath = spiel.tanke(ClosestEnemyTanke).pos - me.pos;
                 timeMeToTanke = norm(myPath) / projectVectorNorm(me.ges, myPath);
@@ -900,7 +906,7 @@ function bes = beschleunigung(spiel, farbe)
                 %Ist diese Tanke unsere nächste Tanke und brauchen wir nicht mehr lange dorthin?
                 %oder ist nur noch eine Tanke da und keine Mine im Weg
                 %UND wir sind noch nicht im compMode
-                if ((ClosestEnemyTanke == TankList{1} && timeMeToTanke < 0.25) || spiel.n_tanke == 1 && ~ownColliding) && ~tankeCompetition && ~cancelCompetition
+                if ((ClosestEnemyTanke == TankList{1} && timeMeToTanke < constIgnoreTankeTime + 0.5 && timeMeToTanke < EnemyTimeToClosestTanke + 0.1) || spiel.n_tanke == 1 && ~ownColliding) && ~tankeCompetition && ~cancelCompetition
                     debugDisp('Tanken: compMode activated!');
                     tankeCompetition = true;
                     accpos = getAccPos(spiel.tanke(ClosestEnemyTanke).pos);
@@ -929,7 +935,7 @@ function bes = beschleunigung(spiel, farbe)
                 end
                 
                 %CancelComp beenden
-                if cancelCompetition && EnemyTimeToClosestTanke > 0.2
+                if cancelCompetition && EnemyTimeToClosestTanke > constIgnoreTankeTime
                     cancelCompetition = false;
                 end
             end
@@ -946,7 +952,7 @@ function bes = beschleunigung(spiel, farbe)
                 timeEnemyToTanke = inf;
             end
             %braucht er lange oder ist nur noch eine Tanke da - entfernen
-            if timeEnemyToTanke > 0.2 || spiel.n_tanke == 1
+            if timeEnemyToTanke > constIgnoreTankeTime || spiel.n_tanke == 1
                 debugDisp('Tanken: ignored Tanke deleted');
                 ignoreTanke = 0;
                 CreatePathAllTanken();
