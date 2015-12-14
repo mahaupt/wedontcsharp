@@ -450,23 +450,11 @@ function bes = beschleunigung(spiel, farbe)
             return;
         end
         
-        vdir = vecNorm(me.ges);
-        towp = waypointList{1} - me.pos;
-        velocity = norm(me.ges);
-
-        %distance to overshoot
-        minTurnDist = projectVectorNorm(towp, vdir);
-        %time to overshoot
-        turnTime = minTurnDist/velocity;
-        %position to overshoot
-        turnPos = me.pos + vecNorm(vdir)*minTurnDist;
-        %distace of overshooting
-        correctDist = norm(turnPos - waypointList{1});
+        timetoarrive = norm(waypointList{1}-me.pos)/norm(me.ges);
+        timetoalign = getTimeToAlignVelocity(me.ges, waypointList{1}-me.pos);
         
-        accCorrection = 0.5*spiel.bes * turnTime^2;
-        if (accCorrection < correctDist && norm(towp) > constWayPointReachedRadius*2 && velocity >= 0.01)
+        if (timetoalign > timetoarrive && norm(towp) > constWayPointReachedRadius*2 && velocity >= 0.01)
             erg = true;
-            %debugDisp('CheckIfTooFast=true');
             return;
         end
         
@@ -500,7 +488,7 @@ function bes = beschleunigung(spiel, farbe)
             customv = me.ges;
         end
         if nargin < 2
-            customa = bes;
+            customa = vecNorm(bes)*spiel.bes;
         end
         
         velocity = norm(customv);
@@ -553,8 +541,8 @@ function bes = beschleunigung(spiel, farbe)
             length = norm(vec1);
             minVel = getMaxVelocityToAlignInTime(vec1, vec2, constCornerBreaking);
             
-            tway = (sqrt(erg^2+2*spiel.bes*length)-erg)/spiel.bes;
-            erg = erg + spiel.bes * tway;
+            tway = sqrt(erg^2+2*spiel.bes*length)-erg;
+            erg = erg + tway;
             
             if (minVel < erg)
                 erg = minVel;
@@ -729,11 +717,8 @@ function bes = beschleunigung(spiel, farbe)
     end
 
     %return projected norm of vector 1 projected on vector2
-    function erg = projectVectorNorm(vec1, vec2)
-        vec1 = vecNorm(vec1);
-        vec2 = vecNorm(vec2);
-        
-        erg = norm(vec1)*dot(vec1, vec2);
+    function erg = projectVectorNorm(vec1, vec2)        
+        erg = norm(vec1)*dot(vecNorm(vec1), vecNorm(vec2));
     end
 
     function erg = getTimeToAlignVelocity(vel1, vec)
@@ -1359,9 +1344,7 @@ function bes = beschleunigung(spiel, farbe)
         enemyDist = spiel.mine(ClosestMine).pos - enemy.pos;
         if numel(waypointList) <= 0
              waypointList{1} =  spiel.mine(ClosestMine).pos + vecNorm(enemyDist)*spiel.mine_radius + constSafeBorder*vecNorm(enemyDist) + spiel.spaceball_radius*vecNorm(enemyDist)*1.2;
-% +            waypointList{1} =  spiel.mine(ClosestMine).pos + vecNorm(enemyDist)*(spiel.mine_radius + constSafeBorder + spiel.spaceball_radius)*1.2;
-             besCalculationMode = 1;
-             calcMineBes();
+% +          waypointList{1} =  spiel.mine(ClosestMine).pos + vecNorm(enemyDist)*(spiel.mine_radius + constSafeBorder + spiel.spaceball_radius)*1.2;
         end
         
         debugDRAW();
