@@ -316,7 +316,7 @@ function bes = beschleunigung(spiel, farbe)
             end
         end
         if (~isequal(outwaypt, [0,0]))
-            if (dot(vecNorm(waypointList{i}-minePos), vecNorm(me.ges)) > 0.86 && i < 3)
+            if (dot(vecNorm(waypointList{i}-minePos), vecNorm(me.ges)) > 0.9 && i < 3)
                 maxVelSq = maxVelSq * 2;
             end
         end
@@ -980,6 +980,7 @@ function bes = beschleunigung(spiel, farbe)
 %% Angriff
     %Angriff
     function attackEnemy()
+        persistent lastAttackMode;
         waitForEnemy = false;
         
         %lockon attack ist nur sicher, wenn sich zwischen Gegner und Mir
@@ -987,13 +988,27 @@ function bes = beschleunigung(spiel, farbe)
         useLockonAttack = false;
         if (~corridorColliding(me.pos, enemy.pos, spiel.mine_radius*2.5))
             useLockonAttack = true;
+        elseif (lastAttackMode == 2)    % real dangerous KAMIKAZE     
+            %%check if about to collide
+            safeSpaceballRadius = (spiel.spaceball_radius);
+
+            %new emergency breaking - is it better?
+            breakTime = norm(me.ges) / spiel.bes;
+        
+            checkPoint = me.pos + 0.5*me.ges*breakTime; %without acceleration
+        
+            if (~isWalkable(checkPoint, safeSpaceballRadius))
+                useLockonAttack = true;
+            end
         end
         
         %select attack mode
         if (~useLockonAttack)
             directAttack();
+            lastAttackMode = 1;
         else
             lockonAttack();
+            lastAttackMode = 2;
         end
     end
     
