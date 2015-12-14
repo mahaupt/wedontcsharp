@@ -35,7 +35,7 @@ function bes = beschleunigung(spiel, farbe)
     overrideBesCalculation = false;
     
     %REFUEL
-    constIgnoreTankeTime = 0.9;
+    constIgnoreTankeTime = 1.5; %wie lange darf der Gegner zu seiner nächsten Tanke benötigen, damit wir sie ignorieren
     
     %DEBUG MODE
     %true: ermöglicht ausgabe von Text und Zeichnen von gizmos
@@ -183,7 +183,6 @@ function bes = beschleunigung(spiel, farbe)
         if currentNumberOfTank ~= spiel.n_tanke && dispWhatToDo == 3
             ignoreTanke = 0;
             CreatePathAllTanken();
-            
             currentNumberOfTank = spiel.n_tanke;
         end
         
