@@ -301,8 +301,24 @@ function bes = beschleunigung(spiel, farbe)
             mineDriveRadius = (minePos(2)+spiel.mine_radius)/2;
         end
         
+        
         %maximal radial velocity
         maxVelSq = spiel.bes*mineDriveRadius;
+        
+        %%enlarge maximal velocity if angle is small
+        %get output wp
+        outwaypt = [0, 0];
+        for i=1:numel(waypointList)
+            if (norm(minePos-waypointList{i}) > constMineProxRadius)
+                outwaypt = waypointList{i};
+                break;
+            end
+        end
+        if (~isequal(outwaypt, [0,0]))
+            if (dot(vecNorm(waypointList{i}-minePos), vecNorm(me.ges)) > 0.9 && i < 3)
+                maxVelSq = maxVelSq * 2;
+            end
+        end
 
         %velocity correction Geschwindigkeitsvektor muss den Kreis
         %Tangieren
@@ -315,13 +331,20 @@ function bes = beschleunigung(spiel, farbe)
             end
         end
         if (norm(toMine) < minimumMineDist)
-            corr = -1;
+            corr = (norm(toMine)-mineDriveRadius)/constSafeBorder;
         end
+        
+        
+        %kreisgeschwindigkeit
+        circvel = norm(projectVectorNorm(me.ges, toGes));
         
         %berechne Zentripetalbeschleunigung und addiere darin die
         %Korrektur
-        zentp = clamp(norm(me.ges)^2/norm(toMine)*(1+corr), -spiel.bes, spiel.bes);
+        zentp = clamp(circvel^2/norm(mineDriveRadius)*(1+corr) + corr*0.1, -spiel.bes, spiel.bes);
+        
+        %Vorwärtsbeschleunigung
         forward = sqrt(spiel.bes^2-zentp^2);
+        
         
         %break before last waypoint or if no wps exist
         if (numel(waypointList) == 1)
@@ -342,7 +365,7 @@ function bes = beschleunigung(spiel, farbe)
         
         %emergencybreaking
         if (norm(me.ges)^2 > maxVelSq)% || emergencyBreaking())
-           bes = vecNorm(bes)-vecNorm(me.ges);
+           bes = vecNorm(bes)-vecNorm(me.ges)*1.5;
         end
         
         %debug drawing
@@ -898,7 +921,7 @@ function bes = beschleunigung(spiel, farbe)
                 %Ist diese Tanke unsere nächste Tanke und brauchen wir nicht mehr lange dorthin?
                 %oder ist nur noch eine Tanke da und keine Mine im Weg
                 %UND wir sind noch nicht im compMode
-                if ((ClosestEnemyTanke == TankList{1} && timeMeToTanke < constIgnoreTankeTime + 0.5) || spiel.n_tanke == 1 && ~ownColliding) && ~tankeCompetition && ~cancelCompetition
+                if ((ClosestEnemyTanke == TankList{1} && timeMeToTanke < constIgnoreTankeTime + 0.5) || spiel.n_tanke == 1 && ~ownColliding) && ~tankeCompetition && ~cancelCompetition && timeMeToTanke < EnemyTimeToClosestTanke + 0.2
                     debugDisp('Tanken: compMode activated!');
                     tankeCompetition = true;
                     accpos = getAccPos(spiel.tanke(ClosestEnemyTanke).pos);
@@ -956,6 +979,7 @@ function bes = beschleunigung(spiel, farbe)
 %% Angriff
     %Angriff
     function attackEnemy()
+        persistent lastAttackMode;
         waitForEnemy = false;
         
         %lockon attack ist nur sicher, wenn sich zwischen Gegner und Mir
@@ -963,13 +987,27 @@ function bes = beschleunigung(spiel, farbe)
         useLockonAttack = false;
         if (~corridorColliding(me.pos, enemy.pos, spiel.mine_radius*2.5))
             useLockonAttack = true;
+        elseif (lastAttackMode == 2)    % real dangerous KAMIKAZE     
+            %%check if about to collide
+            safeSpaceballRadius = (spiel.spaceball_radius);
+
+            %new emergency breaking - is it better?
+            breakTime = norm(me.ges) / spiel.bes;
+        
+            checkPoint = me.pos + 0.5*me.ges*breakTime; %without acceleration
+        
+            if (~isWalkable(checkPoint, safeSpaceballRadius))
+                useLockonAttack = true;
+            end
         end
         
         %select attack mode
         if (~useLockonAttack)
             directAttack();
+            lastAttackMode = 1;
         else
             lockonAttack();
+            lastAttackMode = 2;
         end
     end
     
