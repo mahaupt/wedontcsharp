@@ -899,7 +899,7 @@ function bes = beschleunigung(spiel, farbe)
                 %Ist diese Tanke unsere nächste Tanke und brauchen wir nicht mehr lange dorthin?
                 %oder ist nur noch eine Tanke da und keine Mine im Weg
                 %UND wir sind noch nicht im compMode
-                if ((ClosestEnemyTanke == TankList{1} && timeMeToTanke < constIgnoreTankeTime + 0.5) || spiel.n_tanke == 1 && ~ownColliding) && ~tankeCompetition && ~cancelCompetition
+                if ((ClosestEnemyTanke == TankList{1} && timeMeToTanke < constIgnoreTankeTime + 0.5 && timeMeToTanke < EnemyTimeToClosestTanke + 0.1) || spiel.n_tanke == 1 && ~ownColliding) && ~tankeCompetition && ~cancelCompetition
                     debugDisp('Tanken: compMode activated!');
                     tankeCompetition = true;
                     accpos = getAccPos(spiel.tanke(ClosestEnemyTanke).pos);
