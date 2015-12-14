@@ -466,7 +466,7 @@ function bes = beschleunigung(spiel, farbe)
         accCorrection = 0.5*spiel.bes * turnTime^2;
         if (accCorrection < correctDist && norm(towp) > constWayPointReachedRadius*2 && velocity >= 0.01)
             erg = true;
-            debugDisp('CheckIfTooFast=true');
+            %debugDisp('CheckIfTooFast=true');
             return;
         end
         
@@ -833,7 +833,6 @@ function bes = beschleunigung(spiel, farbe)
             TankList = mexHandle.esc_find_tanke(spiel.mine, spiel.tanke, me.pos, me.ges, enemy.pos, enemy.ges, ignoreTanke, ebenen);
             
             TankList = fliplr(TankList);
-            debugDisp('Tanken: calculating Path');
             if (numel(TankList) > 0)
                 
                 %check if keep first tanke
@@ -851,9 +850,11 @@ function bes = beschleunigung(spiel, farbe)
                 
                 
                 if (keepFirstTanke)
+                    debugDisp('Tanken: calculating Path - keeping first Tanke');
                     waypointList=findPath(me.pos,firstTankePositionPersistent);
                     waypointList = appendToArray(waypointList, findPath(firstTankePositionPersistent,spiel.tanke(TankList{1}).pos));
                 else
+                    debugDisp('Tanken: calculating Path');
                     waypointList = findPath(me.pos,spiel.tanke(TankList{1}).pos);
                     firstTankePositionPersistent = spiel.tanke(TankList{1}).pos;
                 end
