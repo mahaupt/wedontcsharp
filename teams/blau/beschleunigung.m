@@ -313,13 +313,20 @@ function bes = beschleunigung(spiel, farbe)
             end
         end
         if (norm(toMine) < minimumMineDist)
-            corr = -1;
+            corr = (norm(toMine)-mineDriveRadius)/constSafeBorder;
         end
+        
+        
+        %kreisgeschwindigkeit
+        circvel = norm(projectVectorNorm(me.ges, toGes));
         
         %berechne Zentripetalbeschleunigung und addiere darin die
         %Korrektur
-        zentp = clamp(norm(me.ges)^2/norm(toMine)*(1+corr), -spiel.bes, spiel.bes);
+        zentp = clamp(circvel^2/norm(toMine)*(1+corr) + corr*0.1, -spiel.bes, spiel.bes);
+        
+        %Vorwärtsbeschleunigung
         forward = sqrt(spiel.bes^2-zentp^2);
+        
         
         %break before last waypoint or if no wps exist
         if (numel(waypointList) == 1)
