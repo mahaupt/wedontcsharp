@@ -304,7 +304,7 @@ function bes = beschleunigung(spiel, farbe)
 
         %velocity correction Geschwindigkeitsvektor muss den Kreis
         %Tangieren
-        corr = norm(gesToMine)-mineDriveRadius;
+        corr = (norm(gesToMine)-mineDriveRadius)/constSafeBorder;
         if (dot(me.ges, toMine) < 0)
             if (norm(toMine) < mineDriveRadius)
                 corr = -corr;
@@ -318,8 +318,19 @@ function bes = beschleunigung(spiel, farbe)
         
         %berechne Zentripetalbeschleunigung und addiere darin die
         %Korrektur
-        zentp = clamp(norm(me.ges)^2/mineDriveRadius + 20*corr, -spiel.bes, spiel.bes);
+        zentp = clamp(norm(me.ges)^2/norm(toMine)*(1+corr), -spiel.bes, spiel.bes);
         forward = sqrt(spiel.bes^2-zentp^2);
+        
+        %break before last waypoint or if no wps exist
+        if (numel(waypointList) == 1)
+            pathToWpRad = real(acos(clamp(dot(vecNorm(-toMine), vecNorm(waypointList{1}-minePos)), -1, 1))) * mineDriveRadius;
+            breakDist = calcBreakDistance(norm(me.ges), 0);
+            if (breakDist > pathToWpRad && norm(waypointList{1}-minePos) <= constMineProxRadius)
+                forward = -forward;
+            end
+        end
+        
+        %setuo beschleunigung
         bes = zentp * vecNorm(toMine) + forward*toGes;
         
         %no velocity
@@ -329,7 +340,7 @@ function bes = beschleunigung(spiel, farbe)
         
         %emergencybreaking
         if (norm(me.ges)^2 > maxVelSq)% || emergencyBreaking())
-           bes = -me.ges;
+           bes = vecNorm(bes)-vecNorm(me.ges);
         end
         
         %debug drawing
@@ -453,7 +464,7 @@ function bes = beschleunigung(spiel, farbe)
         timetoarrive = norm(waypointList{1}-me.pos)/norm(me.ges);
         timetoalign = getTimeToAlignVelocity(me.ges, waypointList{1}-me.pos);
         
-        if (timetoalign > timetoarrive && norm(towp) > constWayPointReachedRadius*2 && velocity >= 0.01)
+        if (timetoalign > timetoarrive && norm(waypointList{1}-me.pos) > constWayPointReachedRadius*2 && norm(me.ges) >= 0.01)
             erg = true;
             return;
         end
