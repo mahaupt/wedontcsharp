@@ -11,7 +11,7 @@ function bes = beschleunigung(spiel, farbe)
     %Korridorbreite für simplifyPath
     constNavSecurity = 0.02;
     %0.4 je größer der Winkel zum nächsten Wegpunkt, desto höheres Bremsen. Faktor.
-    constCornerBreaking = 0.55;
+    constCornerBreaking = 0.50;
     %Faktor für Seitwärtsbbeschleunigungen fürs Emergencybreaking
     constEmrBrkAccFac = 0.2; 
     %Faktor für Geschwindigkeit fürs Emergencybreaking
@@ -47,6 +47,7 @@ function bes = beschleunigung(spiel, farbe)
     persistent ArrayOfMines; %Zur Bestimmung des Minenverschwindens benötigt
     persistent StartNumberOfTank; %Anzahl der Tanstellen zu Spielbeginn
     persistent currentNumberOfTank; %aktuelle Anzahl an Tanken
+    persistent lastNumberOfMeTanke;
     persistent TankList; %Liste mit Index-Nummern der Tanken, die wir anfahren.
     persistent tankeCompetition; %ist CompetitionMode aktiviert?
     persistent cancelCompetition; %CompetitionMode wird gerade abgebrochen
@@ -54,7 +55,8 @@ function bes = beschleunigung(spiel, farbe)
     persistent waitForEnemy; %benötigt, um auf den Gegner warten zu können
     persistent dispWhatToDo; %Was tun wir gerade? 1=Angriff, 2=Verteidigung, 3=Tanken
     persistent mexHandle; %handle of mex functions
-    persistent Verteidigung; %
+    persistent Verteidigung;
+    persistent firstTankePositionPersistent;
     
     %%Farbe prüfen und zuweisen
     if strcmp (farbe, 'rot')
@@ -81,6 +83,9 @@ function bes = beschleunigung(spiel, farbe)
     
     %Beschleunigung berechnen:
     calculateBES();
+    
+%% Letzte Sachen machen
+    lastNumberOfMeTanke = me.getankt;
     
     
 %% Was soll der Spaceball tun?
@@ -139,6 +144,8 @@ function bes = beschleunigung(spiel, farbe)
         ignoreTanke = 0;
         waitForEnemy = false;
         Verteidigung = false;
+        lastNumberOfMeTanke = 0;
+        firstTankePositionPersistent = [0, 0];
         
         %compile mex files
         if strcmp (farbe, 'rot')
@@ -171,12 +178,13 @@ function bes = beschleunigung(spiel, farbe)
         %TankListe beim Verschwinden einer Tanke aktualisieren:
         
         if currentNumberOfTank ~= spiel.n_tanke && dispWhatToDo == 3
+            ignoreTanke = 0;
             CreatePathAllTanken();
+            
             currentNumberOfTank = spiel.n_tanke;
         end
         
         debugDrawCircle(0, 0, 0, true);
-        
     end
 
 
@@ -458,6 +466,7 @@ function bes = beschleunigung(spiel, farbe)
         accCorrection = 0.5*spiel.bes * turnTime^2;
         if (accCorrection < correctDist && norm(towp) > constWayPointReachedRadius*2 && velocity >= 0.01)
             erg = true;
+            debugDisp('CheckIfTooFast=true');
             return;
         end
         
@@ -737,8 +746,8 @@ function bes = beschleunigung(spiel, farbe)
             return;
         end
         
-        dotp = dot(vecNorm(vel1), vecNorm(vec));
-        angle = clamp(acos(dotp), -1, 1);
+        dotp = real(clamp(dot(vecNorm(vel1), vecNorm(vec)), -1, 1));
+        angle = real(acos(dotp));
         if dotp < 0
             angle = angle + pi/2;
         end
@@ -826,7 +835,28 @@ function bes = beschleunigung(spiel, farbe)
             TankList = fliplr(TankList);
             debugDisp('Tanken: calculating Path');
             if (numel(TankList) > 0)
-                waypointList = findPath(me.pos,spiel.tanke(TankList{1}).pos);
+                
+                %check if keep first tanke
+                keepFirstTanke = false;
+                if (~isequal(firstTankePositionPersistent, [0, 0]) && me.getankt == lastNumberOfMeTanke)
+                    if (~isequal(firstTankePositionPersistent, spiel.tanke(TankList{1}).pos))
+                        keepFirstTanke = true;
+                        if (ignoreTanke ~= 0)
+                            if (isequal(firstTankePositionPersistent, spiel.tanke(ignoreTanke).pos))
+                                keepFirstTanke = false;
+                            end
+                        end
+                    end
+                end
+                
+                
+                if (keepFirstTanke)
+                    waypointList=findPath(me.pos,firstTankePositionPersistent);
+                    waypointList = appendToArray(waypointList, findPath(firstTankePositionPersistent,spiel.tanke(TankList{1}).pos));
+                else
+                    waypointList = findPath(me.pos,spiel.tanke(TankList{1}).pos);
+                    firstTankePositionPersistent = spiel.tanke(TankList{1}).pos;
+                end
                 for i = 1:numel(TankList)-1
                     waypointList = appendToArray(waypointList, findPath(spiel.tanke(TankList{i}).pos,spiel.tanke(TankList{i+1}).pos));
                 end
@@ -883,8 +913,8 @@ function bes = beschleunigung(spiel, farbe)
                 
                 %comMode mit Vollbremsung abbrechen:
                 if tankeCompetition
-                    DistanceToStop = norm(me.ges)^2 / (2 * spiel.bes);
-                    DistanceToTanke = norm(me.pos-spiel.tanke(ClosestEnemyTanke).pos)-spiel.tanke_radius;
+                    DistanceToStop = calcBreakDistance(norm(me.ges), 0);
+                    DistanceToTanke = norm(me.pos-spiel.tanke(ClosestEnemyTanke).pos)-spiel.tanke_radius-spiel.spaceball_radius;
                     if DistanceToStop >= DistanceToTanke && timeMeToTanke - EnemyTimeToClosestTanke > 0.0001
                         debugDisp('Tanken: compMode canceled!');
                         waypointList = [];
@@ -1231,8 +1261,8 @@ function bes = beschleunigung(spiel, farbe)
         meToEdge = edgepos - me.pos;
         enemyToEdge = edgepos - enemy.pos;
 
-        metime = real(getTimeToAlignVelocity(me.ges, vecNorm([abs(meToEdge(1)), abs(meToEdge(2))]))) + norm(meToEdge)/(norm(me.ges) + spiel.bes); %Zeit um Geschwindigkeitsvektor auszurichten + s/v + spiel.bes als const. damit nicht = 0 
-        enemytime = real(getTimeToAlignVelocity(enemy.ges, vecNorm([abs(enemyToEdge(1)), abs(enemyToEdge(2))]))) + norm(enemyToEdge)/(norm(enemy.ges) + spiel.bes);
+        metime = getTimeToAlignVelocity(me.ges, vecNorm(meToEdge)) + norm(meToEdge)/(norm(me.ges) + spiel.bes); %Zeit um Geschwindigkeitsvektor auszurichten + s/v + spiel.bes als const. damit nicht = 0 
+        enemytime = getTimeToAlignVelocity(enemy.ges, vecNorm(meToEdge)) + norm(enemyToEdge)/(norm(enemy.ges) + spiel.bes);
       
         time = enemytime - metime; %Differenz berechnen, je größer der Wert desto besser 
 
@@ -1319,6 +1349,8 @@ function bes = beschleunigung(spiel, farbe)
                 %end
             end
         end
+        constEmrBrkVelFac = 1.1;
+        constEmrBrkAccFac = 0;
     end
 
     function mineTricking()
