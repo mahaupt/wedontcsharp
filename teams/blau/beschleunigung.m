@@ -42,7 +42,7 @@ function bes = beschleunigung(spiel, farbe)
     
     %DEBUG MODE
     %true: ermöglicht ausgabe von Text und Zeichnen von gizmos
-    constDebugMode = true;
+    constDebugMode = false;
     
     %COMPILING
     %true = force compiling, false = not compiling
@@ -505,15 +505,6 @@ function bes = beschleunigung(spiel, farbe)
     function erg = checkIfTooFastE ()
         enemyPath = me.pos-enemy.pos;
         if  (norm(enemyPath)) < (((norm(enemy.ges))^2)/(norm(enemy.bes)*2)+0.03);
-        erg = true;
-        else 
-        erg = false;
-        end
-    end
-
-    function erg = checkIfTooFastECrash () 
-        enemyPath = me.pos-enemy.pos;
-        if  (norm(enemyPath)) < (((norm(enemy.ges))^2)/(norm(enemy.bes)*2));
         erg = true;
         else 
         erg = false;
