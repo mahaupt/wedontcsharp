@@ -1410,12 +1410,25 @@ function bes = beschleunigung(spiel, farbe)
     function changePathForDefence()
         %Diese Funktion soll überprüfen, ob wir durch Abfahren unseres
         %Pfades den Gegner treffen würden und den Pfad entsprechend ändern.
-        if
-            
+        if norm(enemy.pos-me.pos) <= 0.1 && ~corridorColliding(enemy.pos, me.pos, spiel.spaceball_radius) && numel(waypointList) > 0
+            %hier die wegpunktListe interpretieren:
+            %Alle Wegpunkte von hinten durchgehen und prüfen, ob der Gegner
+            %dazwischen liegt. Dann den letzten Wegpunkt dorthin setzen
+            if enemyLineColliding(waypointList{1}, me.pos, spiel.spaceball_radius)
+                debugDisp('DEFENCE: enemy is in our way!');
+                waypointList = [];
+            end
         end
-        
-        
-        return;
+    end
+
+    function erg = enemyLineColliding(startp, endp, radius)
+        erg = false;
+        interpolatedEnemyPos = calcEnemyHitPosition(constEnemyInterpMode);
+        dist = distanceLinePoint(startp, endp, interpolatedEnemyPos);
+        if (dist < spiel.spaceball_radius+radius)
+            erg = true;
+            return;
+        end
     end
 
 
