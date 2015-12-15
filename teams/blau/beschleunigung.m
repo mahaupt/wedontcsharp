@@ -1338,9 +1338,10 @@ function bes = beschleunigung(spiel, farbe)
     end
 
     function fleeEnemy()
-        if  spiel.n_mine > 4
+        if enemy.pos-me.pos < 0.1
+            directFleeing();
+        elseif  spiel.n_mine > 4
             mineTricking;
-            %debugDisp('Defence: mineTricking');
         else
             cornerTricking();
         end
@@ -1404,6 +1405,11 @@ function bes = beschleunigung(spiel, farbe)
 % +          waypointList{1} =  spiel.mine(ClosestMine).pos + vecNorm(enemyDist)*(spiel.mine_radius + constSafeBorder + spiel.spaceball_radius)*1.2;
         end
         
+        debugDRAW();
+    end
+
+    function directFleeing()
+        waypointList=[];
         debugDRAW();
     end
 
