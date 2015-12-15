@@ -42,7 +42,7 @@ function bes = beschleunigung(spiel, farbe)
     
     %DEBUG MODE
     %true: ermöglicht ausgabe von Text und Zeichnen von gizmos
-    constDebugMode = false;
+    constDebugMode = true;
     
     %COMPILING
     %true = force compiling, false = not compiling
@@ -172,6 +172,12 @@ function bes = beschleunigung(spiel, farbe)
         mexHandle.esc_find_tanke = @esc_find_tanke;
 
         cd ../../
+        
+        %call mex functions to initialize variables
+        if (~constCompiling)
+            mexHandle.esc_find_path(spiel.mine(1:2), [0.5,0.5], [0.5,0.5]);
+            mexHandle.esc_find_tanke(spiel.mine(1:2), spiel.tanke, me.pos, me.ges, enemy.pos, enemy.ges, ignoreTanke, 1);
+        end
     end
 
     %registriert Änderungen im Spielfeld und handelt entsprechend
@@ -321,7 +327,7 @@ function bes = beschleunigung(spiel, farbe)
         end
         if (~isequal(outwaypt, [0,0]))
             if (dot(vecNorm(waypointList{i}-minePos), vecNorm(me.ges)) > 0.9 && i < 3)
-                maxVelSq = maxVelSq * 2;
+                maxVelSq = maxVelSq * 1.5;
             end
         end
 
