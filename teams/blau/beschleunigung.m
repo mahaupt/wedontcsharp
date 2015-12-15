@@ -21,6 +21,9 @@ function bes = beschleunigung(spiel, farbe)
     %Mine proximity radius
     constMineProxRadius = spiel.mine_radius + spiel.spaceball_radius + 1.5*constNavSecurity;
     
+    %WHATTODO
+    constDecisionOfAttackAndDefense = 0.8;
+    
     %ATTACK
     % Gegnerinterpolationsmethode 
     % 0: s= v*t+ 0.5*a*t^2
@@ -97,7 +100,7 @@ function bes = beschleunigung(spiel, farbe)
         
         thit = calculateSmoothHitTime(true);
         
-        if ((spiel.n_tanke == 0 && me.getankt > enemy.getankt) || (thit <= 1 && me.getankt>enemy.getankt && ~corridorColliding(me.pos, enemy.pos, constNavSecurity))) && ~tankeCompetition
+        if ((spiel.n_tanke == 0 && me.getankt > enemy.getankt) || (thit <= constDecisionOfAttackAndDefense && me.getankt>enemy.getankt && ~corridorColliding(me.pos, enemy.pos, constNavSecurity))) && ~tankeCompetition
             if (dispWhatToDo ~= 1)
                 dispWhatToDo = 1;
                 debugDRAW();
@@ -107,7 +110,7 @@ function bes = beschleunigung(spiel, farbe)
             %Wenn wir mehr als die Hälfte der Tanken haben oder nahe des Gegners sind und mehr getankt haben - Angriff!
             attackEnemy();
             
-        elseif (enemy.getankt > StartNumberOfTank*0.5 || (thit <= 0.8 && me.getankt<enemy.getankt && ~corridorColliding(me.pos, enemy.pos, constNavSecurity)) && ~tankeCompetition) || (spiel.n_tanke == 1 && me.getankt <= enemy.getankt && norm(me.pos-spiel.tanke(1).pos) - norm(enemy.pos-spiel.tanke(1).pos) > 0.2)
+        elseif (enemy.getankt > StartNumberOfTank*0.5 || (thit <= constDecisionOfAttackAndDefense - constDecisionOfAttackAndDefense/4 && me.getankt<enemy.getankt && ~corridorColliding(me.pos, enemy.pos, constNavSecurity)) && ~tankeCompetition) || (spiel.n_tanke == 1 && me.getankt <= enemy.getankt && norm(me.pos-spiel.tanke(1).pos) - norm(enemy.pos-spiel.tanke(1).pos) > 0.2)
             if (dispWhatToDo ~= 2)
                 %vorher: tanken
                 if (dispWhatToDo == 3)
@@ -845,7 +848,6 @@ function bes = beschleunigung(spiel, farbe)
 %% Tankenfindung
 
     function CreatePathAllTanken()
-        return;
         waitForEnemy = false;
         if ~tankeCompetition && ~cancelCompetition
             ebenen = round(StartNumberOfTank/2)-me.getankt;
@@ -1341,10 +1343,10 @@ function bes = beschleunigung(spiel, farbe)
     function fleeEnemy()
         if  spiel.n_mine > 4
             mineTricking;
-            %debugDisp('Defence: mineTricking');
         else
             cornerTricking();
         end
+        changePathForDefence();
     end
 
     function cornerTricking()
@@ -1406,6 +1408,30 @@ function bes = beschleunigung(spiel, farbe)
         end
         
         debugDRAW();
+    end
+
+    function changePathForDefence()
+        %Diese Funktion soll überprüfen, ob wir durch Abfahren unseres
+        %Pfades den Gegner treffen würden und den Pfad entsprechend ändern.
+        if norm(enemy.pos-me.pos) <= 0.1 && ~corridorColliding(enemy.pos, me.pos, spiel.spaceball_radius) && numel(waypointList) > 0
+            %hier die wegpunktListe interpretieren:
+            %Alle Wegpunkte von hinten durchgehen und prüfen, ob der Gegner
+            %dazwischen liegt. Dann den letzten Wegpunkt dorthin setzen
+            if enemyLineColliding(waypointList{1}, me.pos, spiel.spaceball_radius)
+                debugDisp('DEFENCE: enemy is in our way!');
+                waypointList = [];
+            end
+        end
+    end
+
+    function erg = enemyLineColliding(startp, endp, radius)
+        erg = false;
+        interpolatedEnemyPos = calcEnemyHitPosition(constEnemyInterpMode);
+        dist = distanceLinePoint(startp, endp, interpolatedEnemyPos);
+        if (dist < spiel.spaceball_radius+radius)
+            erg = true;
+            return;
+        end
     end
 
 
