@@ -1110,7 +1110,8 @@ function bes = beschleunigung(spiel, farbe)
         toEnemy = vecNorm(rotEnemyPos - rotMePos);
         
         %position aligned - finetune position -> lock onto target
-        if (norm(rotMeGes(2)-rotEnemyGes(2)) < 0.001 && norm(rotMePos(2)-rotEnemyPos(2)) < spiel.spaceball_radius*0.8)
+        if (norm(rotMeGes(2)-rotEnemyGes(2)) < 0.001 && norm(rotMePos(2)-rotEnemyPos(2)) < spiel.spaceball_radius*0.8 && ... 
+                (rotEnemyGes(1)-rotMeGes(1))/(rotEnemyPos(1)-rotEnemyGes(1)) > -0.2)
             if (lockAnnouncement ~= 1)
                 debugDisp('LockOnAttack: Target Locked!');
                 lockAnnouncement = 1;
@@ -1123,6 +1124,8 @@ function bes = beschleunigung(spiel, farbe)
                 transformationAngle = 0;
             end
         end
+        
+        
 
         %copy enemy acceleration
         ax2comp = rotEnemyBes(2);
