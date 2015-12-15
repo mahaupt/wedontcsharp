@@ -65,9 +65,17 @@ close all
              r = round(rand(1)*1000000);
          end   
 
+        rng(r);
         
-           rng(r)
-           spaceballs 
+% Rechenzeit und Schritt zum aktuellen Zeitpunkt ausgeben
+        CurrentGame = horzcat('Gerade läuft Spiel Nr: ', num2str(i),' -- Seed Nr: ', num2str(r),' -- Gesamtlaufzeit bisher: ', num2str(totalTime), ' Sekunden.');
+        disp(CurrentGame);
+        
+%Spiel durchführen        
+        spaceballs
+        
+%Zeit aktualisieren
+        totalTime = totalTime + toc;
                       
 % Zuweisung der Farbe        
         if strcmp(Farbe,'rot')
@@ -131,11 +139,7 @@ close all
            data{i+1,5} = r;
            data{i+1,6} = 99;
         end
-        
-% Rechenzeit und Schritt zum aktuellen Zeitpunkt ausgeben
-        totalTime = totalTime + toc
-        i
-        
+                
 % Clear variables mit Ausnahmen
         clearvars -except data Durchgaenge Farbe myName enemyName zw zwVar totalTime seedSource seedsFaulty seedsAll
         
