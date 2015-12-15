@@ -167,17 +167,15 @@ function bes = beschleunigung(spiel, farbe)
             mex source/esc_find_tanke.cpp
         end
         
+        %%clear static variables
+        clear esc_find_path
+        clear esc_find_tanke
+        
         %set handles
         mexHandle.esc_find_path = @esc_find_path;
         mexHandle.esc_find_tanke = @esc_find_tanke;
 
         cd ../../
-        
-        %call mex functions to initialize variables
-        if (~constCompiling)
-            mexHandle.esc_find_path(spiel.mine(1:2), [0.5,0.5], [0.5,0.5]);
-            mexHandle.esc_find_tanke(spiel.mine(1:2), spiel.tanke, me.pos, me.ges, enemy.pos, enemy.ges, ignoreTanke, 1);
-        end
     end
 
     %registriert Änderungen im Spielfeld und handelt entsprechend
