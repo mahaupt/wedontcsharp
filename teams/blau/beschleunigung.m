@@ -42,7 +42,7 @@ function bes = beschleunigung(spiel, farbe)
     
     %DEBUG MODE
     %true: ermöglicht ausgabe von Text und Zeichnen von gizmos
-    constDebugMode = false;
+    constDebugMode = true;
     
     %COMPILING
     %true = force compiling, false = not compiling
@@ -166,6 +166,10 @@ function bes = beschleunigung(spiel, farbe)
             mex source/esc_find_path.cpp
             mex source/esc_find_tanke.cpp
         end
+        
+        %%clear static variables
+        clear esc_find_path
+        clear esc_find_tanke
         
         %set handles
         mexHandle.esc_find_path = @esc_find_path;
@@ -321,7 +325,7 @@ function bes = beschleunigung(spiel, farbe)
         end
         if (~isequal(outwaypt, [0,0]))
             if (dot(vecNorm(waypointList{i}-minePos), vecNorm(me.ges)) > 0.9 && i < 3)
-                maxVelSq = maxVelSq * 2;
+                maxVelSq = maxVelSq * 1.5;
             end
         end
 
