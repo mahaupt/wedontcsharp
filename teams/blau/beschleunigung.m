@@ -22,7 +22,7 @@ function bes = beschleunigung(spiel, farbe)
     constMineProxRadius = spiel.mine_radius + spiel.spaceball_radius + 1.5*constNavSecurity;
     
     %WHATTODO
-    constDecisionOfAttackAndDefense = 0.8;
+    constDecisionOfAttackAndDefense = 0.5;
     
     %ATTACK
     % Gegnerinterpolationsmethode 
@@ -110,7 +110,9 @@ function bes = beschleunigung(spiel, farbe)
             %Wenn wir mehr als die Hälfte der Tanken haben oder nahe des Gegners sind und mehr getankt haben - Angriff!
             attackEnemy();
             
-        elseif (enemy.getankt > StartNumberOfTank*0.5 || (thit <= constDecisionOfAttackAndDefense - constDecisionOfAttackAndDefense/4 && me.getankt<enemy.getankt && ~corridorColliding(me.pos, enemy.pos, constNavSecurity)) && ~tankeCompetition) || (spiel.n_tanke == 1 && me.getankt <= enemy.getankt && norm(me.pos-spiel.tanke(1).pos) - norm(enemy.pos-spiel.tanke(1).pos) > 0.2)
+        elseif (enemy.getankt > StartNumberOfTank*0.5 ...
+                || (thit <= constDecisionOfAttackAndDefense - constDecisionOfAttackAndDefense/4 && me.getankt<enemy.getankt && ~corridorColliding(me.pos, enemy.pos, constNavSecurity)) && ~tankeCompetition) ...
+                || (spiel.n_tanke == 1 && me.getankt <= enemy.getankt && ignoreTanke ~= 0)
             if (dispWhatToDo ~= 2)
                 %vorher: tanken
                 if (dispWhatToDo == 3)
@@ -933,7 +935,7 @@ function bes = beschleunigung(spiel, farbe)
                     waypointList{2} = accpos;
                     debugDRAW();
                 %sonst, ist noch mehr als 1 Tanke vorhanden - ignorieren,
-                elseif spiel.n_tanke > 1
+                elseif ~tankeCompetition
                     debugDisp('Tanken: ignore Tanke');
                     ignoreTanke = ClosestEnemyTanke;
                     CreatePathAllTanken;
@@ -970,7 +972,7 @@ function bes = beschleunigung(spiel, farbe)
                 timeEnemyToTanke = inf;
             end
             %braucht er lange oder ist nur noch eine Tanke da - entfernen
-            if timeEnemyToTanke > constIgnoreTankeTime || spiel.n_tanke == 1
+            if timeEnemyToTanke > constIgnoreTankeTime
                 debugDisp('Tanken: ignored Tanke deleted');
                 ignoreTanke = 0;
                 CreatePathAllTanken();
@@ -1343,10 +1345,10 @@ function bes = beschleunigung(spiel, farbe)
     function fleeEnemy()
         if  spiel.n_mine > 4
             mineTricking;
+            changePathForDefence();
         else
             cornerTricking();
         end
-        changePathForDefence();
     end
 
     function cornerTricking()
@@ -1359,23 +1361,13 @@ function bes = beschleunigung(spiel, farbe)
             debugDRAW();
             %waiting for the enemy
         else
-            if (checkIfTooFastE () == true || norm(me.pos-enemy.pos) <= 0.15) && numel(waypointList) <= 0
+            firstWaypoint = me.pos;
+            if (numel(waypointList) >= 1)
+                firstWaypoint = waypointList{1};
+            end
+            
+            if (checkIfTooFastE () == true || norm(me.pos-enemy.pos) <= 0.15) && norm(firstWaypoint-me.pos) < 0.1
                 
-%                 nextCorner = sortrows(cornerNodes, [3 2 1]);
-%                 
-%                 if checkIfTooFastECrash() == true && norm(me.pos - enemy.pos) < 0.5 && (norm(me.ges)^2)/spiel.bes < norm (me.pos - nextCorner(1,1:2))+ spiel.spaceball_radius && norm (me.pos - nextCorner(1,1:2)) < 0.2 && corridorColliding(me.pos, nextCorner(3,1:2), spiel.mine_radius*2) == false
-% 
-%                     Verteidigung = false 
-%                     debugDisp('cornerTricking. Pt3');
-%                     for i=1:4
-%                         cornerNodes(i,3)=norm(cornerNodes(i,1:2)-me.pos-enemy.pos);
-%                     end
-% 
-%                     nextCorner = sortrows(cornerNodes, [3 2 1]);
-% 
-%                     waypointList = [];
-%                     waypointList{1} = nextCorner(3,1:2);
-%                 else
                     Verteidigung = true;  
                     debugDisp('Defence: cornerTricking 2');
                         
@@ -1402,7 +1394,7 @@ function bes = beschleunigung(spiel, farbe)
     function mineTricking()
         ClosestMine = getNearestMineId(me.pos);
         enemyDist = spiel.mine(ClosestMine).pos - enemy.pos;
-        if numel(waypointList) <= 0
+        if numel(waypointList) <= 1
              waypointList{1} =  spiel.mine(ClosestMine).pos + vecNorm(enemyDist)*spiel.mine_radius + constSafeBorder*vecNorm(enemyDist) + spiel.spaceball_radius*vecNorm(enemyDist)*1.2;
 % +          waypointList{1} =  spiel.mine(ClosestMine).pos + vecNorm(enemyDist)*(spiel.mine_radius + constSafeBorder + spiel.spaceball_radius)*1.2;
         end
