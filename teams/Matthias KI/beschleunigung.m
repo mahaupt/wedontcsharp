@@ -23,6 +23,10 @@ function bes = beschleunigung(spiel, farbe)
     %Beschleunigungsbetrag
     nBes = spiel.bes;
     
+    %Gegner beschleunigen Mittelwert
+    mittelWert = 1/dt;
+    persistent gBes;
+    
     %Graphische Darstellung?
     graphics = false;%spiel.graphics;
 
@@ -135,6 +139,34 @@ function bes = beschleunigung(spiel, farbe)
         end
     end
 
+    %Vektoren im Cellarray summieren
+    function s = sum(cell)
+        s = [0, 0];
+        for c_i = 1:length(cell)
+            s = s + cell{c_i};
+        end
+    end
+
+    %Prüft, ob ein Kreis die Bande oder eine Mine schneidet
+    function tf = HitTest(pos, r)
+        tf = false;
+        
+        k.pos = pos;
+        k.radius = r;
+        
+        if schnitt_kreis_bande(k)
+            tf = true;
+            return;
+        end
+        
+        for m_i = 1:spiel.n_mine
+            if schnitt_kreis_kreis(k, minen(m_i))
+                tf = true;
+                return;
+            end
+        end
+    end
+
     
 %% Vorbereitungen und Zuweisungen
 
@@ -170,16 +202,22 @@ function bes = beschleunigung(spiel, farbe)
 	%Bremszeit berechnen
 	t_brems = norm(wir.ges)/nBes;
     
+    %Beschleunigung des Gegners mitteln
+    gBes{end + 1} = gegner.bes;
+    if length(gBes) > mittelWert
+        gBes(1) = [];
+    end
+    
     %Testen, ob wir mehr als die Hälfte der Tankstellen haben oder Spontanangriff
     if (wir.getankt > gegner.getankt + spiel.n_tanke || (wir.getankt == gegner.getankt && spiel.n_tanke == 0)) || (gegner.getankt < wir.getankt && norm(wir.pos - gegner.pos) < 0.1 && 0.9397 < dot(wir.ges, gegner.ges)/(norm(wir.ges)*norm(gegner.ges)))
         %Maß für die Zeit, die zwischen uns und dem Gegner liegt
         t_rel = 1 * norm(gegner.pos - wir.pos)/norm(gegner.ges - wir.ges);
         %Projizierte Position
-        gPos = gegner.pos + gegner.ges * t_rel;
+        gPos = (gegner.pos + gegner.ges * t_rel + 0.5 * sum(gBes)/length(gBes) * t_rel^2);
 
         %Wenn projizierter Punkt außerhalb des Spielfeldes oder nicht innehalb eines gewissen Radius liegt, dann
         %direkt auf Gegner zuhalten
-        if gPos(1) <= 0 || gPos(1) >= 1 || gPos(2) <= 0 || gPos(2) >= 1 || norm(gPos - gegner.pos) >= 0.5 || norm(gPos - wir.pos) >= 0.5
+        if HitTest(gPos, gegner.radius + margin) || norm(gPos - gegner.pos) >= 0.5 || norm(gPos - wir.pos) >= 0.5
             gPos = gegner.pos;
         end
 
@@ -193,11 +231,8 @@ function bes = beschleunigung(spiel, farbe)
         %Alle möglichen Wegpunkte ermitteln
         [X,Y,G] = wegPunkte(wir.pos, wir.ges, t_brems + margin, grad, nBes, dt, wir.radius + margin, minen);
 
-        %Länge des Wegpunkt-Vektors
-        le = length(G);
-        
         %Keine Wege
-        if le == 0
+        if isempty(G)
             %Notbremsung
             emergBrake();
         else
@@ -213,19 +248,19 @@ function bes = beschleunigung(spiel, farbe)
         %Maß für die Zeit, die zwischen uns und dem Gegner liegt
         t_rel = norm(gegner.pos - wir.pos)/norm(gegner.ges - wir.ges);
         %Projizierte Position
-        gPos = (gegner.pos + gegner.ges * t_rel + 0.5 * gegner.bes * t_rel^2);
+        gPos = (gegner.pos + gegner.ges * t_rel + 0.5 * sum(gBes)/length(gBes) * t_rel^2);
 
         %Wenn projizierter Punkt außerhalb des Spielfeldes liegt, dann
         %direkt von Gegner weghalten
-        if gPos(1) <= 0 || gPos(1) >= 1 || gPos(2) <= 0 || gPos(2) >= 1
+        if HitTest(gPos, gegner.radius + margin) || norm(gPos - gegner.pos) >= 0.5 || norm(gPos - wir.pos) >= 0.5
             gPos = gegner.pos;
         end
         
         %Eckenradius
-        cRad = 0.2;
+        cRad = 0.1;
 
         %Sind wir in der Nähe einer Ecke
-        corner = (wir.pos(1) < cRad && wir.pos(2) < cRad) || (wir.pos(1) > 1 - cRad && wir.pos(2) > 1 - cRad) || (wir.pos(1) > 1 - cRad && wir.pos(2) < cRad) || (wir.pos(1) < cRad && wir.pos(2) > 1 - cRad);
+        corner = norm(wir.ges) < 10^-1 || ((wir.pos(1) < cRad && wir.pos(2) < cRad) || (wir.pos(1) > 1 - cRad && wir.pos(2) > 1 - cRad) || (wir.pos(1) > 1 - cRad && wir.pos(2) < cRad) || (wir.pos(1) < cRad && wir.pos(2) > 1 - cRad));
         
         if corner
             %Zum Mittelpunkt zielen
@@ -241,27 +276,16 @@ function bes = beschleunigung(spiel, farbe)
         %Alle möglichen Wegpunkte ermitteln
         [X,Y,G] = wegPunkte(wir.pos, wir.ges, t_brems + margin, grad, nBes, dt, wir.radius + margin, minen);
         
-        %Länge des Wegpunkt-Vektors
-        le = length(G);
-        
         %Keine Wege
-        if le == 0
+        if isempty(G)
             %Notbremsung
             emergBrake();
         else
-            %Beste Verteidigung checken
-            g_indexMax = maxDistance(gPos);
-            g_indexMin = minDistance([1, 1] - gPos);
-            
             %Bester Weg
             if corner
                 g_index = minDistance(gPos);
             else
-                if norm([X(g_indexMax), Y(g_indexMax)] - gPos) > norm([X(g_indexMin), Y(g_indexMin)] - gPos)
-                    g_index = g_indexMax;
-                else
-                    g_index = g_indexMin;
-                end
+                g_index = maxDistance(gPos);
             end
             
             %Beschleunigung zuweisen
@@ -297,18 +321,43 @@ function bes = beschleunigung(spiel, farbe)
         
         %Anzahl der Tanken
         le_t = length(tanken);
+        
+        tankeG = 1:le_t;
+        
+        if wir.getankt == 0
+            t_tanke = naechsteSache(tanken, wir.pos);
+            refY = 0;
+            obereHaelfte = 0;
+            untereHaelfte = 0;
+            for t_i = 1:le_t
+                if abs(tanken(t_i).pos(1) - 0.5) < eps
+                    refY = tanken(t_i).pos(2);
+                    for t_j = 1:le_t
+                        if tanken(t_j).pos(2) > refY
+                            obereHaelfte = obereHaelfte + 1;
+                        else
+                            untereHaelfte = untereHaelfte + 1;
+                        end
+                    end
+                    if obereHaelfte > untereHaelfte
+                        t_tanke = t_i;
+                    end
+                    break;
+                end
+            end
+        else
+            %Tanken bewerten
+            tankGuete(le_t) = 0;
 
-        %Tanken bewerten
-        tankGuete(le_t) = 0;
-        
-        for t_i = 1:le_t
-            tankRichtung = tanken(t_i).pos - wir.pos;
-            tankRichtungG = tanken(t_i).pos - gegner.pos;
-            tankGuete(t_i) = 4 * (1 - norm(tankRichtung)) + 2 * dot(wir.ges, tankRichtung) + norm(tankRichtungG) + (1 - dot(gegner.ges, tankRichtungG));
+            for t_i = 1:le_t
+                tankRichtung = tanken(t_i).pos - wir.pos;
+                tankRichtungG = tanken(t_i).pos - gegner.pos;
+                tankGuete(t_i) = 4 * (1 - norm(tankRichtung)) + 2.5 * dot(wir.ges, tankRichtung) + norm(tankRichtungG) + (1 - dot(gegner.ges, tankRichtungG));
+            end
+
+            %Beste Tanke auswählen
+            [~, t_tanke] = max(tankGuete);
         end
-        
-        %Beste Tanke auswählen
-        [~, t_tanke] = max(tankGuete);
         
         if graphics
             hold on
@@ -320,7 +369,7 @@ function bes = beschleunigung(spiel, farbe)
         [X,Y,G] = wegPunkte(wir.pos, wir.ges, t_brems + margin, grad, nBes, dt, wir.radius + margin, minen);
 
         %Keine Wege
-        if isempty(G);
+        if isempty(G)
             %Notbremsung
             emergBrake();
         else
