@@ -1338,13 +1338,12 @@ function bes = beschleunigung(spiel, farbe)
     end
 
     function fleeEnemy()
-        if enemy.pos-me.pos < 0.1
-            directFleeing();
-        elseif  spiel.n_mine > 4
+        if  spiel.n_mine > 4
             mineTricking;
         else
             cornerTricking();
         end
+        changePathForDefence();
     end
 
     function cornerTricking()
@@ -1408,9 +1407,15 @@ function bes = beschleunigung(spiel, farbe)
         debugDRAW();
     end
 
-    function directFleeing()
-        waypointList=[];
-        debugDRAW();
+    function changePathForDefence()
+        %Diese Funktion soll überprüfen, ob wir durch Abfahren unseres
+        %Pfades den Gegner treffen würden und den Pfad entsprechend ändern.
+        if
+            
+        end
+        
+        
+        return;
     end
 
 
