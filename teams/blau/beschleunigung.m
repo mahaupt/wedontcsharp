@@ -347,11 +347,11 @@ function bes = beschleunigung(spiel, farbe)
         
         
         %break before last waypoint or if no wps exist
-        if (numel(waypointList) == 1)
+        if (numel(waypointList) == 1 && norm(waypointList{1}-minePos) <= constMineProxRadius)
             pathToWpRad = real(acos(clamp(dot(vecNorm(-toMine), vecNorm(waypointList{1}-minePos)), -1, 1))) * mineDriveRadius;
             breakDist = calcBreakDistance(norm(me.ges), 0);
-            if (breakDist > pathToWpRad && norm(waypointList{1}-minePos) <= constMineProxRadius)
-                forward = -forward;
+            if (breakDist > pathToWpRad && dot(me.ges, toGes) > 0)
+                forward = -(forward); % + norm(zentp)/2
             end
         end
         
@@ -845,6 +845,7 @@ function bes = beschleunigung(spiel, farbe)
 %% Tankenfindung
 
     function CreatePathAllTanken()
+        return;
         waitForEnemy = false;
         if ~tankeCompetition && ~cancelCompetition
             ebenen = round(StartNumberOfTank/2)-me.getankt;
