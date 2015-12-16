@@ -368,7 +368,7 @@ function bes = beschleunigung(spiel, farbe)
         bes = zentp * vecNorm(toMine) + forward*toGes;
         
         %no velocity
-        if (norm(me.ges) < 0.003)
+        if (norm(me.ges) < 0.01)
             bes = toGes;
         end
         
@@ -986,7 +986,10 @@ function bes = beschleunigung(spiel, farbe)
             checkPoint = me.pos + 0.5*me.ges*breakTime; %without acceleration
         
             if (~isWalkable(checkPoint, safeSpaceballRadius))
+                %debugDisp('keeepAttack');
                 useLockonAttack = true;
+            else
+                %debugDisp('switch attack');
             end
         end
         
