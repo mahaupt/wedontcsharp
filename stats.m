@@ -44,17 +44,17 @@ data{1,5} = 'Seed:';
 % data{1,6}: 0=Verloren, 1=Gewonnen, 1.1=Gewonnen durch Gegner getroffen, 2=Crash in Mine, 3=Crash in Bande, 4=me.getankt>enemy.getankt, 5=me.getankt<enemy.getankt
 
 
-% Rechenzeitvariable einführen
+% Rechenzeitvariable einfÃ¼hren
 totalTime = 0;
 
 
 % Hauptschleife
 for i = 1 : Durchgaenge
 
-% Alle Fenster bis auf das letzte Spaceballspielfeldfenster schließen    
+% Alle Fenster bis auf das letzte Spaceballspielfeldfenster schlieÃŸen    
 close all
 
-% Wert für r ermitteln    
+% Wert fÃ¼r r ermitteln    
          if seedSource == 0    
              r = seedsFaulty(i,1);
              
@@ -68,14 +68,16 @@ close all
         rng(r);
         
 % Rechenzeit und Schritt zum aktuellen Zeitpunkt ausgeben
-        CurrentGame = horzcat('Gerade läuft Spiel Nr: ', num2str(i),' -- Seed Nr: ', num2str(r),' -- Gesamtlaufzeit bisher: ', num2str(totalTime), ' Sekunden.');
+        CurrentGame = horzcat('Gerade lÃ¤uft Spiel Nr: ', num2str(i),' -- Seed Nr: ', num2str(r),' -- Gesamtlaufzeit bisher: ', num2str(totalTime), ' Sekunden.');
         disp(CurrentGame);
         
-%Spiel durchführen
-        try
+%Spiel durchfÃ¼hren
+         isError = false;
+         try
             spaceballs
-        catch
-        end
+         catch
+            isError = true
+         end
         
 %Zeit aktualisieren
         totalTime = totalTime + toc;
@@ -98,8 +100,8 @@ close all
         data{i+1,1} = num2str(i);
  
         
-% Datentabelle füllen
-        if me.punkte == 1
+% Datentabelle fÃ¼llen
+        if me.punkte == 1 && ~isError
            data{i+1,2} = 'Gewonnnen';
            data{i+1,3} = enemy.ereignis;
            data{i+1,4} = spiel.i_t/100;
@@ -109,7 +111,7 @@ close all
                 data{i+1,6} = 1.1;
            end
            
-        elseif enemy.punkte == 1
+        elseif enemy.punkte == 1 && ~isError
            data{i+1,2} = 'Verloren';
            data{i+1,3} = me.ereignis;
            data{i+1,4} = spiel.i_t/100;
@@ -121,14 +123,14 @@ close all
                data{i+1,6} = 3;
            end
            
-        elseif me.getankt > enemy.getankt
+        elseif me.getankt > enemy.getankt && ~isError
            data{i+1,2} = 'Unent. Angriff';
            data{i+1,3} = me.ereignis;
            data{i+1,4} = spiel.i_t/100;
            data{i+1,5} = r;
            data{i+1,6} = 4;
            
-        elseif me.getankt < enemy.getankt
+        elseif me.getankt < enemy.getankt && ~isError
            data{i+1,2} = 'Unent. Verteidigung';
            data{i+1,3} = me.ereignis;
            data{i+1,4} = spiel.i_t/100;
@@ -222,7 +224,7 @@ for i = 1 : Durchgaenge
 
 end               
   
-% Leere Cells löschen
+% Leere Cells lÃ¶schen
 loseSeeds = loseSeeds(~cellfun('isempty',loseSeeds));
 unentDefense = unentDefense(~cellfun('isempty',unentDefense));
 unentAttack = unentAttack(~cellfun('isempty',unentAttack));
