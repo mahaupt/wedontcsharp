@@ -4,3 +4,5 @@
 *.avi
 *.cpp~
 *.h~
+*.log
+*.mat

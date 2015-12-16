@@ -19,7 +19,7 @@ function bes = beschleunigung(spiel, farbe)
     %simplifyPath umgehen
     constSkipSimplifyPath = false;
     %Mine proximity radius
-    constMineProxRadius = spiel.mine_radius + spiel.spaceball_radius + 1.5*constNavSecurity;
+    constMineProxRadius = spiel.mine_radius + spiel.spaceball_radius + 1.7*constNavSecurity;
     
     %WHATTODO
     constDecisionOfAttackAndDefense = 0.5;
@@ -42,27 +42,27 @@ function bes = beschleunigung(spiel, farbe)
     
     %DEBUG MODE
     %true: ermöglicht ausgabe von Text und Zeichnen von gizmos
-    constDebugMode = false;
+    constDebugMode = true;
     
     %COMPILING
     %true = force compiling, false = not compiling
     constCompiling = true;
     
     %statische Variablen definieren
-    persistent waypointList; %Liste mit Wegpunkten. Werden automatisch nacheinander abgefahren
-    persistent ArrayOfMines; %Zur Bestimmung des Minenverschwindens benötigt
-    persistent StartNumberOfTank; %Anzahl der Tanstellen zu Spielbeginn
-    persistent currentNumberOfTank; %aktuelle Anzahl an Tanken
-    persistent lastNumberOfMeTanke;
-    persistent TankList; %Liste mit Index-Nummern der Tanken, die wir anfahren.
-    persistent tankeCompetition; %ist CompetitionMode aktiviert?
-    persistent cancelCompetition; %CompetitionMode wird gerade abgebrochen
-    persistent ignoreTanke; %diese Tanke ignorieren!
-    persistent waitForEnemy; %benötigt, um auf den Gegner warten zu können
-    persistent dispWhatToDo; %Was tun wir gerade? 1=Angriff, 2=Verteidigung, 3=Tanken
-    persistent mexHandle; %handle of mex functions
-    persistent Verteidigung;
-    persistent firstTankePositionPersistent;
+    persistent p_waypointList; %Liste mit Wegpunkten. Werden automatisch nacheinander abgefahren
+    persistent p_ArrayOfMines; %Zur Bestimmung des Minenverschwindens benötigt
+    persistent p_StartNumberOfTank; %Anzahl der Tanstellen zu Spielbeginn
+    persistent p_currentNumberOfTank; %aktuelle Anzahl an Tanken
+    persistent p_lastNumberOfMeTanke;
+    persistent p_TankList; %Liste mit Index-Nummern der Tanken, die wir anfahren.
+    persistent p_tankeCompetition; %ist CompetitionMode aktiviert?
+    persistent p_cancelCompetition; %CompetitionMode wird gerade abgebrochen
+    persistent p_ignoreTanke; %diese Tanke ignorieren!
+    persistent p_cornerWaitForEnemy; %benötigt, um auf den Gegner warten zu können
+    persistent p_dispWhatToDo; %Was tun wir gerade? 1=Angriff, 2=Verteidigung, 3=Tanken
+    persistent p_mexHandle; %handle of mex functions
+    persistent p_cornerVerteidigung;
+    persistent p_firstTankePositionPersistent;
     
     %%Farbe prüfen und zuweisen
     if strcmp (farbe, 'rot')
@@ -91,7 +91,7 @@ function bes = beschleunigung(spiel, farbe)
     calculateBES();
     
 %% Letzte Sachen machen
-    lastNumberOfMeTanke = me.getankt;
+    p_lastNumberOfMeTanke = me.getankt;
     
     
 %% Was soll der Spaceball tun?
@@ -100,27 +100,29 @@ function bes = beschleunigung(spiel, farbe)
         
         thit = calculateSmoothHitTime(true);
         
-        if ((spiel.n_tanke == 0 && me.getankt > enemy.getankt) || (thit <= constDecisionOfAttackAndDefense && me.getankt>enemy.getankt && ~corridorColliding(me.pos, enemy.pos, constNavSecurity))) && ~tankeCompetition
-            if (dispWhatToDo ~= 1)
-                dispWhatToDo = 1;
+        if ((spiel.n_tanke == 0 && me.getankt > enemy.getankt) || (thit <= constDecisionOfAttackAndDefense && me.getankt>enemy.getankt && ~corridorColliding(me.pos, enemy.pos, constNavSecurity))) && ~p_tankeCompetition
+            if (p_dispWhatToDo ~= 1)
+                p_dispWhatToDo = 1;
                 debugDRAW();
                 debugDisp('whatToDo: ATTACK');
             end
             
+            p_cornerVerteidigung = false;
+            
             %Wenn wir mehr als die Hälfte der Tanken haben oder nahe des Gegners sind und mehr getankt haben - Angriff!
             attackEnemy();
             
-        elseif (enemy.getankt > StartNumberOfTank*0.5 ...
-                || (thit <= constDecisionOfAttackAndDefense - constDecisionOfAttackAndDefense/4 && me.getankt<enemy.getankt && ~corridorColliding(me.pos, enemy.pos, constNavSecurity)) && ~tankeCompetition) ...
-                || (spiel.n_tanke == 1 && me.getankt <= enemy.getankt && ignoreTanke ~= 0)
-            if (dispWhatToDo ~= 2)
+        elseif (enemy.getankt > p_StartNumberOfTank*0.5 ...
+                || (thit <= constDecisionOfAttackAndDefense - constDecisionOfAttackAndDefense/4 && me.getankt<enemy.getankt && ~corridorColliding(me.pos, enemy.pos, constNavSecurity)) && ~p_tankeCompetition) ...
+                || (spiel.n_tanke == 1 && me.getankt <= enemy.getankt && p_ignoreTanke ~= 0)
+            if (p_dispWhatToDo ~= 2)
                 %vorher: tanken
-                if (dispWhatToDo == 3)
+                if (p_dispWhatToDo == 3)
                     safeDeleteWaypoints();
                     debugDRAW();
                 end
                 
-                dispWhatToDo = 2;
+                p_dispWhatToDo = 2;
                 debugDisp('whatToDo: DEFENCE');
             end
             
@@ -129,9 +131,10 @@ function bes = beschleunigung(spiel, farbe)
             fleeEnemy();
            
         else
+            p_cornerVerteidigung = false;
             
-            if (dispWhatToDo ~= 3)
-                dispWhatToDo = 3;
+            if (p_dispWhatToDo ~= 3)
+                p_dispWhatToDo = 3;
                 debugDisp('whatToDo: REFUEL');
                 CreatePathAllTanken();
             end
@@ -142,18 +145,18 @@ function bes = beschleunigung(spiel, farbe)
     %wird einmal am Start aufgerufen
     %initialisiert wichtige Variablen
     function initSpaceball()
-        dispWhatToDo = -1;
-        waypointList = [];
-        ArrayOfMines = spiel.mine;
-        StartNumberOfTank = spiel.n_tanke;
-        currentNumberOfTank = spiel.n_tanke;
-        tankeCompetition = false;
-        cancelCompetition = false;
-        ignoreTanke = 0;
-        waitForEnemy = false;
-        Verteidigung = false;
-        lastNumberOfMeTanke = 0;
-        firstTankePositionPersistent = [0, 0];
+        p_dispWhatToDo = -1;
+        p_waypointList = [];
+        p_ArrayOfMines = spiel.mine;
+        p_StartNumberOfTank = spiel.n_tanke;
+        p_currentNumberOfTank = spiel.n_tanke;
+        p_tankeCompetition = false;
+        p_cancelCompetition = false;
+        p_ignoreTanke = 0;
+        p_cornerWaitForEnemy = false;
+        p_cornerVerteidigung = false;
+        p_lastNumberOfMeTanke = 0;
+        p_firstTankePositionPersistent = [0, 0];
         
         %compile mex files
         if strcmp (farbe, 'rot')
@@ -167,9 +170,13 @@ function bes = beschleunigung(spiel, farbe)
             mex source/esc_find_tanke.cpp
         end
         
+        %%clear static variables
+        clear esc_find_path
+        clear esc_find_tanke
+        
         %set handles
-        mexHandle.esc_find_path = @esc_find_path;
-        mexHandle.esc_find_tanke = @esc_find_tanke;
+        p_mexHandle.esc_find_path = @esc_find_path;
+        p_mexHandle.esc_find_tanke = @esc_find_tanke;
 
         cd ../../
     end
@@ -178,17 +185,17 @@ function bes = beschleunigung(spiel, farbe)
     function gameChangeHandler()
         
         %Nodegrid beim Verschwinden einer Mine aktualisieren:
-        if spiel.n_mine < numel(ArrayOfMines)
+        if spiel.n_mine < numel(p_ArrayOfMines)
             resimplifyWaypoints();
-            ArrayOfMines = spiel.mine;
+            p_ArrayOfMines = spiel.mine;
         end
 
         %TankListe beim Verschwinden einer Tanke aktualisieren:
         
-        if currentNumberOfTank ~= spiel.n_tanke && dispWhatToDo == 3
-            ignoreTanke = 0;
+        if p_currentNumberOfTank ~= spiel.n_tanke && p_dispWhatToDo == 3
+            p_ignoreTanke = 0;
             CreatePathAllTanken();
-            currentNumberOfTank = spiel.n_tanke;
+            p_currentNumberOfTank = spiel.n_tanke;
         end
         
         debugDrawCircle(0, 0, 0, true);
@@ -217,7 +224,7 @@ function bes = beschleunigung(spiel, farbe)
         
         
         %Ist kein Wegpunkt vorhanden, schnellstmöglich auf 0 abbremsen und stehen bleiben
-        if (numel(waypointList) <= 0)
+        if (numel(p_waypointList) <= 0)
             bes = -me.ges;
             return;
         end
@@ -225,11 +232,11 @@ function bes = beschleunigung(spiel, farbe)
         %check if me and next waypoint is close to mine
         if (spiel.n_mine > 0 && besCalculationMode == 0)
             checkMineID = getNearestMineId(me.pos);
-            mineID = getNearestMineId(waypointList{1});
+            mineID = getNearestMineId(p_waypointList{1});
             toMine1 = norm(spiel.mine(mineID).pos - me.pos);
-            toMine2 = norm(spiel.mine(mineID).pos - waypointList{1});
+            toMine2 = norm(spiel.mine(mineID).pos - p_waypointList{1});
             
-            if (toMine1 < constMineProxRadius && toMine2 < constMineProxRadius && checkMineID == mineID && ~Verteidigung ) 
+            if (toMine1 < constMineProxRadius && toMine2 < constMineProxRadius && checkMineID == mineID && ~p_cornerVerteidigung ) 
                 besCalculationMode = 1;
                 besMineID = mineID;
             end
@@ -260,7 +267,7 @@ function bes = beschleunigung(spiel, farbe)
         
         %Vektor in Richtung der Kreistangente
         toGes = vecNorm(getPerpend(toMine));
-        if (dot(toGes, waypointList{1}-me.pos) < 0)
+        if (dot(toGes, p_waypointList{1}-me.pos) < 0)
             toGes = -toGes;
         end
         %Vektor im Rechten Winkel zur Gschwindigkeit, der zur Mine zeigt.
@@ -275,12 +282,12 @@ function bes = beschleunigung(spiel, farbe)
         
         %Suche nach kleinstem Radius in Wegpunkten und mache ihn zum 
         %Orbitradius
-        for i=1:numel(waypointList)
+        for i=1:numel(p_waypointList)
             if (i > 5)
                 break;
             end
             
-            dist = norm(minePos-waypointList{i});
+            dist = norm(minePos-p_waypointList{i});
             if (dist > constMineProxRadius)
                 break;
             end
@@ -313,15 +320,15 @@ function bes = beschleunigung(spiel, farbe)
         %%enlarge maximal velocity if angle is small
         %get output wp
         outwaypt = [0, 0];
-        for i=1:numel(waypointList)
-            if (norm(minePos-waypointList{i}) > constMineProxRadius)
-                outwaypt = waypointList{i};
+        for i=1:numel(p_waypointList)
+            if (norm(minePos-p_waypointList{i}) > constMineProxRadius)
+                outwaypt = p_waypointList{i};
                 break;
             end
         end
         if (~isequal(outwaypt, [0,0]))
-            if (dot(vecNorm(waypointList{i}-minePos), vecNorm(me.ges)) > 0.9 && i < 3)
-                maxVelSq = maxVelSq * 2;
+            if (dot(vecNorm(p_waypointList{i}-minePos), vecNorm(me.ges)) > 0.9 && i < 3)
+                maxVelSq = maxVelSq * 1.5;
             end
         end
 
@@ -352,8 +359,8 @@ function bes = beschleunigung(spiel, farbe)
         
         
         %break before last waypoint or if no wps exist
-        if (numel(waypointList) == 1 && norm(waypointList{1}-minePos) <= constMineProxRadius)
-            pathToWpRad = real(acos(clamp(dot(vecNorm(-toMine), vecNorm(waypointList{1}-minePos)), -1, 1))) * mineDriveRadius;
+        if (numel(p_waypointList) == 1 && norm(p_waypointList{1}-minePos) <= constMineProxRadius)
+            pathToWpRad = real(acos(clamp(dot(vecNorm(-toMine), vecNorm(p_waypointList{1}-minePos)), -1, 1))) * mineDriveRadius;
             breakDist = calcBreakDistance(norm(me.ges), 0);
             if (breakDist > pathToWpRad && dot(me.ges, toGes) > 0)
                 forward = -(forward); % + norm(zentp)/2
@@ -364,13 +371,15 @@ function bes = beschleunigung(spiel, farbe)
         bes = zentp * vecNorm(toMine) + forward*toGes;
         
         %no velocity
-        if (norm(me.ges) < 0.003)
+        if (norm(me.ges) < 0.01)
             bes = toGes;
         end
         
         %emergencybreaking
         if (norm(me.ges)^2 > maxVelSq)% || emergencyBreaking())
            bes = vecNorm(bes)-vecNorm(me.ges)*1.5;
+        elseif (dot(me.ges, toGes) < 0)
+           bes = vecNorm(bes)+vecNorm(toGes);
         end
         
         %debug drawing
@@ -380,8 +389,8 @@ function bes = beschleunigung(spiel, farbe)
         %Springe aus diesem Beschleunigungsmodus, wenn der nächste Wegpunkt
         %außerhalb des Orbitradiusses liegt und unser Beschleunigungsvektor
         %auf den nächsten Wegpunkt zeigt
-        towp = vecNorm(waypointList{1}-me.pos);
-        wpdist = norm(waypointList{1} - minePos);
+        towp = vecNorm(p_waypointList{1}-me.pos);
+        wpdist = norm(p_waypointList{1} - minePos);
         if (wpdist > constMineProxRadius)
             vel1 = vecNorm(me.ges);
             vel2 = vecNorm(vecNorm(me.ges)+vecNorm(toMine)/1000);
@@ -392,8 +401,8 @@ function bes = beschleunigung(spiel, farbe)
         end
         
         %Wegpunkte einsammeln
-        if norm(me.pos-waypointList{1}) < constNavSecurity*1.5
-            waypointList(1) = [];
+        if norm(me.pos-p_waypointList{1}) < constNavSecurity*1.5
+            p_waypointList(1) = [];
             debugDRAW();
         end
     end
@@ -401,7 +410,7 @@ function bes = beschleunigung(spiel, farbe)
     %calculate line acceleration
     function calcLineBes()
         %acceleration
-        dir = vecNorm(waypointList{1}-me.pos);
+        dir = vecNorm(p_waypointList{1}-me.pos);
         corr = dir-vecNorm(me.ges);
         corr = 300*corr * norm(me.ges);
         bes = dir + corr;
@@ -410,7 +419,7 @@ function bes = beschleunigung(spiel, farbe)
         breakingEndVel = calcBreakingEndVel();
         
         %decelleration
-        distanceToWaypoint=norm(waypointList{1}-me.pos);
+        distanceToWaypoint=norm(p_waypointList{1}-me.pos);
         breakDistance = calcBreakDistance(norm(me.ges), breakingEndVel);
         if (breakDistance > distanceToWaypoint && breakingEndVel < norm(me.ges) || checkIfTooFast())
             bes=-dir + corr;
@@ -423,15 +432,15 @@ function bes = beschleunigung(spiel, farbe)
         
         
         wpReachedDist = calcWaypointReachedRadius(breakingEndVel);
-        debugDrawCircle(1, waypointList{1}, wpReachedDist);
+        debugDrawCircle(1, p_waypointList{1}, wpReachedDist);
         
         %%Überprüfen, ob Wegpunkt erreicht wurde, dann 1. Punkt löschen
-        if norm(me.pos-waypointList{1}) < wpReachedDist
-            waypointList(1) = [];
-            if tankeCompetition
-                tankeCompetition = false;
+        if norm(me.pos-p_waypointList{1}) < wpReachedDist
+            p_waypointList(1) = [];
+            if p_tankeCompetition
+                p_tankeCompetition = false;
                 debugDisp('Tanken: compMode deactivated');
-                waypointList = [];
+                p_waypointList = [];
                 CreatePathAllTanken();
                 debugDRAW();
             end
@@ -442,31 +451,20 @@ function bes = beschleunigung(spiel, farbe)
             %%berechne neu
             
             %Sonderfall, Spaceball selbst viel zu nah an mine:
-            if (spiel.n_mine > 0 && norm(me.ges) < 0.001)
+            if (spiel.n_mine > 0 && norm(me.ges) < 0.002)
                 toMineVec = spiel.mine(getNearestMineId(me.pos)).pos - me.pos;
                 closeMineDist = norm(toMineVec);
                 if (closeMineDist < spiel.spaceball_radius + spiel.mine_radius + constSafeBorder*2)
                     firstWp = me.pos - vecNorm(toMineVec)*constNavSecurity*1.2;
-                    waypointList = appendToArray({firstWp}, waypointList);
+                    p_waypointList = appendToArray({firstWp}, p_waypointList);
                     debugDRAW();
                     bes = -toMineVec;
                     return;
                 end
-            elseif (corridorColliding(me.pos, waypointList{1}, spiel.spaceball_radius) && dispWhatToDo == 3)
-                %sonst
-                debugDisp('calculateBES: Stuck at tanken - recalculating');
-                waypointList = [];
-                if (numel(TankList) > 0)
-                    waypointList = findPath(me.pos,spiel.tanke(TankList{1}).pos);
-                    for i = 1:numel(TankList)-1
-                        waypointList = appendToArray(waypointList, findPath(spiel.tanke(TankList{i}).pos,spiel.tanke(TankList{i+1}).pos));
-                    end
-                end
-                debugDRAW();
-            elseif (corridorColliding(me.pos, waypointList{1}, spiel.spaceball_radius) && dispWhatToDo ~= 3 && ~Verteidigung)
+            elseif (corridorColliding(me.pos, p_waypointList{1}, spiel.spaceball_radius) && p_dispWhatToDo ~= 3 && ~p_cornerVerteidigung)
                 %sonst
                 debugDisp('calculateBES: Stuck - recalculating');
-                waypointList = appendToArray(findPath(me.pos, waypointList{1}), waypointList(2:end));
+                p_waypointList = appendToArray(findPath(me.pos, p_waypointList{1}), p_waypointList(2:end));
                 debugDRAW();
             end
             
@@ -487,14 +485,14 @@ function bes = beschleunigung(spiel, farbe)
         erg = false;
 
         %nothing to do
-        if (numel(waypointList) <= 0)
+        if (numel(p_waypointList) <= 0)
             return;
         end
         
-        timetoarrive = norm(waypointList{1}-me.pos)/norm(me.ges);
-        timetoalign = getTimeToAlignVelocity(me.ges, waypointList{1}-me.pos);
+        timetoarrive = norm(p_waypointList{1}-me.pos)/norm(me.ges);
+        timetoalign = getTimeToAlignVelocity(me.ges, p_waypointList{1}-me.pos);
         
-        if (timetoalign > timetoarrive && norm(waypointList{1}-me.pos) > constWayPointReachedRadius*2 && norm(me.ges) >= 0.01)
+        if (timetoalign > timetoarrive && norm(p_waypointList{1}-me.pos) > constWayPointReachedRadius*2 && norm(me.ges) >= 0.01)
             erg = true;
             return;
         end
@@ -553,7 +551,7 @@ function bes = beschleunigung(spiel, farbe)
         erg = 0;
         
         %if this is the last waypoint - break to full stop
-        if (numel(waypointList) <= 1)
+        if (numel(p_waypointList) <= 1)
             return;
         end
         
@@ -561,15 +559,15 @@ function bes = beschleunigung(spiel, farbe)
         erg = 0;
         
         %go backwards through waypoints
-        for i=fliplr(1:numel(waypointList)-1)
+        for i=fliplr(1:numel(p_waypointList)-1)
             
             %get minimal velocity for this waypoint
             if (i==1)
-                vec1 = waypointList{i} - me.pos;
+                vec1 = p_waypointList{i} - me.pos;
             else
-                vec1 = waypointList{i} - waypointList{i-1};
+                vec1 = p_waypointList{i} - p_waypointList{i-1};
             end
-            vec2 = waypointList{i+1} - waypointList{i};
+            vec2 = p_waypointList{i+1} - p_waypointList{i};
             length = norm(vec1);
             minVel = getMaxVelocityToAlignInTime(vec1, vec2, constCornerBreaking);
             
@@ -589,13 +587,13 @@ function bes = beschleunigung(spiel, farbe)
 
     function erg = calcWaypointReachedRadius(endvel)
         erg = constWayPointReachedRadius; %0.01
-        if (numel(waypointList) < 2)
+        if (numel(p_waypointList) < 2)
             return;
         end
         
         %direction to next wp
-        dir1 = vecNorm(waypointList{1} - me.pos);
-        dir2 = vecNorm(waypointList{2} - waypointList{1});
+        dir1 = vecNorm(p_waypointList{1} - me.pos);
+        dir2 = vecNorm(p_waypointList{2} - p_waypointList{1});
         
         %get time to align waypoints
         time = getTimeToAlignVelocity(endvel*dir1, dir2);
@@ -606,7 +604,7 @@ function bes = beschleunigung(spiel, farbe)
 %% Pathfinder
     %Wegpunkte finden
     function waypoints = findPath(startp, endp)
-        waypoints = simplifyPath(mexHandle.esc_find_path(spiel.mine, startp, endp));
+        waypoints = simplifyPath(p_mexHandle.esc_find_path(spiel.mine, startp, endp));
     end
    
     %clamps value between min and max
@@ -672,8 +670,8 @@ function bes = beschleunigung(spiel, farbe)
 
     %bestehende Waypoints erneut vereinfachen
     function resimplifyWaypoints()
-        waypointList = appendToArray({me.pos}, waypointList);
-        waypointList = simplifyPath(waypointList);
+        p_waypointList = appendToArray({me.pos}, p_waypointList);
+        p_waypointList = simplifyPath(p_waypointList);
     end
 
 
@@ -790,7 +788,7 @@ function bes = beschleunigung(spiel, farbe)
     function endPosition = safeDeleteWaypoints()
         %nothing to do
         endPosition = me.pos;
-        if (numel(waypointList) <= 0)
+        if (numel(p_waypointList) <= 0)
             return;
         end
         
@@ -801,8 +799,8 @@ function bes = beschleunigung(spiel, farbe)
         %end position = full break distance
         endPosition = me.pos + dir*breakDistance;
         
-        waypointList = [];
-        waypointList{1} = endPosition;
+        p_waypointList = [];
+        p_waypointList{1} = endPosition;
     end
     
     function erg = getNearestMineId(pos)
@@ -841,24 +839,24 @@ function bes = beschleunigung(spiel, farbe)
 %% Tankenfindung
 
     function CreatePathAllTanken()
-        waitForEnemy = false;
-        if ~tankeCompetition && ~cancelCompetition
-            ebenen = round(StartNumberOfTank/2)-me.getankt;
-            if me.getankt >= round(StartNumberOfTank/2)
+        p_cornerWaitForEnemy = false;
+        if ~p_tankeCompetition && ~p_cancelCompetition
+            ebenen = round(p_StartNumberOfTank/2)-me.getankt;
+            if me.getankt >= round(p_StartNumberOfTank/2)
                 ebenen = spiel.n_tanke;
             end
-            TankList = mexHandle.esc_find_tanke(spiel.mine, spiel.tanke, me.pos, me.ges, enemy.pos, enemy.ges, ignoreTanke, ebenen);
+            p_TankList = p_mexHandle.esc_find_tanke(spiel.mine, spiel.tanke, me.pos, me.ges, enemy.pos, enemy.ges, p_ignoreTanke, ebenen);
             
-            TankList = fliplr(TankList);
-            if (numel(TankList) > 0)
+            p_TankList = fliplr(p_TankList);
+            if (numel(p_TankList) > 0)
                 
                 %check if keep first tanke
                 keepFirstTanke = false;
-                if (~isequal(firstTankePositionPersistent, [0, 0]) && me.getankt == lastNumberOfMeTanke)
-                    if (~isequal(firstTankePositionPersistent, spiel.tanke(TankList{1}).pos))
+                if (~isequal(p_firstTankePositionPersistent, [0, 0]) && me.getankt == p_lastNumberOfMeTanke)
+                    if (~isequal(p_firstTankePositionPersistent, spiel.tanke(p_TankList{1}).pos))
                         keepFirstTanke = true;
-                        if (ignoreTanke ~= 0)
-                            if (isequal(firstTankePositionPersistent, spiel.tanke(ignoreTanke).pos))
+                        if (p_ignoreTanke ~= 0)
+                            if (isequal(p_firstTankePositionPersistent, spiel.tanke(p_ignoreTanke).pos))
                                 keepFirstTanke = false;
                             end
                         end
@@ -868,15 +866,15 @@ function bes = beschleunigung(spiel, farbe)
                 
                 if (keepFirstTanke)
                     debugDisp('Tanken: calculating Path - keeping first Tanke');
-                    waypointList=findPath(me.pos,firstTankePositionPersistent);
-                    waypointList = appendToArray(waypointList, findPath(firstTankePositionPersistent,spiel.tanke(TankList{1}).pos));
+                    p_waypointList=findPath(me.pos,p_firstTankePositionPersistent);
+                    p_waypointList = appendToArray(p_waypointList, findPath(p_firstTankePositionPersistent,spiel.tanke(p_TankList{1}).pos));
                 else
                     debugDisp('Tanken: calculating Path');
-                    waypointList = findPath(me.pos,spiel.tanke(TankList{1}).pos);
-                    firstTankePositionPersistent = spiel.tanke(TankList{1}).pos;
+                    p_waypointList = findPath(me.pos,spiel.tanke(p_TankList{1}).pos);
+                    p_firstTankePositionPersistent = spiel.tanke(p_TankList{1}).pos;
                 end
-                for i = 1:numel(TankList)-1
-                    waypointList = appendToArray(waypointList, findPath(spiel.tanke(TankList{i}).pos,spiel.tanke(TankList{i+1}).pos));
+                for i = 1:numel(p_TankList)-1
+                    p_waypointList = appendToArray(p_waypointList, findPath(spiel.tanke(p_TankList{i}).pos,spiel.tanke(p_TankList{i+1}).pos));
                 end
                 debugDRAW();
             end
@@ -907,7 +905,7 @@ function bes = beschleunigung(spiel, farbe)
             end
             
             %Gegner schnell bei Tanke, Tanke noch nicht ignoriert, keine Mine dazwischen UND noch Tanken in der TankList
-            if (EnemyTimeToClosestTanke < constIgnoreTankeTime && ClosestEnemyTanke ~= ignoreTanke && ~enemyColliding) && numel(TankList) > 0
+            if (EnemyTimeToClosestTanke < constIgnoreTankeTime && ClosestEnemyTanke ~= p_ignoreTanke && ~enemyColliding) && numel(p_TankList) > 0
                 %wie lange brauchen wir zu der am Gegner dichtesten Tanke?
                 myPath = spiel.tanke(ClosestEnemyTanke).pos - me.pos;
                 timeMeToTanke = norm(myPath) / projectVectorNorm(me.ges, myPath);
@@ -917,37 +915,37 @@ function bes = beschleunigung(spiel, farbe)
                 %Ist diese Tanke unsere nächste Tanke und brauchen wir nicht mehr lange dorthin?
                 %oder ist nur noch eine Tanke da und keine Mine im Weg
                 %UND wir sind noch nicht im compMode
-                if ((ClosestEnemyTanke == TankList{1} && timeMeToTanke < constIgnoreTankeTime + 0.5) || spiel.n_tanke == 1 && ~ownColliding) && ~tankeCompetition && ~cancelCompetition && timeMeToTanke < EnemyTimeToClosestTanke + 0.2
+                if ((ClosestEnemyTanke == p_TankList{1} && timeMeToTanke < constIgnoreTankeTime + 0.5) || spiel.n_tanke == 1 && ~ownColliding) && ~p_tankeCompetition && ~p_cancelCompetition && timeMeToTanke < EnemyTimeToClosestTanke + 0.2
                     debugDisp('Tanken: compMode activated!');
-                    tankeCompetition = true;
+                    p_tankeCompetition = true;
                     accpos = getAccPos(spiel.tanke(ClosestEnemyTanke).pos);
-                    waypointList = [];
-                    waypointList{1} = spiel.tanke(ClosestEnemyTanke).pos;
-                    waypointList{2} = accpos;
+                    p_waypointList = [];
+                    p_waypointList{1} = spiel.tanke(ClosestEnemyTanke).pos;
+                    p_waypointList{2} = accpos;
                     debugDRAW();
                 %sonst, ist noch mehr als 1 Tanke vorhanden - ignorieren,
-                elseif ~tankeCompetition
+                elseif ~p_tankeCompetition
                     debugDisp('Tanken: ignore Tanke');
-                    ignoreTanke = ClosestEnemyTanke;
+                    p_ignoreTanke = ClosestEnemyTanke;
                     CreatePathAllTanken;
                 end
                 
                 %comMode mit Vollbremsung abbrechen:
-                if tankeCompetition
+                if p_tankeCompetition
                     DistanceToStop = calcBreakDistance(norm(me.ges), 0);
                     DistanceToTanke = norm(me.pos-spiel.tanke(ClosestEnemyTanke).pos)-spiel.tanke_radius-spiel.spaceball_radius;
                     if DistanceToStop >= DistanceToTanke && timeMeToTanke - EnemyTimeToClosestTanke > 0.0001
                         debugDisp('Tanken: compMode canceled!');
-                        waypointList = [];
-                        cancelCompetition = true;
-                        tankeCompetition = false;
+                        p_waypointList = [];
+                        p_cancelCompetition = true;
+                        p_tankeCompetition = false;
                         debugDRAW();
                     end
                 end
                 
                 %CancelComp beenden
-                if cancelCompetition && EnemyTimeToClosestTanke > constIgnoreTankeTime
-                    cancelCompetition = false;
+                if p_cancelCompetition && EnemyTimeToClosestTanke > constIgnoreTankeTime
+                    p_cancelCompetition = false;
                 end
             end
         end
@@ -955,9 +953,9 @@ function bes = beschleunigung(spiel, farbe)
         %ignoreTanke entfernen:
         
         %existiert die ignorierte Tanke?
-        if (ignoreTanke > 0 && ignoreTanke <= spiel.n_tanke)
+        if (p_ignoreTanke > 0 && p_ignoreTanke <= spiel.n_tanke)
             %wie lange braucht der Gegner zu dieser Tanke?
-            enemyPath = spiel.tanke(ignoreTanke).pos - enemy.pos;
+            enemyPath = spiel.tanke(p_ignoreTanke).pos - enemy.pos;
             timeEnemyToTanke = norm(enemyPath) / projectVectorNorm(enemy.ges, enemyPath);
             if timeEnemyToTanke < 0
                 timeEnemyToTanke = inf;
@@ -965,7 +963,7 @@ function bes = beschleunigung(spiel, farbe)
             %braucht er lange oder ist nur noch eine Tanke da - entfernen
             if timeEnemyToTanke > constIgnoreTankeTime
                 debugDisp('Tanken: ignored Tanke deleted');
-                ignoreTanke = 0;
+                p_ignoreTanke = 0;
                 CreatePathAllTanken();
             end
         end
@@ -976,7 +974,7 @@ function bes = beschleunigung(spiel, farbe)
     %Angriff
     function attackEnemy()
         persistent lastAttackMode;
-        waitForEnemy = false;
+        p_cornerWaitForEnemy = false;
         
         %lockon attack ist nur sicher, wenn sich zwischen Gegner und Mir
         %keine Mine befindet
@@ -993,7 +991,10 @@ function bes = beschleunigung(spiel, farbe)
             checkPoint = me.pos + 0.5*me.ges*breakTime; %without acceleration
         
             if (~isWalkable(checkPoint, safeSpaceballRadius))
+                %debugDisp('keeepAttack');
                 useLockonAttack = true;
+            else
+                %debugDisp('switch attack');
             end
         end
         
@@ -1013,17 +1014,17 @@ function bes = beschleunigung(spiel, farbe)
         enemypos = calcEnemyHitPosition(constEnemyInterpMode);
         if (~corridorColliding(me.pos, enemypos, constNavSecurity) || norm(me.pos-enemypos) < constWayPointReachedRadius+2*constGridRadius)
             %delete all other waypoints
-            if (numel(waypointList) > 1)
+            if (numel(p_waypointList) > 1)
                 safeDeleteWaypoints();
             end
             
             %set wp directly to enemy - more precise
-            endIndex = numel(waypointList);
+            endIndex = numel(p_waypointList);
             if (endIndex == 0)
                 endIndex = 1;
             end
             
-            waypointList{endIndex} = getAccPos(enemypos);
+            p_waypointList{endIndex} = getAccPos(enemypos);
             debugDRAW();
             debugDrawCircle(2, enemypos, spiel.spaceball_radius);
         else
@@ -1032,8 +1033,8 @@ function bes = beschleunigung(spiel, farbe)
             %Prüfe, ob Pfad neu berechnet werden soll (Gegner liegt
             %außerhalb von pathResolution vom letzten Wegpunkt)
             recalcPath = false;
-            if numel(waypointList) >= 1
-                if norm(enemypos-waypointList{numel(waypointList)}) > pathResolution
+            if numel(p_waypointList) >= 1
+                if norm(enemypos-p_waypointList{numel(p_waypointList)}) > pathResolution
                     recalcPath = true;
                 end
             else
@@ -1044,7 +1045,7 @@ function bes = beschleunigung(spiel, farbe)
             if recalcPath
                 debugDisp('directAttack: finding Path to Enemy');
                 startPos = safeDeleteWaypoints();
-                waypointList = appendToArray(waypointList, findPath(startPos,enemypos));
+                p_waypointList = appendToArray(p_waypointList, findPath(startPos,enemypos));
 
                 debugDRAW();
                 debugDrawCircle(2, enemypos, spiel.spaceball_radius);
@@ -1060,8 +1061,8 @@ function bes = beschleunigung(spiel, farbe)
         end
         
         %delete waypointlist
-        if (numel(waypointList) > 1)
-            waypointList = {};
+        if (numel(p_waypointList) > 1)
+            p_waypointList = {};
             debugDRAW();
         end
         
@@ -1344,38 +1345,37 @@ function bes = beschleunigung(spiel, farbe)
 
     function cornerTricking()
         cornerNodes = {[0.02,0.98], [0.98,0.98], [0.02,0.02], [0.98,0.02]};
-        if waitForEnemy == false
+        if p_cornerWaitForEnemy == false
             debugDisp('Defence: cornerTricking 1');
             safeDeleteWaypoints();
-            waypointList = appendToArray(waypointList, findPath(me.pos, bestDefCorner())); %Ecke Anfahren 
-            waitForEnemy = true;
+            p_waypointList = appendToArray(p_waypointList, findPath(me.pos, bestDefCorner())); %Ecke Anfahren 
+            p_cornerWaitForEnemy = true;
             debugDRAW();
             %waiting for the enemy
         else
-            firstWaypoint = me.pos;
-            if (numel(waypointList) >= 1)
-                firstWaypoint = waypointList{1};
+            lastWaypoint = me.pos;
+            if (numel(p_waypointList) >= 1)
+                lastWaypoint = p_waypointList{end};
             end
             
-            if (checkIfTooFastE () == true || norm(me.pos-enemy.pos) <= 0.15) && norm(firstWaypoint-me.pos) < 0.1
+            if (checkIfTooFastE () == true || norm(me.pos-enemy.pos) <= 0.15) && norm(lastWaypoint-me.pos) < 0.1
                 
-                    Verteidigung = true;  
-                    debugDisp('Defence: cornerTricking 2');
-                        
-            
-                    edges = zeros(4,2);
-                    for i=1:4
-                        edges(i, 1) = defCornerTime(cornerNodes{i}); %Berechnet Zeit für Ecke 1-4 -> Erste Spalte edges 
-                        edges(i, 2) = i; %Nr. der Ecke -> 2. Spalte edges
-                    end
+                p_cornerVerteidigung = true;  
+                debugDisp('Defence: cornerTricking 2');
 
-                    nextCorner = sortrows(edges, [1 2]); %Sortiert Ecken nach den Werten der ersten Zeile
-                    
-                    waypointList = [];
-                    waypointList{1} = cornerNodes{nextCorner(3, 2)}; %Setzt das 3. Element von nextCorner als WP 
-                    
-                    debugDRAW();
-                %end
+
+                edges = zeros(4,2);
+                for i=1:4
+                    edges(i, 1) = defCornerTime(cornerNodes{i}); %Berechnet Zeit für Ecke 1-4 -> Erste Spalte edges 
+                    edges(i, 2) = i; %Nr. der Ecke -> 2. Spalte edges
+                end
+
+                nextCorner = sortrows(edges, [1 2]); %Sortiert Ecken nach den Werten der ersten Zeile
+
+                p_waypointList = [];
+                p_waypointList{1} = cornerNodes{nextCorner(3, 2)}; %Setzt das 3. Element von nextCorner als WP 
+
+                debugDRAW();
             end
         end
         constEmrBrkVelFac = 1.1;
@@ -1385,8 +1385,8 @@ function bes = beschleunigung(spiel, farbe)
     function mineTricking()
         ClosestMine = getNearestMineId(me.pos);
         enemyDist = spiel.mine(ClosestMine).pos - enemy.pos;
-        if numel(waypointList) <= 1
-             waypointList{1} =  spiel.mine(ClosestMine).pos + vecNorm(enemyDist)*spiel.mine_radius + constSafeBorder*vecNorm(enemyDist) + spiel.spaceball_radius*vecNorm(enemyDist)*1.2;
+        if numel(p_waypointList) <= 1
+             p_waypointList{1} =  spiel.mine(ClosestMine).pos + vecNorm(enemyDist)*spiel.mine_radius + constSafeBorder*vecNorm(enemyDist) + spiel.spaceball_radius*vecNorm(enemyDist)*1.2;
 % +          waypointList{1} =  spiel.mine(ClosestMine).pos + vecNorm(enemyDist)*(spiel.mine_radius + constSafeBorder + spiel.spaceball_radius)*1.2;
         end
         
@@ -1396,13 +1396,13 @@ function bes = beschleunigung(spiel, farbe)
     function changePathForDefence()
         %Diese Funktion soll überprüfen, ob wir durch Abfahren unseres
         %Pfades den Gegner treffen würden und den Pfad entsprechend ändern.
-        if norm(enemy.pos-me.pos) <= 0.1 && ~corridorColliding(enemy.pos, me.pos, spiel.spaceball_radius) && numel(waypointList) > 0
+        if norm(enemy.pos-me.pos) <= 0.1 && ~corridorColliding(enemy.pos, me.pos, spiel.spaceball_radius) && numel(p_waypointList) > 0
             %hier die wegpunktListe interpretieren:
             %Alle Wegpunkte von hinten durchgehen und prüfen, ob der Gegner
             %dazwischen liegt. Dann den letzten Wegpunkt dorthin setzen
-            if enemyLineColliding(waypointList{1}, me.pos, spiel.spaceball_radius)
+            if enemyLineColliding(p_waypointList{1}, me.pos, spiel.spaceball_radius)
                 debugDisp('DEFENCE: enemy is in our way!');
-                waypointList = [];
+                p_waypointList = [];
             end
         end
     end
@@ -1441,8 +1441,8 @@ function bes = beschleunigung(spiel, farbe)
             dcolor = spiel.farbe.rot;
         end
         
-        for i = 1 : numel(waypointList)
-            drawHandles(i) = rectangle ('Parent', spiel.spielfeld_handle, 'Position', [waypointList{i}-0.0025, 0.005, 0.005], 'Curvature', [1 1], 'FaceColor', dcolor, 'EdgeColor', [0, 0, 0]);
+        for i = 1 : numel(p_waypointList)
+            drawHandles(i) = rectangle ('Parent', spiel.spielfeld_handle, 'Position', [p_waypointList{i}-0.0025, 0.005, 0.005], 'Curvature', [1 1], 'FaceColor', dcolor, 'EdgeColor', [0, 0, 0]);
         end
     end
 
