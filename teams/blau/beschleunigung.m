@@ -375,6 +375,8 @@ function bes = beschleunigung(spiel, farbe)
         %emergencybreaking
         if (norm(me.ges)^2 > maxVelSq)% || emergencyBreaking())
            bes = vecNorm(bes)-vecNorm(me.ges)*1.5;
+        elseif (dot(me.ges, toGes) < 0)
+           bes = vecNorm(bes)+vecNorm(toGes);
         end
         
         %debug drawing
