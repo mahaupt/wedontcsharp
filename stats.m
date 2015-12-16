@@ -1,5 +1,9 @@
 function [] = stats(Durchgaenge, Farbe, seedSource)
 
+DATO=date;
+filename=['matlab-log-',DATO,'-', num2str(round(rand(1)*10000)), '.log'];
+eval(['diary ',filename]);
+
 % Seeds laden, Variablen anpassen
 if seedSource == 0
    load('seedsFaulty.mat')
@@ -286,5 +290,7 @@ disp(' ');
 disp(time);
 disp(' ');
 disp(Statistische_Erhebung);
+
+diary off
 
 end

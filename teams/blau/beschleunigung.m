@@ -23,7 +23,7 @@ function bes = beschleunigung(spiel, farbe)
     
     %WHATTODO
     constDecisionOfAttackAndDefense = 0.5;
-    
+    hfajk()
     %ATTACK
     % Gegnerinterpolationsmethode 
     % 0: s= v*t+ 0.5*a*t^2
