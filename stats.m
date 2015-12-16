@@ -71,8 +71,11 @@ close all
         CurrentGame = horzcat('Gerade läuft Spiel Nr: ', num2str(i),' -- Seed Nr: ', num2str(r),' -- Gesamtlaufzeit bisher: ', num2str(totalTime), ' Sekunden.');
         disp(CurrentGame);
         
-%Spiel durchführen        
-        spaceballs
+%Spiel durchführen
+        try
+            spaceballs
+        catch
+        end
         
 %Zeit aktualisieren
         totalTime = totalTime + toc;
