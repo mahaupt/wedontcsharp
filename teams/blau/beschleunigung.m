@@ -19,7 +19,7 @@ function bes = beschleunigung(spiel, farbe)
     %simplifyPath umgehen
     constSkipSimplifyPath = false;
     %Mine proximity radius
-    constMineProxRadius = spiel.mine_radius + spiel.spaceball_radius + 1.5*constNavSecurity;
+    constMineProxRadius = spiel.mine_radius + spiel.spaceball_radius + 1.7*constNavSecurity;
     
     %WHATTODO
     constDecisionOfAttackAndDefense = 0.5;
