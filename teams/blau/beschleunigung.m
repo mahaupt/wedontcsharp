@@ -446,7 +446,7 @@ function bes = beschleunigung(spiel, farbe)
             %%berechne neu
             
             %Sonderfall, Spaceball selbst viel zu nah an mine:
-            if (spiel.n_mine > 0 && norm(me.ges) < 0.001)
+            if (spiel.n_mine > 0 && norm(me.ges) < 0.002)
                 toMineVec = spiel.mine(getNearestMineId(me.pos)).pos - me.pos;
                 closeMineDist = norm(toMineVec);
                 if (closeMineDist < spiel.spaceball_radius + spiel.mine_radius + constSafeBorder*2)
@@ -456,17 +456,6 @@ function bes = beschleunigung(spiel, farbe)
                     bes = -toMineVec;
                     return;
                 end
-            elseif (corridorColliding(me.pos, waypointList{1}, spiel.spaceball_radius) && dispWhatToDo == 3)
-                %sonst
-                debugDisp('calculateBES: Stuck at tanken - recalculating');
-                waypointList = [];
-                if (numel(TankList) > 0)
-                    waypointList = findPath(me.pos,spiel.tanke(TankList{1}).pos);
-                    for i = 1:numel(TankList)-1
-                        waypointList = appendToArray(waypointList, findPath(spiel.tanke(TankList{i}).pos,spiel.tanke(TankList{i+1}).pos));
-                    end
-                end
-                debugDRAW();
             elseif (corridorColliding(me.pos, waypointList{1}, spiel.spaceball_radius) && dispWhatToDo ~= 3 && ~Verteidigung)
                 %sonst
                 debugDisp('calculateBES: Stuck - recalculating');
