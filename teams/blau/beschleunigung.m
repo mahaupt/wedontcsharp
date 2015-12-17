@@ -138,7 +138,10 @@ function bes = beschleunigung(spiel, farbe)
                 debugDisp('whatToDo: REFUEL');
                 CreatePathAllTanken();
             end
-            doesEnemyGetTanke();
+            
+            if me.getankt < round(p_StartNumberOfTank / 2)
+                doesEnemyGetTanke();
+            end
         end
     end
 
