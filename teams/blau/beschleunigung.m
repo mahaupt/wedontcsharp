@@ -42,11 +42,11 @@ function bes = beschleunigung(spiel, farbe)
     
     %DEBUG MODE
     %true: ermöglicht ausgabe von Text und Zeichnen von gizmos
-    constDebugMode = true;
+    constDebugMode = false;
     
     %COMPILING
     %true = force compiling, false = not compiling
-    constCompiling = true;
+    constCompiling = false;
     
     %statische Variablen definieren
     persistent p_waypointList; %Liste mit Wegpunkten. Werden automatisch nacheinander abgefahren
