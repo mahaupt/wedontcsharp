@@ -42,7 +42,7 @@ function bes = beschleunigung(spiel, farbe)
     
     %DEBUG MODE
     %true: ermöglicht ausgabe von Text und Zeichnen von gizmos
-    constDebugMode = false;
+    constDebugMode = true;
     
     %COMPILING
     %true = force compiling, false = not compiling
@@ -138,7 +138,10 @@ function bes = beschleunigung(spiel, farbe)
                 debugDisp('whatToDo: REFUEL');
                 CreatePathAllTanken();
             end
-            doesEnemyGetTanke();
+            
+            if me.getankt < round(p_StartNumberOfTank / 2)
+                doesEnemyGetTanke();
+            end
         end
     end
 
