@@ -1302,7 +1302,7 @@ function bes = beschleunigung(spiel, farbe)
         enemyToEdge = edgepos - enemy.pos;
 
         metime = getTimeToAlignVelocity(me.ges, vecNorm(meToEdge)) + norm(meToEdge)/(norm(me.ges) + spiel.bes); %Zeit um Geschwindigkeitsvektor auszurichten + s/v + spiel.bes als const. damit nicht = 0 
-        enemytime = getTimeToAlignVelocity(enemy.ges, vecNorm(meToEdge)) + norm(enemyToEdge)/(norm(enemy.ges) + spiel.bes);
+        enemytime = getTimeToAlignVelocity(enemy.ges, vecNorm(enemyToEdge)) + norm(enemyToEdge)/(norm(enemy.ges) + spiel.bes);
       
         time = enemytime - metime; %Differenz berechnen, je größer der Wert desto besser 
 
@@ -1382,12 +1382,59 @@ function bes = beschleunigung(spiel, farbe)
         constEmrBrkAccFac = 0;
     end
 
+    function time = defMineTime(pos) %Berechnet die Zeit von unserem/vom gegnerischen Standort in Ecke X 
+        minepos = pos;
+        meToMine = minepos - me.pos;
+        enemyToMine = minepos - enemy.pos;
+
+        metime = getTimeToAlignVelocity(me.ges, vecNorm(meToMine)) + norm(meToMine)/(norm(me.ges) + spiel.bes); %Zeit um Geschwindigkeitsvektor auszurichten + s/v + spiel.bes als const. damit nicht = 0 
+        enemytime = getTimeToAlignVelocity(enemy.ges, vecNorm(enemyToMine)) + norm(enemyToMine)/(norm(enemy.ges) + spiel.bes);
+      
+        time = enemytime - metime; %Differenz berechnen, je größer der Wert desto besser 
+
+        
+        if (dot(vecNorm(meToMine), vecNorm(enemy.pos-me.pos)) > 0.6 && norm(meToMine) > 0.06)  
+            %Wenn in Richtung der Ecke + ca 25° zu jeder Seite der Gegner ist und wir uns im Radius von 0.06 vom WP befinden -> 100 Strafsekunden
+            time = time - 100;
+            
+            if (dot(vecNorm(meToMine), vecNorm(enemy.pos-me.pos)) > 0.9)
+                time = time - 100;
+            end
+        end
+        
+        
+    end
+
+    function tMine = bestDefMine() 
+%         mineList = [spiel.n_mine]
+        tMine = [0, 0];
+        savetime = -Inf;
+        
+        for i=1:spiel.n_mine 
+            checktime = defMineTime(spiel.mine(i).pos); %Zeitdiff. für alle Ecken berechnen 
+            
+            if (savetime < checktime) %Zeit für Ecke 1 überschreibt savetime und wir als neue savetime gespeichert. Die neue Savetime wird nur von größeren Zeitdiffs überschrieben. 
+                tMine = spiel.mine(i); %Ecke von Zeit X wird als beste Ecke festgelegt und ggf. wieder überschrieben 
+                savetime = checktime;
+            end
+        end
+    end
+
     function mineTricking()
-        ClosestMine = getNearestMineId(me.pos);
-        enemyDist = spiel.mine(ClosestMine).pos - enemy.pos;
+        closestMine = norm(spiel.mine(getNearestMineId(me.pos)).pos - me.pos);
+        if closestMine >= spiel.mine_radius + constSafeBorder + spiel.spaceball_radius + 0.02
+            
+                   bestMine = bestDefMine()
+                   enemyDist = bestMine.pos - enemy.pos;
+        
+                    if numel(p_waypointList) <= 1
+                        p_waypointList{1} =  bestMine.pos + vecNorm(enemyDist)*spiel.mine_radius + constSafeBorder*vecNorm(enemyDist) + spiel.spaceball_radius*vecNorm(enemyDist)*1.2;
+                    end
+        end
+        
+        enemyDist = spiel.mine(getNearestMineId(me.pos)).pos - enemy.pos;
         if numel(p_waypointList) <= 1
-             p_waypointList{1} =  spiel.mine(ClosestMine).pos + vecNorm(enemyDist)*spiel.mine_radius + constSafeBorder*vecNorm(enemyDist) + spiel.spaceball_radius*vecNorm(enemyDist)*1.2;
-% +          waypointList{1} =  spiel.mine(ClosestMine).pos + vecNorm(enemyDist)*(spiel.mine_radius + constSafeBorder + spiel.spaceball_radius)*1.2;
+             p_waypointList{1} =  spiel.mine(getNearestMineId(me.pos)).pos + vecNorm(enemyDist)*spiel.mine_radius + constSafeBorder*vecNorm(enemyDist) + spiel.spaceball_radius*vecNorm(enemyDist)*1.2;
         end
         
         debugDRAW();
