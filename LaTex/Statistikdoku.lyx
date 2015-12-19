@@ -1,0 +1,580 @@
+#LyX 2.1 created this file. For more info see http://www.lyx.org/
+\lyxformat 474
+\begin_document
+\begin_header
+\textclass article
+\use_default_options true
+\begin_modules
+theorems-ams
+eqs-within-sections
+figs-within-sections
+\end_modules
+\maintain_unincluded_children false
+\language english
+\language_package default
+\inputencoding auto
+\fontencoding global
+\font_roman default
+\font_sans default
+\font_typewriter default
+\font_math auto
+\font_default_family default
+\use_non_tex_fonts false
+\font_sc false
+\font_osf false
+\font_sf_scale 100
+\font_tt_scale 100
+\graphics default
+\default_output_format default
+\output_sync 0
+\bibtex_command default
+\index_command default
+\paperfontsize default
+\spacing single
+\use_hyperref false
+\papersize default
+\use_geometry false
+\use_package amsmath 1
+\use_package amssymb 1
+\use_package cancel 1
+\use_package esint 1
+\use_package mathdots 1
+\use_package mathtools 1
+\use_package mhchem 1
+\use_package stackrel 1
+\use_package stmaryrd 1
+\use_package undertilde 1
+\cite_engine basic
+\cite_engine_type default
+\biblio_style plain
+\use_bibtopic false
+\use_indices false
+\paperorientation portrait
+\suppress_date false
+\justification true
+\use_refstyle 1
+\index Index
+\shortcut idx
+\color #008000
+\end_index
+\secnumdepth 1
+\tocdepth 1
+\paragraph_separation indent
+\paragraph_indentation default
+\quotes_language english
+\papercolumns 1
+\papersides 1
+\paperpagestyle default
+\tracking_changes false
+\output_changes false
+\html_math_output 0
+\html_css_as_file 0
+\html_be_strict false
+\end_header
+
+\begin_body
+
+\begin_layout Part*
+Das Statistikprogramm
+\end_layout
+
+\begin_layout Standard
+Das Statistikprogramm dient in erster Linie dazu, spaceballs.m beliebig oft
+ ausführen zu lassen, um dann im Anschluss eine aussagekräftige Spielstatistik
+ über Siege und Niederlagen zu erhalten.
+ Im Folgenden wird die Funktionsweise erläutert und die Verwendung des RNG
+\begin_inset Foot
+status collapsed
+
+\begin_layout Plain Layout
+Random Number Generation
+\end_layout
+
+\end_inset
+
+-Befehls erklärt.
+\begin_inset Newline newline
+\end_inset
+
+Das Statistikprogramm gliedert sich in zwei Dateien.
+ Der eigentliche Programmcode der Statistik ist als Funktion in stats.m geschrieb
+en, welche über die statistics.m Datei aufgerufen wird.
+ Letztere dient zur Festlegung der Parameter, die vom Nutzer an die Funktion
+ übergeben werden.
+\end_layout
+
+\begin_layout Section
+statistics.m - Parameterdeklaration und Übergabe an die Funktion 
+\noun on
+statistics.m
+\end_layout
+
+\begin_layout Standard
+Es ist zu empfehlen, dass in spaceballs.m die Zeitrafferfunktion aktiviert
+ wird, da ansonsten unnötig viel Zeit für den Durchlauf einer Statistik
+ aufgewendet werden muss.
+ Ebenfalls kann es nützlich sein die Zeichnung des Spielfeldes in Schritt.m
+ abzuschalten, um die Rechenzeit zu verkürzen:
+\end_layout
+
+\begin_layout LyX-Code
+spiel.zeitraffer_checkbox_anfangswert = true;
+\end_layout
+
+\begin_layout LyX-Code
+
+\end_layout
+
+\begin_layout LyX-Code
+%% Spielfeld grafisch aktualisieren
+\end_layout
+
+\begin_layout LyX-Code
+spielfeld_aktualisieren (spiel, video);
+\end_layout
+
+\begin_layout Standard
+Außerdem ist der komplette Initialisierungs Abschnitt in spaceballs.m auszukommen
+tieren.
+\begin_inset Newline newline
+\end_inset
+
+Nachfolgend können zwischen drei unterschiedlichen Ansätzen zur Erhebung
+ einer Statistik entschieden werden.
+ Der gewünschte Ansatz ist in Matlab über Strg.
+ + Eingabe auszuführen.
+\begin_inset Newline newline
+\end_inset
+
+
+\end_layout
+
+\begin_layout Labeling
+\labelwidthstring 00.00.0000
+1.) Statistik über 
+\emph on
+beliebige
+\emph default
+ Zufallswerte, Parameter deklaration.
+\begin_inset Newline newline
+\end_inset
+
+Es wird über den RNG ein Zufallswert erzeugt, aus dem dann ein reproduzierbarer
+ Wert für das Spielfeld resultiert.
+\begin_inset Newline newline
+\end_inset
+
+Die eigene Farbe und die Anzahl der spaceballs Durchläufe wird festgelegt:
+\end_layout
+
+\begin_layout LyX-Code
+meineFarbe = 'blau';
+\end_layout
+
+\begin_layout LyX-Code
+Durchgaenge = 40;
+\end_layout
+
+\begin_layout LyX-Code
+
+\end_layout
+
+\begin_layout LyX-Code
+clc stats(Durchgaenge, meineFarbe, 2);
+\end_layout
+
+\begin_layout Labeling
+\labelwidthstring 00.00.0000
+2.) Statistik über 
+\emph on
+alle
+\emph default
+ in 1.) genutzten Zufallswerte
+\begin_inset Newline newline
+\end_inset
+
+Dient z.b als Überprüfungsverfahren nach einer Veränderung in beschleunigung.m
+\end_layout
+
+\begin_layout LyX-Code
+clc stats([], [], 1);
+\end_layout
+
+\begin_layout Labeling
+\labelwidthstring 00.00.0000
+3.) Statistik über alle 
+\emph on
+problematischen
+\emph default
+ Seeds aus 1.)
+\begin_inset Newline newline
+\end_inset
+
+Hierbei werden explizit nur die Seeds, bei denen verloren oder unentschieden
+ gespielt wurde, betrachtet.
+\end_layout
+
+\begin_layout LyX-Code
+clc stats([], [], 0);
+\end_layout
+
+\begin_layout Section
+stats.m - Arbeitsweise und Aufbau der Funktion
+\end_layout
+
+\begin_layout Standard
+Nach Eröffnung der Funktion mit den Eingangsparametern
+\begin_inset Foot
+status collapsed
+
+\begin_layout Plain Layout
+Durchgaenge, Farbe, seedSource
+\end_layout
+
+\end_inset
+
+, die in 1 festgelegt wurden, wird geprüft welche Spielfeldszufallswerte
+ (Seeds) für die laufende Statistikerhebung benötigt werden.
+\begin_inset Foot
+status collapsed
+
+\begin_layout Plain Layout
+Dazu sei hier schon vorweg erwäht, dass zum Einen problematische Seeds,
+ zweitens aber auch alle verwendeten Seeds in jeweils einer .mat Datei gespeicher
+t werden.
+\end_layout
+
+\end_inset
+
+ Es werden die später benötigten Variablen definiert, welche auf den in
+ den .mat Dateien gespeicherten Daten beruhen.
+\end_layout
+
+\begin_layout LyX-Code
+if seedSource == 0    load('seedsFaulty.mat')  if isempty(seedsFaulty)  
+   disp ('Keine Seeds vorhanden')     return  end    seedNum = length(seedsFault
+y);    Durchgaenge = seedNum;    Farbe = Farbe;    rng(zw);     elseif seedSourc
+e == 1    load('seedsAll.mat')     if isempty(seedsAll)     disp ('Keine
+ Seeds vorhanden')     return  end    seedNum = length(seedsAll);    Durchgaenge
+ = seedNum;    Farbe = Farbe;    rng(zw);     
+\end_layout
+
+\begin_layout Standard
+Lediglich bei der seedSource == 2 wird eine komplett unabhängige, 
+\emph on
+frische
+\emph default
+ Statistik erzeugt.
+ Dazu wird über den RNG ein Zufallswert erzeugt und gleichzeitig als Variable
+ definiert, damit diese anschließend in der .mat Datei gesichert werden kann.
+ Falls keine Seedquelle vom Nutzer angegeben wurde, resultiert eine Fehlermeldun
+g im Command-Window
+\begin_inset Foot
+status collapsed
+
+\begin_layout Plain Layout
+Dem wurde insofern vorgebeugt, dass der Nutzer in statistics.m nur noch seine
+ Farbe und die Anzahl der Durchläufe angeben muss, nicht aber die Seedquelle.
+\end_layout
+
+\end_inset
+
+.
+\end_layout
+
+\begin_layout LyX-Code
+elseif seedSource == 2    Durchgaenge = Durchgaenge;    zwVar = rng('shuffle');
+    zw = zwVar.Seed;     else     disp('Fehler! Keine Seedquelle angegeben')
+    return; end
+\end_layout
+
+\begin_layout LyX-Code
+
+\end_layout
+
+\begin_layout LyX-Code
+else disp('Fehler! Keine Seedquelle angegeben') return; end
+\end_layout
+
+\begin_layout Standard
+Anschließend wird eine leere Datentabelle generiert, die stets eine Zeile
+ mehr hat, als Durchgänge definiert wurden.
+ Damit kann eine Spalten-beschreibende Kopfzeile untergebracht werden, die
+ sich wie folgt darstellt:
+\end_layout
+
+\begin_layout LyX-Code
+data = cell(Durchgaenge+1,6); data{1,1} = 'Durchlauf:'; data{1,2} = 'Ereignis:';
+ data{1,3} = 'Grund f.
+ Ergeinis:'; data{1,4} = 'Zeit:'; data{1,5} = 'Seed:'; % data{1,6}: 0=Verloren,
+ 1=Gewonnen, 1.1=Gewonnen durch Gegner getroffen, 2=Crash in Mine, 3=Crash
+ in Bande, 4=me.getankt>enemy.getankt, 5=me.getankt<enemy.getankt
+\end_layout
+
+\begin_layout Standard
+Da es durchaus interessant ist zu erfahren, wie lange Matlab in einem großen
+ Statistikdurchlauf über z.B 1000 Durchgänge bereits gerechnet hat, wird
+ eine Variable für die Gesamtzeit eingeführt.
+ Unteranderem diese Information wird am Ende eines jeden spaceball.m Aufrufs
+ ausgegeben.
+\end_layout
+
+\begin_layout LyX-Code
+% Rechenzeitvariable einführen
+\end_layout
+
+\begin_layout LyX-Code
+totalTime = 0;
+\end_layout
+
+\begin_layout Standard
+Nachdem nun die vorerst benötigten Variablen deklariert wurden, wird folgend
+ die Hauptschleife geöffnet.
+ Einfach formuliert, wird dort spaceballs.m eben so oft ausgeführt, wie es
+ vom Nutzer gewünscht wurde.
+ Gleichzeitig werden die eingetretenden Ereignisse in die zuvor generierte
+ Datentabelle geschrieben.
+\end_layout
+
+\begin_layout LyX-Code
+% Hauptschleife
+\end_layout
+
+\begin_layout LyX-Code
+for i = 1 : Durchgaenge
+\end_layout
+
+\begin_layout Standard
+Es ist noch zwingend erforderlich, die korrekten Seeds an den RNG zu übergeben.
+ Dazu wird wieder die Seedquelle herangezogen und geprüft, welcher Ansatz
+ zur Durchführung einer Statistik der Nutzer wünscht.
+ Aus den entsprechenden .mat Dateien werden die Seeds über den Laufindex
+ der For-Schleife gewählt und schließlich an den RNG übergeben.
+ Falls seedSource == 2 gewählt wurde, kann über den rand-Befehl ein entsprechend
+er zufälliger Seed generiert werden
+\begin_inset Foot
+status collapsed
+
+\begin_layout Plain Layout
+Da der RNG für diesen Ansatz zuvor auf Shuffle gesetzt wurde, entsteht tatsächli
+ch ein komplett zufälliger Wert.
+ 
+\end_layout
+
+\end_inset
+
+.
+ Darauffolgend wird geprüft, welche Spieldaten die eigenen bzw.
+ die des Gegners sind.
+ 
+\end_layout
+
+\begin_layout LyX-Code
+% Alle Fenster bis auf das letzte Spaceballspielfeldfenster schließen close
+ all
+\end_layout
+
+\begin_layout LyX-Code
+% Wert für r ermitteln if seedSource == 0 r = seedsFaulty(i,1); elseif seedSourc
+e == 1 r = seedsAll(i,1); elseif seedSource == 2 r = round(rand(1)*1000000);
+ end 
+\end_layout
+
+\begin_layout LyX-Code
+rng(r) spaceballs % Zuweisung der Farbe if strcmp(Farbe,'rot') me = spiel.rot;
+ enemy = spiel.blau; myName = spiel.rot.name; enemyName = spiel.blau.name; else
+ me = spiel.blau; enemy = spiel.rot; myName = spiel.blau.name; enemyName = spiel.rot.n
+ame; end
+\end_layout
+
+\begin_layout Standard
+In jedem Aufruf von spaceballs.m wird nun die Datentabelle durch entsprechende
+ Abfragen mit Informationen wie z.B.
+ dem aktuellen Durchlauf gefüllt
+\begin_inset Foot
+status collapsed
+
+\begin_layout Plain Layout
+Die anfallenden Daten werden jeweils die i+1te Zeile geschrieben, weil die
+ Kopfzeile bereits 
+\begin_inset Quotes eld
+\end_inset
+
+belegt
+\begin_inset Quotes erd
+\end_inset
+
+ ist und die for-Schleife von 1 bis zur Anzahl der Durchgänge geht.
+\end_layout
+
+\end_inset
+
+.
+ Zur Veranschaulichung ist hier eine Beispielabfrage aufgeführt:
+\end_layout
+
+\begin_layout LyX-Code
+data{i+1,1} = num2str(i); % Datentabelle füllen
+\end_layout
+
+\begin_layout LyX-Code
+
+\end_layout
+
+\begin_layout LyX-Code
+if me.punkte == 1 && ~isError            data{i+1,2} = 'Gewonnnen';     
+       data{i+1,3} = enemy.ereignis;            data{i+1,4} = spiel.i_t/100;
+            data{i+1,5} = r;            data{i+1,6} = 1;            if strcmp(me.
+ereignis,'Rot trifft Blau.') || strcmp(me.ereignis,'Blau trifft Rot.') data{i+1,6}
+ = 1.1;            end
+\end_layout
+
+\begin_layout Standard
+Für den Fall, dass ein Spiel durch klicken in das Spielfeld abgebrochen
+\begin_inset Foot
+status collapsed
+
+\begin_layout Plain Layout
+Durch klicken in das Spielfeld wird das laufende Spiel lediglich übersprungen,
+ der gesamte Statistikdurchlauf ließe sich z.B mit Strg.
+ + C beenden.
+\end_layout
+
+\end_inset
+
+ wird, ist dies in der Auswertung berücksichtigt und es wird ein Error vermerkt.
+ Außerdem wird über den try-and-catch Befehl, sichergestellt, dass die Statistik
+ weiterläuft, sofern ein Error in der beschleunigung.m vorliegt
+\begin_inset Foot
+status collapsed
+
+\begin_layout Plain Layout
+Normalerweise würde Matlab den kompletten Berechnungsvorgang abbrechen.
+\end_layout
+
+\end_inset
+
+.
+ 
+\end_layout
+
+\begin_layout LyX-Code
+isError = false; try spaceballs; catch isError = true; end
+\end_layout
+
+\begin_layout LyX-Code
+
+\end_layout
+
+\begin_layout LyX-Code
+else data{i+1,2} = 'Error'; data{i+1,3} = me.ereignis; data{i+1,4} = spiel.i_t/100
+; data{i+1,5} = r; data{i+1,6} = 99; end
+\end_layout
+
+\begin_layout Standard
+Am Ende der Hauptschleife werden Informationsanzeigen zum aktuellen Fortschritt
+ definiert.
+ Dazu gehört der akutell verwendete Seed, die Rechenzeit und eine prozentuale
+ Fortschrittsanzeige.
+ Zudem werden - bis auf einige Ausnahmen - alle Variablen aus dem Workspace
+ gelöscht, da spaceballs.m ohne diese Bereinigung nicht erneut funktionieren
+ würde
+\begin_inset Foot
+status collapsed
+
+\begin_layout Plain Layout
+Dies ist nötig, da der komplette Initialisierungsteil in spaceballs.m auskommenti
+ert wurde.
+\end_layout
+
+\end_inset
+
+.
+\end_layout
+
+\begin_layout LyX-Code
+clearvars -except data Durchgaenge Farbe myName enemyName zw zwVar totalTime
+ seedSource seedsFaulty seedsAll
+\end_layout
+
+\begin_layout Standard
+Damit die Ausnahmen des clearvars Befehls nicht überhandnehmen, werden erst
+ nach der Hauptforschleife weitere Variablend eklariert, die zur Auswertung
+ heran gezogen werden.
+\end_layout
+
+\begin_layout LyX-Code
+sumWins = 0; sumLose = 0; sumAttack = 0; sumDefense = 0; sumERROR = 0; gegErwisc
+ht = 0; MineGetr = 0; BandeGetr = 0; time = 0; loseSeeds = cell(sumLose,1);
+ unentDefense = cell(sumDefense,1); unentAttack = cell(sumAttack,1);
+\end_layout
+
+\begin_layout Standard
+In der anschließenden Auswertungsschleife werden die eingetretenden Eregnisse
+ jeweils aufsummiert, die Durchschnittszeit berechnet sowie problematische
+ Seeds gespeichert.
+\end_layout
+
+\begin_layout LyX-Code
+% Auswertungsschleife for i = 1 : Durchgaenge % Ereignissummen Berechnen
+ if data{i+1,6} == 1 sumWins = sumWins + 1; elseif data{i+1,6} == 1.1 sumWins
+ = sumWins + 1; gegErwischt = gegErwischt + 1; elseif data{i+1,6} == 0 sumLose
+ = sumLose + 1; elseif data{i+1,6} == 2 sumLose = sumLose + 1; MineGetr
+ = MineGetr + 1; elseif data{i+1,6} == 3 sumLose = sumLose + 1; BandeGetr
+ = BandeGetr + 1; elseif data{i+1,6} == 4 sumAttack = sumAttack + 1; elseif
+ data{i+1,6} == 5 sumDefense = sumDefense + 1; elseif data{i+1,6} == 99
+ sumERROR = sumERROR + 1; end % Durchschnittszeit berechnen if data{i+1,6}
+ == 1 || 1.1 time = time + data{i+1,4}; end
+\end_layout
+
+\begin_layout LyX-Code
+medianTime = time/sumWins; % Relevante Seeds speichern if data{i+1,6} ==
+ 0 loseSeeds{i,1} = data{i+1,5}; elseif data{i+1,6} == 2 loseSeeds{i,1}
+ = data{i+1,5}; elseif data{i+1,6} == 3 loseSeeds{i,1} = data{i+1,5};
+\end_layout
+
+\begin_layout LyX-Code
+elseif data{i+1,6} == 4 unentAttack{i,1} = data{i+1,5};
+\end_layout
+
+\begin_layout LyX-Code
+elseif data{i+1,6} == 5 unentDefense{i,1} = data{i+1,5}; end 
+\end_layout
+
+\begin_layout LyX-Code
+end
+\end_layout
+
+\begin_layout Standard
+Sodann werden loseSeeds, unentDefense sowie unentAttack zu seedsFaulty zusammeng
+efasst und als seedsFaulty.mat abgespeichert.
+ Ferner werden alle Seeds als seedsAll.mat gespeichert.
+ In beide Dateien werden überdies Informationen über die Farbe und den übergeord
+neten Zufallswert zw gespeichert.
+ Am Ende des gesamten Statistikdurchlaufes werden nun noch die gesammelten
+ Informationen prosaisch dargestellt und dem Nutzer angezeigt:
+\end_layout
+
+\begin_layout LyX-Code
+time = horzcat('Gesamtrechenzeit: ', num2str(round(totalTime/60,1)), ' Minuten')
+; Gegner = horzcat(myName, ' VS ', enemyName); SatzA = horzcat('Von ', num2str(D
+urchgaenge), ' Spielen wurden ', num2str(sumWins), ' gewonnen'); SatzAB
+ = horzcat('Von ', num2str(Durchgaenge), ' Spielen wurden ', num2str(sumWins),
+ ' in durchschnittlich ', num2str(medianTime), ' Sekunden gewonnen.'); Quote1
+ = horzcat('Gewonnen: ', num2str(sumWins/Durchgaenge*100),' %'); Quote2
+ = horzcat(' davon den Gegner erwischt: ', num2str(gegErwischt/sumWins*100),'
+ %'); Quote3 = horzcat('Verloren: ', num2str(sumLose/Durchgaenge*100),'
+ %'); Quote4 = horzcat(' davon in Mine gefahren: ', num2str(MineGetr/sumLose*100
+),' %'); Quote5 = horzcat(' davon in Bande gefahren: ', num2str(BandeGetr/sumLos
+e*100),' %'); Quote6 = horzcat('Unentschieden im Angriff: ', num2str(sumAttack/D
+urchgaenge*100),' %'); Quote7 = horzcat('Unentschieden in der Verteidigung:
+ ', num2str(sumDefense/Durchgaenge*100),' %'); Quote8 = horzcat('Error:
+ ', num2str(sumERROR/Durchgaenge*100),' %');
+\end_layout
+
+\begin_layout LyX-Code
+Statistische_Erhebung = data(:,1:5);
+\end_layout
+
+\end_body
+\end_document
