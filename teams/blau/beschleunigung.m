@@ -1341,7 +1341,9 @@ function bes = beschleunigung(spiel, farbe)
         if  spiel.n_mine > 4
             mineTricking;
             changePathForDefence();
-        else
+        elseif false && spiel.n_mine == 0
+            circleTricking();
+        else 
             cornerTricking();
         end
     end
@@ -1465,6 +1467,102 @@ function bes = beschleunigung(spiel, farbe)
             erg = true;
             return;
         end
+    end
+
+    function circleTricking()
+
+        overrideBesCalculation = true;
+        
+        %Distanz und Richtung
+        Mittelpunkt = [0.5, 0.5];
+        toMittelpunkt = Mittelpunkt - me.pos;
+        circleRadius = 0.4;
+        
+        %Vektor in Richtung der Kreistangente
+        toGes = vecNorm(getPerpend(toMittelpunkt));
+        if numel(p_waypointList) > 0
+            if (dot(toGes, p_waypointList{1}-me.pos) < 0)
+                toGes = -toGes;
+            end
+        else
+            if (dot(toGes, me.pos) < 0)
+                toGes = -toGes;
+            end
+        end
+        
+        %Vektor im Rechten Winkel zur Gschwindigkeit, der zum Mittelpunkt zeigt.
+        gesToMittelpunkt = vecNorm(getPerpend(me.ges));
+        gesToMittelpunkt = gesToMittelpunkt*distanceLinePoint(me.pos-vecNorm(me.ges), me.pos+vecNorm(me.ges), Mittelpunkt);
+        if (dot(gesToMittelpunkt, gesToMittelpunkt) < 0)
+            gesToMittelpunkt = -gesToMittelpunkt;
+        end
+        
+        %maximal radial velocity
+        maxVelSq = spiel.bes*circleRadius;
+        
+
+        %%enlarge maximal velocity if angle is small
+        %get output wp
+        outwaypt = [0, 0];
+        for i=1:numel(p_waypointList)
+            if (norm(Mittelpunkt-p_waypointList{i}) > constMineProxRadius)
+                outwaypt = p_waypointList{i};
+                break;
+            end
+        end
+        if (~isequal(outwaypt, [0,0]))
+            if (dot(vecNorm(p_waypointList{i}-Mittelpunkt), vecNorm(me.ges)) > 0.9 && i < 3)
+                maxVelSq = maxVelSq * 1.5;
+            end
+        end
+
+        %velocity correction Geschwindigkeitsvektor muss den Kreis
+        %Tangieren
+        corr = (norm(gesToMittelpunkt)-circleRadius)/constSafeBorder;
+        if (dot(me.ges, toMittelpunkt) < 0)
+            if (norm(toMittelpunkt) < circleRadius)
+                corr = -corr;
+            else
+                corr = 1;
+            end
+        end
+        
+        
+        %kreisgeschwindigkeit
+        circvel = norm(projectVectorNorm(me.ges, toGes));
+        
+        %berechne Zentripetalbeschleunigung und addiere darin die
+        %Korrektur
+        zentp = clamp(circvel^2/norm(circleRadius)*(1+corr) + corr*0.1, -spiel.bes, spiel.bes);
+        
+        %Vorwärtsbeschleunigung
+        forward = sqrt(spiel.bes^2-zentp^2);
+        
+        
+        %setuo beschleunigung
+        bes = zentp * vecNorm(toMittelpunkt) + forward*toGes;
+        
+        %no velocity
+        if (norm(me.ges) < 0.01)
+            bes = toGes;
+        end
+        
+        %emergencybreaking
+        if (norm(me.ges)^2 > maxVelSq)% || emergencyBreaking())
+           bes = vecNorm(bes)-vecNorm(me.ges)*1.5;
+        elseif (dot(me.ges, toGes) < 0)
+           bes = vecNorm(bes)+vecNorm(toGes);
+        end
+        
+        %debug drawing
+        debugDrawCircle(1, Mittelpunkt, circleRadius);
+ 
+        %Wegpunkte einsammeln
+        if numel(p_waypointList) > 0 && norm(me.pos-p_waypointList{1}) < constNavSecurity*1.5
+            p_waypointList(1) = [];
+            debugDRAW();
+        end
+        
     end
 
 
