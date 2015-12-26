@@ -63,6 +63,9 @@ function bes = beschleunigung(spiel, farbe)
     persistent p_mexHandle; %handle of mex functions
     persistent p_cornerVerteidigung;
     persistent p_firstTankePositionPersistent;
+    persistent p_cornerTrick;
+    
+
     
     %%Farbe prüfen und zuweisen
     if strcmp (farbe, 'rot')
@@ -160,6 +163,7 @@ function bes = beschleunigung(spiel, farbe)
         p_cornerVerteidigung = false;
         p_lastNumberOfMeTanke = 0;
         p_firstTankePositionPersistent = [0, 0];
+        p_cornerTrick = false
         
         %compile mex files
         if strcmp (farbe, 'rot')
@@ -1338,15 +1342,28 @@ function bes = beschleunigung(spiel, farbe)
     end
 
     function fleeEnemy()
-        if  spiel.n_mine > 4
+ 
+        for i=1:spiel.n_mine 
+            time_m = defMineTime(spiel.mine(i).pos)
+         end
+                 
+        if  spiel.n_mine > 4 % ggf. noch Zeit beachten? 
             mineTricking;
             changePathForDefence();
+        elseif spiel.n_mine < 5 && spiel.n_mine > 0 && ~p_cornerTrick
+            if time_m > 0 
+               mineTricking;
+               changePathForDefence();
+            else
+                cornerTricking();
+            end
         else
             cornerTricking();
         end
     end
 
     function cornerTricking()
+        p_cornerTrick = true 
         cornerNodes = {[0.02,0.98], [0.98,0.98], [0.02,0.02], [0.98,0.02]};
         if p_cornerWaitForEnemy == false
             debugDisp('Defence: cornerTricking 1');
@@ -1385,7 +1402,7 @@ function bes = beschleunigung(spiel, farbe)
         constEmrBrkAccFac = 0;
     end
 
-    function time = defMineTime(pos) %Berechnet die Zeit von unserem/vom gegnerischen Standort in Ecke X 
+    function time_m = defMineTime(pos) %Berechnet die Zeit von unserem/vom gegnerischen Standort in Ecke X 
         minepos = pos;
         meToMine = minepos - me.pos;
         enemyToMine = minepos - enemy.pos;
@@ -1393,17 +1410,17 @@ function bes = beschleunigung(spiel, farbe)
         metime = getTimeToAlignVelocity(me.ges, vecNorm(meToMine)) + norm(meToMine)/(norm(me.ges) + spiel.bes); %Zeit um Geschwindigkeitsvektor auszurichten + s/v + spiel.bes als const. damit nicht = 0 
         enemytime = getTimeToAlignVelocity(enemy.ges, vecNorm(enemyToMine)) + norm(enemyToMine)/(norm(enemy.ges) + spiel.bes);
       
-        time = enemytime - metime; %Differenz berechnen, je größer der Wert desto besser 
+        time_m = enemytime - metime; %Differenz berechnen, je größer der Wert desto besser 
 
         
-        if (dot(vecNorm(meToMine), vecNorm(enemy.pos-me.pos)) > 0.6 && norm(meToMine) > 0.06)  
-            %Wenn in Richtung der Ecke + ca 25° zu jeder Seite der Gegner ist und wir uns im Radius von 0.06 vom WP befinden -> 100 Strafsekunden
-            time = time - 100;
-            
-            if (dot(vecNorm(meToMine), vecNorm(enemy.pos-me.pos)) > 0.9)
-                time = time - 100;
-            end
-        end
+%         if (dot(vecNorm(meToMine), vecNorm(enemy.pos-me.pos)) > 0.6 && norm(meToMine) > 0.06)  
+%             %Wenn in Richtung der Ecke + ca 25° zu jeder Seite der Gegner ist und wir uns im Radius von 0.06 vom WP befinden -> 100 Strafsekunden
+%             time_m = time_m - 100;
+%             
+%             if (dot(vecNorm(meToMine), vecNorm(enemy.pos-me.pos)) > 0.9)
+%                 time_m = time_m - 100;
+%             end
+%         end
         
         
     end
@@ -1411,14 +1428,14 @@ function bes = beschleunigung(spiel, farbe)
     function tMine = bestDefMine() 
 %         mineList = [spiel.n_mine]
         tMine = [0, 0];
-        savetime = -Inf;
+        savetime_mine = -Inf;
         
         for i=1:spiel.n_mine 
             checktime = defMineTime(spiel.mine(i).pos); %Zeitdiff. für alle Ecken berechnen 
             
-            if (savetime < checktime) %Zeit für Ecke 1 überschreibt savetime und wir als neue savetime gespeichert. Die neue Savetime wird nur von größeren Zeitdiffs überschrieben. 
+            if (savetime_mine < checktime) %Zeit für Ecke 1 überschreibt savetime und wir als neue savetime gespeichert. Die neue Savetime wird nur von größeren Zeitdiffs überschrieben. 
                 tMine = spiel.mine(i); %Ecke von Zeit X wird als beste Ecke festgelegt und ggf. wieder überschrieben 
-                savetime = checktime;
+                savetime_mine = checktime;
             end
         end
     end
@@ -1427,7 +1444,7 @@ function bes = beschleunigung(spiel, farbe)
         closestMine = norm(spiel.mine(getNearestMineId(me.pos)).pos - me.pos);
         if closestMine >= spiel.mine_radius + constSafeBorder + spiel.spaceball_radius + 0.02
             
-                   bestMine = bestDefMine()
+                   bestMine = bestDefMine();
                    enemyDist = bestMine.pos - enemy.pos;
         
                     if numel(p_waypointList) <= 1
