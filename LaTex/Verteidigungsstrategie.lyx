@@ -1,0 +1,205 @@
+#LyX 2.1 created this file. For more info see http://www.lyx.org/
+\lyxformat 474
+\begin_document
+\begin_header
+\textclass article
+\use_default_options true
+\maintain_unincluded_children false
+\language english
+\language_package default
+\inputencoding auto
+\fontencoding global
+\font_roman default
+\font_sans default
+\font_typewriter default
+\font_math auto
+\font_default_family default
+\use_non_tex_fonts false
+\font_sc false
+\font_osf false
+\font_sf_scale 100
+\font_tt_scale 100
+\graphics default
+\default_output_format default
+\output_sync 0
+\bibtex_command default
+\index_command default
+\paperfontsize default
+\use_hyperref false
+\papersize default
+\use_geometry false
+\use_package amsmath 1
+\use_package amssymb 1
+\use_package cancel 1
+\use_package esint 1
+\use_package mathdots 1
+\use_package mathtools 1
+\use_package mhchem 1
+\use_package stackrel 1
+\use_package stmaryrd 1
+\use_package undertilde 1
+\cite_engine basic
+\cite_engine_type default
+\biblio_style plain
+\use_bibtopic false
+\use_indices false
+\paperorientation portrait
+\suppress_date false
+\justification true
+\use_refstyle 1
+\index Index
+\shortcut idx
+\color #008000
+\end_index
+\secnumdepth 3
+\tocdepth 3
+\paragraph_separation indent
+\paragraph_indentation default
+\quotes_language english
+\papercolumns 1
+\papersides 1
+\paperpagestyle default
+\tracking_changes false
+\output_changes false
+\html_math_output 0
+\html_css_as_file 0
+\html_be_strict false
+\end_header
+
+\begin_body
+
+\begin_layout Subsection
+Verteidigung
+\end_layout
+
+\begin_layout Standard
+Für den unwahrscheinlichen Fall, dass unser Spaceball es nicht schafft mehr
+ als die Hälfte aller Tankstellen vor dem Gegner einzusammeln geht er in
+ den Verteidigungsmodus über.
+ Primärziel der Verteidigung ist das fliehen vor dem Gegner und ein daraus
+ resultierendes Unentschieden, Sekundärziel ist es, die Gefahr, einer Kollision,
+ durch banden- und minennahe Manöver, für den Gegner zu erhöhen.
+ Unsere Verteidigung ist in zwei Hauptmanöver aufgeteilt, welche sich in
+ Teil miteinerander kombinieren lassen.
+\end_layout
+
+\begin_layout Subsubsection
+Eckenverteidigung - 
+\family typewriter
+cornerTricking()
+\end_layout
+
+\begin_layout Standard
+Die erste Strategie sieht - wie der Name vermutlich schon induziert - vor,
+ dass wir die Ecken als Teil unserer Verteidigung nutzen, genauergesagt
+ fahren wir mit einem Abstand von 0.01 Spielfeldbreiten von den Banden von
+ Ecke zu Ecke.
+ Wir verwenden diese Art der Verteidigung, wenn nur noch 4 oder weniger
+ Minen vorhanden sind.
+ Gegen Gegner mit einem guten Angriff, welcher auch Kamikaze fährt, ist
+ diese Verteidigung nicht 100%-tig sicher und kann uns, aber auch dem Angreifer
+ zum Verhängnis werden.
+ Gegner welche über einen defensiven Angriff verfügen (sprich niemal die
+ Gefahr eines Bandencrashes eingehen), haben bei dieser Art der Verteidigung
+ keine Chance uns zu treffen, da wir aus einer Ecke immer gerade so losfahren,
+ dass der Gegner uns nicht erwischt - Voraussetzung dafür ist allerdings,
+ dass der Gegner rechtzeitig bremst und vor der Bande zu stehen kommen würde.
+\begin_inset Newline newline
+\end_inset
+
+
+\family typewriter
+cornerTricking
+\family default
+ ist in 2 Parts aufgeteilt: 
+\end_layout
+
+\begin_layout Subsubsection*
+
+\family typewriter
+cornerTricking Pt.1:
+\end_layout
+
+\begin_layout Standard
+Die Aufgabe des ersten Teils der Eckenverteidigung ist es, die für uns beste
+ Ecke zum starten der Flucht entlang der Banden zu finden.
+ Hierzu berechnen wir die Zeitdifferenz von der Zeit, welche wir zu der
+ jeweiligen Ecke brauchen und der Zeit, welche der Gegner in die selbige
+ Ecke benötigt.
+ Wichtig hierbei ist, dass wir die Ecke erreichen, bevor der Gegner den
+ Bremspunkt zum rechtzeitigen anhalten vor der Bande überschreitet.
+ Nur so ist gewährleistet, dass wir rechtzeitig in Richtung der nächsten
+ Ecke beschleunigen.
+ Für den Fall, dass der Gegner uns sehr dicht auf den Fersen ist und seinen
+ Bremspunkt erreicht, bevor wir in unserer ausgewählten Ecke ankommen, so
+ biegen wir bereits vor dem erreichen dieser zur nächsten ab.
+\end_layout
+
+\begin_layout Subsubsection*
+
+\family typewriter
+cornerTricking Pt.
+ 2:
+\end_layout
+
+\begin_layout Standard
+Haben wir eine Ecke erreicht oder sind in der Nähe einer und der Gegner
+ hat den Bremspunkt für die Ecke überschritten wird
+\family typewriter
+ cornerTricking Pt.2
+\family default
+ aktiviert.
+ Wie auch in 
+\family typewriter
+Pt.
+ 1
+\family default
+ berechnen wir die Zeitdifferenz für beide Spaceballs und die jeweiligen
+ Ecken.
+ Damit wir nicht in die Ecke (zurück) fahren, aus der der Gegner gerade
+ kommt (die Zeitdifferenz ist hier ja besser, da der Gegner länger braucht
+ um seinen Geschwindigkeitsvektor um über 90° zu drehen), überprüfen wir
+ mit Hilfe des Winkels zwischen der Verbindungslinie von uns und der überprüften
+ Ecke und der Verbindungslinie der Position des Gegners und unserer Position
+ (s.
+ Abb.
+ XY) ob der Gegner aus der gerade geprüften Ecke kommt - ist die der Fall,
+ so addieren wir 100 Strafsekunden auf die errechnete Zeitdifferenz.
+ Auf diesem Wege ist sichergestellt, dass wir immer in die richtige Ecke
+ fahren.
+\end_layout
+
+\begin_layout Subsubsection
+Minenverteidigung - 
+\family typewriter
+mineTricking()
+\end_layout
+
+\begin_layout Standard
+Die Minenverteidigung ist das effizienteste Mittel zur Verteidigung, setzt
+ allerdings voraus, dass noch Minen vorhanden sind.
+ Sobald der Gegner mehr als die Hälfte aller Tankstellen eingesammelt hat,
+ begeben wir uns zu der Mine, welche wir mit dem größten Zeitvorsprung vor
+ dem Gegner erreichen (wie bei der Eckenverteidigung auch).
+ Nach dem erreichen der besten Mine spiegeln wir die gegnerische Position
+ am Minenmittelpunkt und begeben uns auf die dem Gegner gegenüberliegende
+ Seite der Mine im Abstand von ca 0.02 Spielfeldbreiten.
+ Durch unsere Minenbeschleunigung halten wir den gewählten Abstand und bewegen
+ uns auf einer kreisrunden Bahn, mit der größmöglichen Geschwindigkeit,
+ um die Mine, sodass der Gegner erst mit uns kollidieren kann, wenn die
+ Mine verschwindet.
+ Sammelt der Gegner also nicht alle noch vorhandenen Minen ein, so hat der
+ Angreifer - wenn wir einmal im Minenmodus sind - keine Chance mehr uns
+ zu erwischen (außer er sammelt aus Gründen doch noch die restlichen Minen
+ ein).
+ Ist keine Tankstelle mehr vorhanden, verschwindet alle 3 Sekunden ein Mine
+ - da der Wechsel von einer Mine zu nächsten, trotz der Zeitberechnung,
+ relativ riskant ist, haben wir beschlossen, dass wir bei vier verbleibenden
+ Minen automatisch in die Bandenverteidigung gehen.
+ Dieses Vorgehen ist in unseren Augen die beste Kombination aus der Effizienz
+ der Minenverteidigung und dem dabei unter Umständen auftretenden Wechsel
+ zwischen Minen.
+\end_layout
+
+\end_body
+\end_document
