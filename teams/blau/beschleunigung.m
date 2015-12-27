@@ -163,7 +163,7 @@ function bes = beschleunigung(spiel, farbe)
         p_cornerVerteidigung = false;
         p_lastNumberOfMeTanke = 0;
         p_firstTankePositionPersistent = [0, 0];
-        p_cornerTrick = false
+        p_cornerTrick = false;
         
         %compile mex files
         if strcmp (farbe, 'rot')
@@ -1342,28 +1342,42 @@ function bes = beschleunigung(spiel, farbe)
     end
 
     function fleeEnemy()
- 
-        for i=1:spiel.n_mine 
-            time_m = defMineTime(spiel.mine(i).pos)
-         end
+                savetime_mine = -Inf;
+
+                for i=1:spiel.n_mine 
+                    checktime = defMineTime(spiel.mine(i).pos); %Zeitdiff. für alle Ecken berechnen 
+                    if (savetime_mine < checktime) %Zeit für Ecke 1 überschreibt savetime und wir als neue savetime gespeichert. Die neue Savetime wird nur von größeren Zeitdiffs überschrieben. 
+                    savetime_mine = checktime
+                    end
+                end
                  
-        if  spiel.n_mine > 4 % ggf. noch Zeit beachten? 
+        if  spiel.n_mine > 4 %&& checktime > -1 % ggf. noch Zeit beachten? 
             mineTricking;
             changePathForDefence();
         elseif spiel.n_mine < 5 && spiel.n_mine > 0 && ~p_cornerTrick
-            if time_m > 0 
+                savetime_mine = -Inf;
+
+                for i=1:spiel.n_mine 
+                    checktime = defMineTime(spiel.mine(i).pos); %Zeitdiff. für alle Ecken berechnen 
+                    if (savetime_mine < checktime) %Zeit für Ecke 1 überschreibt savetime und wir als neue savetime gespeichert. Die neue Savetime wird nur von größeren Zeitdiffs überschrieben. 
+                    savetime_mine = checktime
+                    end
+                end
+            
+            if checktime > -0.5 
                mineTricking;
                changePathForDefence();
             else
                 cornerTricking();
             end
+            
         else
             cornerTricking();
         end
     end
 
     function cornerTricking()
-        p_cornerTrick = true 
+        p_cornerTrick = true;
         cornerNodes = {[0.02,0.98], [0.98,0.98], [0.02,0.02], [0.98,0.02]};
         if p_cornerWaitForEnemy == false
             debugDisp('Defence: cornerTricking 1');
