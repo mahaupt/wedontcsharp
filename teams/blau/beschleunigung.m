@@ -1342,14 +1342,14 @@ function bes = beschleunigung(spiel, farbe)
     end
 
     function fleeEnemy()
-                savetime_mine = -Inf;
-
-                for i=1:spiel.n_mine 
-                    checktime = defMineTime(spiel.mine(i).pos); %Zeitdiff. für alle Ecken berechnen 
-                    if (savetime_mine < checktime) %Zeit für Ecke 1 überschreibt savetime und wir als neue savetime gespeichert. Die neue Savetime wird nur von größeren Zeitdiffs überschrieben. 
-                    savetime_mine = checktime
-                    end
-                end
+                
+        savetime_mine = -Inf;
+        for i=1:spiel.n_mine 
+            checktime = defMineTime(spiel.mine(i).pos); %Zeitdiff. für alle Ecken berechnen 
+            if (savetime_mine < checktime) %Zeit für Ecke 1 überschreibt savetime und wir als neue savetime gespeichert. Die neue Savetime wird nur von größeren Zeitdiffs überschrieben. 
+                savetime_mine = checktime
+            end
+        end
                  
         if  spiel.n_mine > 4 %&& checktime > -1 % ggf. noch Zeit beachten? 
             mineTricking;
@@ -1416,7 +1416,7 @@ function bes = beschleunigung(spiel, farbe)
         constEmrBrkAccFac = 0;
     end
 
-    function time_m = defMineTime(pos) %Berechnet die Zeit von unserem/vom gegnerischen Standort in Ecke X 
+    function time_m = defMineTime(pos) %Berechnet die Zeit von unserem/vom gegnerischen Standort zur Mine X 
         minepos = pos;
         meToMine = minepos - me.pos;
         enemyToMine = minepos - enemy.pos;
@@ -1425,17 +1425,6 @@ function bes = beschleunigung(spiel, farbe)
         enemytime = getTimeToAlignVelocity(enemy.ges, vecNorm(enemyToMine)) + norm(enemyToMine)/(norm(enemy.ges) + spiel.bes);
       
         time_m = enemytime - metime; %Differenz berechnen, je größer der Wert desto besser 
-
-        
-%         if (dot(vecNorm(meToMine), vecNorm(enemy.pos-me.pos)) > 0.6 && norm(meToMine) > 0.06)  
-%             %Wenn in Richtung der Ecke + ca 25° zu jeder Seite der Gegner ist und wir uns im Radius von 0.06 vom WP befinden -> 100 Strafsekunden
-%             time_m = time_m - 100;
-%             
-%             if (dot(vecNorm(meToMine), vecNorm(enemy.pos-me.pos)) > 0.9)
-%                 time_m = time_m - 100;
-%             end
-%         end
-        
         
     end
 
