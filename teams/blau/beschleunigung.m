@@ -63,6 +63,9 @@ function bes = beschleunigung(spiel, farbe)
     persistent p_mexHandle; %handle of mex functions
     persistent p_cornerVerteidigung;
     persistent p_firstTankePositionPersistent;
+    persistent p_cornerTrick;
+    
+
     
     %%Farbe prüfen und zuweisen
     if strcmp (farbe, 'rot')
@@ -160,6 +163,7 @@ function bes = beschleunigung(spiel, farbe)
         p_cornerVerteidigung = false;
         p_lastNumberOfMeTanke = 0;
         p_firstTankePositionPersistent = [0, 0];
+        p_cornerTrick = false;
         
         %compile mex files
         if strcmp (farbe, 'rot')
@@ -1338,17 +1342,42 @@ function bes = beschleunigung(spiel, farbe)
     end
 
     function fleeEnemy()
-        if  spiel.n_mine > 4
+                
+        savetime_mine = -Inf;
+        for i=1:spiel.n_mine 
+            checktime = defMineTime(spiel.mine(i).pos); %Zeitdiff. für alle Ecken berechnen 
+            if (savetime_mine < checktime) %Zeit für Ecke 1 überschreibt savetime und wir als neue savetime gespeichert. Die neue Savetime wird nur von größeren Zeitdiffs überschrieben. 
+                savetime_mine = checktime
+            end
+        end
+                 
+        if  spiel.n_mine > 4 %&& checktime > -1 % ggf. noch Zeit beachten? 
             mineTricking;
             changePathForDefence();
-        elseif false && spiel.n_mine == 0
-            circleTricking();
-        else 
+        elseif spiel.n_mine < 5 && spiel.n_mine > 0 && ~p_cornerTrick
+                savetime_mine = -Inf;
+
+                for i=1:spiel.n_mine 
+                    checktime = defMineTime(spiel.mine(i).pos); %Zeitdiff. für alle Ecken berechnen 
+                    if (savetime_mine < checktime) %Zeit für Ecke 1 überschreibt savetime und wir als neue savetime gespeichert. Die neue Savetime wird nur von größeren Zeitdiffs überschrieben. 
+                    savetime_mine = checktime
+                    end
+                end
+            
+            if checktime > -0.5 
+               mineTricking;
+               changePathForDefence();
+            else
+                cornerTricking();
+            end
+            
+        else
             cornerTricking();
         end
     end
 
     function cornerTricking()
+        p_cornerTrick = true;
         cornerNodes = {[0.02,0.98], [0.98,0.98], [0.02,0.02], [0.98,0.02]};
         if p_cornerWaitForEnemy == false
             debugDisp('Defence: cornerTricking 1');
@@ -1387,7 +1416,7 @@ function bes = beschleunigung(spiel, farbe)
         constEmrBrkAccFac = 0;
     end
 
-    function time = defMineTime(pos) %Berechnet die Zeit von unserem/vom gegnerischen Standort in Ecke X 
+    function time_m = defMineTime(pos) %Berechnet die Zeit von unserem/vom gegnerischen Standort zur Mine X 
         minepos = pos;
         meToMine = minepos - me.pos;
         enemyToMine = minepos - enemy.pos;
@@ -1395,32 +1424,21 @@ function bes = beschleunigung(spiel, farbe)
         metime = getTimeToAlignVelocity(me.ges, vecNorm(meToMine)) + norm(meToMine)/(norm(me.ges) + spiel.bes); %Zeit um Geschwindigkeitsvektor auszurichten + s/v + spiel.bes als const. damit nicht = 0 
         enemytime = getTimeToAlignVelocity(enemy.ges, vecNorm(enemyToMine)) + norm(enemyToMine)/(norm(enemy.ges) + spiel.bes);
       
-        time = enemytime - metime; %Differenz berechnen, je größer der Wert desto besser 
-
-        
-        if (dot(vecNorm(meToMine), vecNorm(enemy.pos-me.pos)) > 0.6 && norm(meToMine) > 0.06)  
-            %Wenn in Richtung der Ecke + ca 25° zu jeder Seite der Gegner ist und wir uns im Radius von 0.06 vom WP befinden -> 100 Strafsekunden
-            time = time - 100;
-            
-            if (dot(vecNorm(meToMine), vecNorm(enemy.pos-me.pos)) > 0.9)
-                time = time - 100;
-            end
-        end
-        
+        time_m = enemytime - metime; %Differenz berechnen, je größer der Wert desto besser 
         
     end
 
     function tMine = bestDefMine() 
 %         mineList = [spiel.n_mine]
         tMine = [0, 0];
-        savetime = -Inf;
+        savetime_mine = -Inf;
         
         for i=1:spiel.n_mine 
             checktime = defMineTime(spiel.mine(i).pos); %Zeitdiff. für alle Ecken berechnen 
             
-            if (savetime < checktime) %Zeit für Ecke 1 überschreibt savetime und wir als neue savetime gespeichert. Die neue Savetime wird nur von größeren Zeitdiffs überschrieben. 
+            if (savetime_mine < checktime) %Zeit für Ecke 1 überschreibt savetime und wir als neue savetime gespeichert. Die neue Savetime wird nur von größeren Zeitdiffs überschrieben. 
                 tMine = spiel.mine(i); %Ecke von Zeit X wird als beste Ecke festgelegt und ggf. wieder überschrieben 
-                savetime = checktime;
+                savetime_mine = checktime;
             end
         end
     end
@@ -1429,7 +1447,7 @@ function bes = beschleunigung(spiel, farbe)
         closestMine = norm(spiel.mine(getNearestMineId(me.pos)).pos - me.pos);
         if closestMine >= spiel.mine_radius + constSafeBorder + spiel.spaceball_radius + 0.02
             
-                   bestMine = bestDefMine()
+                   bestMine = bestDefMine();
                    enemyDist = bestMine.pos - enemy.pos;
         
                     if numel(p_waypointList) <= 1
@@ -1467,102 +1485,6 @@ function bes = beschleunigung(spiel, farbe)
             erg = true;
             return;
         end
-    end
-
-    function circleTricking()
-
-        overrideBesCalculation = true;
-        
-        %Distanz und Richtung
-        Mittelpunkt = [0.5, 0.5];
-        toMittelpunkt = Mittelpunkt - me.pos;
-        circleRadius = 0.4;
-        
-        %Vektor in Richtung der Kreistangente
-        toGes = vecNorm(getPerpend(toMittelpunkt));
-        if numel(p_waypointList) > 0
-            if (dot(toGes, p_waypointList{1}-me.pos) < 0)
-                toGes = -toGes;
-            end
-        else
-            if (dot(toGes, me.pos) < 0)
-                toGes = -toGes;
-            end
-        end
-        
-        %Vektor im Rechten Winkel zur Gschwindigkeit, der zum Mittelpunkt zeigt.
-        gesToMittelpunkt = vecNorm(getPerpend(me.ges));
-        gesToMittelpunkt = gesToMittelpunkt*distanceLinePoint(me.pos-vecNorm(me.ges), me.pos+vecNorm(me.ges), Mittelpunkt);
-        if (dot(gesToMittelpunkt, gesToMittelpunkt) < 0)
-            gesToMittelpunkt = -gesToMittelpunkt;
-        end
-        
-        %maximal radial velocity
-        maxVelSq = spiel.bes*circleRadius;
-        
-
-        %%enlarge maximal velocity if angle is small
-        %get output wp
-        outwaypt = [0, 0];
-        for i=1:numel(p_waypointList)
-            if (norm(Mittelpunkt-p_waypointList{i}) > constMineProxRadius)
-                outwaypt = p_waypointList{i};
-                break;
-            end
-        end
-        if (~isequal(outwaypt, [0,0]))
-            if (dot(vecNorm(p_waypointList{i}-Mittelpunkt), vecNorm(me.ges)) > 0.9 && i < 3)
-                maxVelSq = maxVelSq * 1.5;
-            end
-        end
-
-        %velocity correction Geschwindigkeitsvektor muss den Kreis
-        %Tangieren
-        corr = (norm(gesToMittelpunkt)-circleRadius)/constSafeBorder;
-        if (dot(me.ges, toMittelpunkt) < 0)
-            if (norm(toMittelpunkt) < circleRadius)
-                corr = -corr;
-            else
-                corr = 1;
-            end
-        end
-        
-        
-        %kreisgeschwindigkeit
-        circvel = norm(projectVectorNorm(me.ges, toGes));
-        
-        %berechne Zentripetalbeschleunigung und addiere darin die
-        %Korrektur
-        zentp = clamp(circvel^2/norm(circleRadius)*(1+corr) + corr*0.1, -spiel.bes, spiel.bes);
-        
-        %Vorwärtsbeschleunigung
-        forward = sqrt(spiel.bes^2-zentp^2);
-        
-        
-        %setuo beschleunigung
-        bes = zentp * vecNorm(toMittelpunkt) + forward*toGes;
-        
-        %no velocity
-        if (norm(me.ges) < 0.01)
-            bes = toGes;
-        end
-        
-        %emergencybreaking
-        if (norm(me.ges)^2 > maxVelSq)% || emergencyBreaking())
-           bes = vecNorm(bes)-vecNorm(me.ges)*1.5;
-        elseif (dot(me.ges, toGes) < 0)
-           bes = vecNorm(bes)+vecNorm(toGes);
-        end
-        
-        %debug drawing
-        debugDrawCircle(1, Mittelpunkt, circleRadius);
- 
-        %Wegpunkte einsammeln
-        if numel(p_waypointList) > 0 && norm(me.pos-p_waypointList{1}) < constNavSecurity*1.5
-            p_waypointList(1) = [];
-            debugDRAW();
-        end
-        
     end
 
 
