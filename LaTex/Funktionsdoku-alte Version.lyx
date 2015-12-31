@@ -1,8 +1,7 @@
-#LyX 2.2 created this file. For more info see http://www.lyx.org/
-\lyxformat 503
+#LyX 2.1 created this file. For more info see http://www.lyx.org/
+\lyxformat 474
 \begin_document
 \begin_header
-\origin unavailable
 \textclass article
 \use_default_options true
 \maintain_unincluded_children false
@@ -10,16 +9,16 @@
 \language_package default
 \inputencoding auto
 \fontencoding global
-\font_roman "default" "default"
-\font_sans "default" "default"
-\font_typewriter "default" "default"
-\font_math "auto" "auto"
+\font_roman default
+\font_sans default
+\font_typewriter default
+\font_math auto
 \font_default_family default
 \use_non_tex_fonts false
 \font_sc false
 \font_osf false
-\font_sf_scale 100 100
-\font_tt_scale 100 100
+\font_sf_scale 100
+\font_tt_scale 100
 \graphics default
 \default_output_format default
 \output_sync 0
@@ -71,77 +70,6 @@
 
 \begin_layout Section
 Funktionsdokumentation
-\end_layout
-
-\begin_layout Subsection
-Funktion whatToDo
-\end_layout
-
-\begin_layout Subsubsection
-Syntax
-\end_layout
-
-\begin_layout LyX-Code
-whatToDo()
-\end_layout
-
-\begin_layout Subsubsection
-Beschreibung
-\end_layout
-
-\begin_layout Standard
-Diese Funktion entscheidet in jedem Rechenschritt, ob unser Spaceball tanken,
- angreifen oder verteidigen soll.
- Die entsprechenden Funktionen (attackEnemy(), fleeEnemy(), CreatePathAllTanken(
-) + doesEnemyGetTanke()) werden dann aufgerufen.
-\end_layout
-
-\begin_layout Subsection
-Funktion initSpaceall
-\end_layout
-
-\begin_layout Subsubsection
-Syntax
-\end_layout
-
-\begin_layout LyX-Code
-initSpaceBall()
-\end_layout
-
-\begin_layout Subsubsection
-Beschreibung
-\end_layout
-
-\begin_layout Standard
-Diese Funktion wird einmal am Anfang des Spiels aufgerufen und setzt die
- Anfangswerte unserer persistend Variablen.
- Außerdem werden unsere .mex-Dateien kompiliert, sofern dies erwünscht ist
- (constCompiling==true).
-\end_layout
-
-\begin_layout Subsection
-Funktion gameChangeHandler
-\end_layout
-
-\begin_layout Subsubsection
-Syntax
-\end_layout
-
-\begin_layout LyX-Code
-gameChangeHandler()
-\end_layout
-
-\begin_layout Subsubsection
-Beschreibung
-\end_layout
-
-\begin_layout Standard
-Diese Funktion wird in jedem Rechenschritt aufgerufen.
- Innerhalb dieser Funktion werden verschiedene Werte geprüft und bei Änderungen
- dieser Werte werden Funktionen aufgerufen.
- Unser aktueller Pfad wird beim Verschwinden einer Mine aktualisiert (resimplify
-Waypoints()) und beim Verschwinden einer Tankstelle wird CreatePathAllTanken()
- ausgeführt.
 \end_layout
 
 \begin_layout Subsection
@@ -226,6 +154,10 @@ CellArray waypoints
 Die Wegpunkte vom Start zum Ziel um die Minen herum.
  Die Wegpunkte sind sehr nah beieinander.
  Durch SimplifyPath lässt sich die Wegpunktliste auf das Wesentliche kürzen.
+\end_layout
+
+\begin_layout LyX-Code
+
 \end_layout
 
 \begin_layout Subsection
@@ -2456,53 +2388,6 @@ boolean walkable
 \begin_layout Standard
 ist true, wenn sich keine Kollisionsobjekte im gegebenen Bereich befinden
  - ansonsten false
-\end_layout
-
-\begin_layout Subsection
-Funktion CreatePathAllTanken
-\end_layout
-
-\begin_layout Subsubsection
-Syntax
-\end_layout
-
-\begin_layout LyX-Code
- CreatePathAllTanken()
-\end_layout
-
-\begin_layout Subsubsection
-Beschreibung
-\end_layout
-
-\begin_layout Standard
-Diese Funktion ruft die ausgelagerte Funktion esc_find_tanke auf, berechnet
- den Weg zwischen den dort ausgegebenen Punkten und fügt diesen der p_waypointLi
-st Variable hinzu.
- Außerdem wird geprüft, ob sich dadurch die erste Tankstelle ändert, was
- bei Bedarf verhindert wird.
-\end_layout
-
-\begin_layout Subsection
-Funktion doesEnemyGetTanke
-\end_layout
-
-\begin_layout Subsubsection
-Syntax
-\end_layout
-
-\begin_layout LyX-Code
- doesEnemyGetTanke()
-\end_layout
-
-\begin_layout Subsubsection
-Beschreibung
-\end_layout
-
-\begin_layout Standard
-Solange wir im Tank-Modus sind wird diese Funktion in jedem Rechenschritt
- aufgerufen.
- Bei Bedarf wird in den competitionMode geschaltet oder eine Tankstelle
- ignoriert.
 \end_layout
 
 \end_body
