@@ -3,6 +3,53 @@
 \begin_document
 \begin_header
 \textclass article
+\begin_preamble
+\usepackage{listings}
+\usepackage{color}
+\usepackage{hyperref} % Link Ränder weglassen
+\hypersetup{
+    colorlinks=true,
+    linkcolor=black,
+    citecolor=black,
+    filecolor=black,
+    urlcolor=black,
+}
+
+\definecolor{mygreen}{rgb}{0,0.6,0}
+\definecolor{bgcolor}{gray}{0.95}
+\definecolor{gray}{rgb}{0.5,0.5,0.5}
+\definecolor{lightgray}{gray}{0.8}
+\definecolor{mymauve}{rgb}{0.58,0,0.82}
+
+
+\lstset{ %
+  backgroundcolor=\color{bgcolor},   % choose the background color; you must add \usepackage{color} or \usepackage{xcolor}
+  basicstyle=\footnotesize,        % the size of the fonts that are used for the code
+  breakatwhitespace=false,         % sets if automatic breaks should only happen at whitespace
+  breaklines=true,                 % sets automatic line breaking
+  captionpos=b,                    % sets the caption-position to bottom
+  commentstyle=\color{mygreen},    % comment style
+  deletekeywords={...},            % if you want to delete keywords from the given language
+  escapeinside={\%*}{*)},          % if you want to add LaTeX within your code
+  extendedchars=true,              % lets you use non-ASCII characters; for 8-bits encodings only, does not work with UTF-8
+  frame=none,	                   % adds a frame around the code
+  keepspaces=true,                 % keeps spaces in text, useful for keeping indentation of code (possibly needs columns=flexible)
+  keywordstyle=\color{blue},       % keyword style
+  language=Matlab,                 % the language of the code
+  otherkeywords={*,...},           % if you want to add more keywords to the set
+  numbers=none,                    % where to put the line-numbers; possible values are (none, left, right)
+  numbersep=5pt,                   % how far the line-numbers are from the code
+  numberstyle=\tiny\color{gray}, % the style that is used for the line-numbers
+  rulecolor=\color{lightgray},         % if not set, the frame-color may be changed on line-breaks within not-black text (e.g. comments (green here))
+  showspaces=false,                % show spaces everywhere adding particular underscores; it overrides 'showstringspaces'
+  showstringspaces=false,          % underline spaces within strings only
+  showtabs=false,                  % show tabs within strings adding particular underscores
+  stepnumber=1,                    % the step between two line-numbers. If it's 1, each line will be numbered
+  stringstyle=\color{mymauve},     % string literal style
+  tabsize=2,	                   % sets default tabsize to 2 spaces
+  title=\lstname                   % show the filename of files included with \lstinputlisting; also try caption instead of title
+}
+\end_preamble
 \use_default_options true
 \begin_modules
 theorems-ams
@@ -10,7 +57,7 @@ eqs-within-sections
 figs-within-sections
 \end_modules
 \maintain_unincluded_children false
-\language english
+\language ngerman
 \language_package default
 \inputencoding auto
 \fontencoding global
@@ -31,7 +78,16 @@ figs-within-sections
 \index_command default
 \paperfontsize default
 \spacing single
-\use_hyperref false
+\use_hyperref true
+\pdf_bookmarks true
+\pdf_bookmarksnumbered false
+\pdf_bookmarksopen false
+\pdf_bookmarksopenlevel 1
+\pdf_breaklinks false
+\pdf_pdfborder false
+\pdf_colorlinks false
+\pdf_backref false
+\pdf_pdfusetitle true
 \papersize default
 \use_geometry false
 \use_package amsmath 1
@@ -61,7 +117,7 @@ figs-within-sections
 \tocdepth 1
 \paragraph_separation indent
 \paragraph_indentation default
-\quotes_language english
+\quotes_language german
 \papercolumns 1
 \papersides 1
 \paperpagestyle default
@@ -104,9 +160,11 @@ en, welche über die statistics.m Datei aufgerufen wird.
 \end_layout
 
 \begin_layout Section
-statistics.m - Parameterdeklaration und Übergabe an die Funktion 
+Parameterdeklaration in 
 \noun on
 statistics.m
+\noun default
+ 
 \end_layout
 
 \begin_layout Standard
@@ -118,6 +176,12 @@ Es ist zu empfehlen, dass in spaceballs.m die Zeitrafferfunktion aktiviert
 \end_layout
 
 \begin_layout LyX-Code
+\begin_inset listings
+inline false
+status open
+
+\begin_layout LyX-Code
+
 spiel.zeitraffer_checkbox_anfangswert = true;
 \end_layout
 
@@ -125,17 +189,14 @@ spiel.zeitraffer_checkbox_anfangswert = true;
 
 \end_layout
 
-\begin_layout LyX-Code
-%% Spielfeld grafisch aktualisieren
-\end_layout
+\end_inset
 
-\begin_layout LyX-Code
-spielfeld_aktualisieren (spiel, video);
+
 \end_layout
 
 \begin_layout Standard
-Außerdem ist der komplette Initialisierungs Abschnitt in spaceballs.m auszukommen
-tieren.
+Außerdem ist der komplette Initialisierungsabschnitt in spaceballs.m auszukomment
+ieren.
 \begin_inset Newline newline
 \end_inset
 
@@ -155,7 +216,7 @@ Nachfolgend können zwischen drei unterschiedlichen Ansätzen zur Erhebung
 \emph on
 beliebige
 \emph default
- Zufallswerte, Parameter deklaration.
+ Zufallswerte, Parameter Deklaration.
 \begin_inset Newline newline
 \end_inset
 
@@ -168,10 +229,17 @@ Die eigene Farbe und die Anzahl der spaceballs Durchläufe wird festgelegt:
 \end_layout
 
 \begin_layout LyX-Code
+\begin_inset listings
+inline false
+status open
+
+\begin_layout LyX-Code
+
 meineFarbe = 'blau';
 \end_layout
 
 \begin_layout LyX-Code
+
 Durchgaenge = 40;
 \end_layout
 
@@ -180,7 +248,18 @@ Durchgaenge = 40;
 \end_layout
 
 \begin_layout LyX-Code
-clc stats(Durchgaenge, meineFarbe, 2);
+
+clc 
+\end_layout
+
+\begin_layout LyX-Code
+
+stats(Durchgaenge, meineFarbe, 2);
+\end_layout
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Labeling
@@ -197,7 +276,23 @@ Dient z.b als Überprüfungsverfahren nach einer Veränderung in beschleunigung.
 \end_layout
 
 \begin_layout LyX-Code
-clc stats([], [], 1);
+\begin_inset listings
+inline false
+status open
+
+\begin_layout Plain Layout
+
+clc 
+\end_layout
+
+\begin_layout Plain Layout
+
+stats([], [], 1);
+\end_layout
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Labeling
@@ -215,11 +310,27 @@ Hierbei werden explizit nur die Seeds, bei denen verloren oder unentschieden
 \end_layout
 
 \begin_layout LyX-Code
-clc stats([], [], 0);
+\begin_inset listings
+inline false
+status open
+
+\begin_layout Plain Layout
+
+clc 
+\end_layout
+
+\begin_layout Plain Layout
+
+stats([], [], 0);
+\end_layout
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Section
-stats.m - Arbeitsweise und Aufbau der Funktion
+Arbeitsweise und Aufbau der Funktion stats.m
 \end_layout
 
 \begin_layout Standard
@@ -233,13 +344,13 @@ Durchgaenge, Farbe, seedSource
 
 \end_inset
 
-, die in 1 festgelegt wurden, wird geprüft welche Spielfeldszufallswerte
+, die in 1 festgelegt wurden, wird geprüft welche Spielfeldzufallswerte
  (Seeds) für die laufende Statistikerhebung benötigt werden.
 \begin_inset Foot
 status collapsed
 
 \begin_layout Plain Layout
-Dazu sei hier schon vorweg erwäht, dass zum Einen problematische Seeds,
+Dazu sei hier schon vorweg erwähnt, dass zum Einen problematische Seeds,
  zweitens aber auch alle verwendeten Seeds in jeweils einer .mat Datei gespeicher
 t werden.
 \end_layout
@@ -251,12 +362,112 @@ t werden.
 \end_layout
 
 \begin_layout LyX-Code
-if seedSource == 0    load('seedsFaulty.mat')  if isempty(seedsFaulty)  
-   disp ('Keine Seeds vorhanden')     return  end    seedNum = length(seedsFault
-y);    Durchgaenge = seedNum;    Farbe = Farbe;    rng(zw);     elseif seedSourc
-e == 1    load('seedsAll.mat')     if isempty(seedsAll)     disp ('Keine
- Seeds vorhanden')     return  end    seedNum = length(seedsAll);    Durchgaenge
- = seedNum;    Farbe = Farbe;    rng(zw);     
+\begin_inset listings
+inline false
+status open
+
+\begin_layout Plain Layout
+
+if seedSource == 0
+\end_layout
+
+\begin_layout Plain Layout
+
+   load('seedsFaulty.mat')
+\end_layout
+
+\begin_layout Plain Layout
+
+	if isempty(seedsFaulty)
+\end_layout
+
+\begin_layout Plain Layout
+
+    	disp ('Keine Seeds vorhanden')
+\end_layout
+
+\begin_layout Plain Layout
+
+    	return
+\end_layout
+
+\begin_layout Plain Layout
+
+ 	end
+\end_layout
+
+\begin_layout Plain Layout
+
+   seedNum = length(seedsFaulty);
+\end_layout
+
+\begin_layout Plain Layout
+
+   Durchgaenge = seedNum;
+\end_layout
+
+\begin_layout Plain Layout
+
+   Farbe = Farbe;
+\end_layout
+
+\begin_layout Plain Layout
+
+   rng(zw);
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+elseif seedSource == 1
+\end_layout
+
+\begin_layout Plain Layout
+
+   load('seedsAll.mat')
+\end_layout
+
+\begin_layout Plain Layout
+
+	if isempty(seedsAll)
+\end_layout
+
+\begin_layout Plain Layout
+
+    	disp ('Keine Seeds vorhanden')
+\end_layout
+
+\begin_layout Plain Layout
+
+    	return
+\end_layout
+
+\begin_layout Plain Layout
+
+ 	end
+\end_layout
+
+\begin_layout Plain Layout
+
+   seedNum = length(seedsAll);
+\end_layout
+
+\begin_layout Plain Layout
+
+   Durchgaenge = seedNum;
+\end_layout
+
+\begin_layout Plain Layout
+
+   Farbe = Farbe;    rng(zw);
+\end_layout
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
@@ -283,48 +494,151 @@ Dem wurde insofern vorgebeugt, dass der Nutzer in statistics.m nur noch seine
 \end_layout
 
 \begin_layout LyX-Code
-elseif seedSource == 2    Durchgaenge = Durchgaenge;    zwVar = rng('shuffle');
-    zw = zwVar.Seed;     else     disp('Fehler! Keine Seedquelle angegeben')
-    return; end
+\begin_inset listings
+inline false
+status open
+
+\begin_layout Plain Layout
+
+elseif seedSource == 2
 \end_layout
 
-\begin_layout LyX-Code
+\begin_layout Plain Layout
+
+   Durchgaenge = Durchgaenge;
+\end_layout
+
+\begin_layout Plain Layout
+
+   zwVar = rng('shuffle');
+\end_layout
+
+\begin_layout Plain Layout
+
+   zw = zwVar.Seed;
+\end_layout
+
+\begin_layout Plain Layout
 
 \end_layout
 
-\begin_layout LyX-Code
-else disp('Fehler! Keine Seedquelle angegeben') return; end
+\begin_layout Plain Layout
+
+else
+\end_layout
+
+\begin_layout Plain Layout
+
+   disp('Fehler! Keine Seedquelle angegeben')
+\end_layout
+
+\begin_layout Plain Layout
+
+   return;
+\end_layout
+
+\begin_layout Plain Layout
+
+end
+\end_layout
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
 Anschließend wird eine leere Datentabelle generiert, die stets eine Zeile
  mehr hat, als Durchgänge definiert wurden.
  Damit kann eine Spalten-beschreibende Kopfzeile untergebracht werden, die
- sich wie folgt darstellt:
+ sich wie folgt darstellt
+\begin_inset Foot
+status collapsed
+
+\begin_layout Plain Layout
+Für Spalte sechs ist keine Benennung nötig, da sie ohnehin nicht visuell
+ ausgegeben wird
+\end_layout
+
+\end_inset
+
+:
 \end_layout
 
 \begin_layout LyX-Code
-data = cell(Durchgaenge+1,6); data{1,1} = 'Durchlauf:'; data{1,2} = 'Ereignis:';
- data{1,3} = 'Grund f.
- Ergeinis:'; data{1,4} = 'Zeit:'; data{1,5} = 'Seed:'; % data{1,6}: 0=Verloren,
- 1=Gewonnen, 1.1=Gewonnen durch Gegner getroffen, 2=Crash in Mine, 3=Crash
- in Bande, 4=me.getankt>enemy.getankt, 5=me.getankt<enemy.getankt
+\begin_inset listings
+inline false
+status open
+
+\begin_layout Plain Layout
+
+data = cell(Durchgaenge+1,6);
+\end_layout
+
+\begin_layout Plain Layout
+
+data{1,1} = 'Durchlauf:';
+\end_layout
+
+\begin_layout Plain Layout
+
+data{1,2} = 'Ereignis:';
+\end_layout
+
+\begin_layout Plain Layout
+
+data{1,3} = 'Grund f.
+ Ergeinis:';
+\end_layout
+
+\begin_layout Plain Layout
+
+data{1,4} = 'Zeit:';
+\end_layout
+
+\begin_layout Plain Layout
+
+data{1,5} = 'Seed:';
+\end_layout
+
+\begin_layout Plain Layout
+
+% data{1,6}: 0=Verloren, 1=Gewonnen, 1.1=Gewonnen durch Gegner getroffen,
+ 2=Crash in Mine, 3=Crash in Bande, 4=me.getankt>enemy.getankt, 5=me.getankt<enemy.g
+etankt
+\end_layout
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
 Da es durchaus interessant ist zu erfahren, wie lange Matlab in einem großen
  Statistikdurchlauf über z.B 1000 Durchgänge bereits gerechnet hat, wird
  eine Variable für die Gesamtzeit eingeführt.
- Unteranderem diese Information wird am Ende eines jeden spaceball.m Aufrufs
+ Unter anderem diese Information wird am Ende eines jeden spaceball.m Aufrufs
  ausgegeben.
 \end_layout
 
 \begin_layout LyX-Code
+\begin_inset listings
+inline false
+status open
+
+\begin_layout LyX-Code
+
 % Rechenzeitvariable einführen
 \end_layout
 
 \begin_layout LyX-Code
+
 totalTime = 0;
+\end_layout
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
@@ -332,16 +646,28 @@ Nachdem nun die vorerst benötigten Variablen deklariert wurden, wird folgend
  die Hauptschleife geöffnet.
  Einfach formuliert, wird dort spaceballs.m eben so oft ausgeführt, wie es
  vom Nutzer gewünscht wurde.
- Gleichzeitig werden die eingetretenden Ereignisse in die zuvor generierte
+ Gleichzeitig werden die eingetretenen Ereignisse in die zuvor generierte
  Datentabelle geschrieben.
 \end_layout
 
 \begin_layout LyX-Code
+\begin_inset listings
+inline false
+status open
+
+\begin_layout LyX-Code
+
 % Hauptschleife
 \end_layout
 
 \begin_layout LyX-Code
+
 for i = 1 : Durchgaenge
+\end_layout
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
@@ -356,8 +682,11 @@ er zufälliger Seed generiert werden
 status collapsed
 
 \begin_layout Plain Layout
-Da der RNG für diesen Ansatz zuvor auf Shuffle gesetzt wurde, entsteht tatsächli
-ch ein komplett zufälliger Wert.
+Da der RNG für diesen Ansatz zuvor auf 
+\emph on
+Shuffle
+\emph default
+ gesetzt wurde, entsteht tatsächlich ein komplett zufälliger Wert.
  
 \end_layout
 
@@ -370,21 +699,145 @@ ch ein komplett zufälliger Wert.
 \end_layout
 
 \begin_layout LyX-Code
-% Alle Fenster bis auf das letzte Spaceballspielfeldfenster schließen close
- all
+\begin_inset listings
+inline false
+status open
+
+\begin_layout LyX-Code
+
+% Alle Fenster bis auf das letzte Spaceballspielfeldfenster schließen
 \end_layout
 
 \begin_layout LyX-Code
-% Wert für r ermitteln if seedSource == 0 r = seedsFaulty(i,1); elseif seedSourc
-e == 1 r = seedsAll(i,1); elseif seedSource == 2 r = round(rand(1)*1000000);
- end 
+
+close all
 \end_layout
 
 \begin_layout LyX-Code
-rng(r) spaceballs % Zuweisung der Farbe if strcmp(Farbe,'rot') me = spiel.rot;
- enemy = spiel.blau; myName = spiel.rot.name; enemyName = spiel.blau.name; else
- me = spiel.blau; enemy = spiel.rot; myName = spiel.blau.name; enemyName = spiel.rot.n
-ame; end
+
+\end_layout
+
+\begin_layout LyX-Code
+
+% Wert für r ermitteln 
+\end_layout
+
+\begin_layout LyX-Code
+
+if seedSource == 0
+\end_layout
+
+\begin_layout LyX-Code
+
+	r = seedsFaulty(i,1);
+\end_layout
+
+\begin_layout LyX-Code
+
+elseif seedSource == 1
+\end_layout
+
+\begin_layout LyX-Code
+
+	r = seedsAll(i,1);
+\end_layout
+
+\begin_layout LyX-Code
+
+elseif seedSource == 2
+\end_layout
+
+\begin_layout LyX-Code
+
+	r = round(rand(1)*1000000);
+\end_layout
+
+\begin_layout LyX-Code
+
+end 
+\end_layout
+
+\begin_layout LyX-Code
+
+\end_layout
+
+\begin_layout LyX-Code
+
+rng(r)
+\end_layout
+
+\begin_layout LyX-Code
+
+spaceballs 
+\end_layout
+
+\begin_layout LyX-Code
+
+\end_layout
+
+\begin_layout LyX-Code
+
+% Zuweisung der Farbe 
+\end_layout
+
+\begin_layout LyX-Code
+
+if strcmp(Farbe,'rot')
+\end_layout
+
+\begin_layout LyX-Code
+
+	me = spiel.rot;
+\end_layout
+
+\begin_layout LyX-Code
+
+	enemy = spiel.blau;
+\end_layout
+
+\begin_layout LyX-Code
+
+	myName = spiel.rot.name;
+\end_layout
+
+\begin_layout LyX-Code
+
+	enemyName = spiel.blau.name;
+\end_layout
+
+\begin_layout LyX-Code
+
+else 
+\end_layout
+
+\begin_layout LyX-Code
+
+	me = spiel.blau;
+\end_layout
+
+\begin_layout LyX-Code
+
+	enemy = spiel.rot;
+\end_layout
+
+\begin_layout LyX-Code
+
+	myName = spiel.blau.name;
+\end_layout
+
+\begin_layout LyX-Code
+
+	enemyName = spiel.rot.name;
+\end_layout
+
+\begin_layout LyX-Code
+
+end
+\end_layout
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
@@ -414,7 +867,18 @@ belegt
 \end_layout
 
 \begin_layout LyX-Code
-data{i+1,1} = num2str(i); % Datentabelle füllen
+\begin_inset listings
+inline false
+status open
+
+\begin_layout LyX-Code
+
+% Datentabelle füllen
+\end_layout
+
+\begin_layout LyX-Code
+
+data{i+1,1} = num2str(i);
 \end_layout
 
 \begin_layout LyX-Code
@@ -422,11 +886,68 @@ data{i+1,1} = num2str(i); % Datentabelle füllen
 \end_layout
 
 \begin_layout LyX-Code
-if me.punkte == 1 && ~isError            data{i+1,2} = 'Gewonnnen';     
-       data{i+1,3} = enemy.ereignis;            data{i+1,4} = spiel.i_t/100;
-            data{i+1,5} = r;            data{i+1,6} = 1;            if strcmp(me.
-ereignis,'Rot trifft Blau.') || strcmp(me.ereignis,'Blau trifft Rot.') data{i+1,6}
- = 1.1;            end
+
+if me.punkte == 1 && ~isError
+\end_layout
+
+\begin_layout LyX-Code
+
+           data{i+1,2} = 'Gewonnnen';
+\end_layout
+
+\begin_layout LyX-Code
+
+           data{i+1,3} = enemy.ereignis;
+\end_layout
+
+\begin_layout LyX-Code
+
+           data{i+1,4} = spiel.i_t/100;
+\end_layout
+
+\begin_layout LyX-Code
+
+           data{i+1,5} = r;
+\end_layout
+
+\begin_layout LyX-Code
+
+           data{i+1,6} = 1;
+\end_layout
+
+\begin_layout LyX-Code
+
+            if strcmp(me.ereignis,'Rot trifft Blau.') || strcmp(me.ereignis,'Blau
+ trifft Rot.')
+\end_layout
+
+\begin_layout LyX-Code
+
+            data{i+1,6} = 1.1;
+\end_layout
+
+\begin_layout LyX-Code
+
+           end
+\end_layout
+
+\begin_layout LyX-Code
+
+...
+\end_layout
+
+\begin_layout LyX-Code
+
+\end_layout
+
+\begin_layout LyX-Code
+
+end
+\end_layout
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
@@ -459,7 +980,28 @@ Normalerweise würde Matlab den kompletten Berechnungsvorgang abbrechen.
 \end_layout
 
 \begin_layout LyX-Code
-isError = false; try spaceballs; catch isError = true; end
+\begin_inset listings
+inline false
+status open
+
+\begin_layout LyX-Code
+
+isError = false;
+\end_layout
+
+\begin_layout LyX-Code
+
+try spaceballs;
+\end_layout
+
+\begin_layout LyX-Code
+
+catch isError = true;
+\end_layout
+
+\begin_layout LyX-Code
+
+end
 \end_layout
 
 \begin_layout LyX-Code
@@ -467,14 +1009,44 @@ isError = false; try spaceballs; catch isError = true; end
 \end_layout
 
 \begin_layout LyX-Code
-else data{i+1,2} = 'Error'; data{i+1,3} = me.ereignis; data{i+1,4} = spiel.i_t/100
-; data{i+1,5} = r; data{i+1,6} = 99; end
+
+else data{i+1,2} = 'Error';
+\end_layout
+
+\begin_layout LyX-Code
+
+data{i+1,3} = me.ereignis;
+\end_layout
+
+\begin_layout LyX-Code
+
+data{i+1,4} = spiel.i_t/100;
+\end_layout
+
+\begin_layout LyX-Code
+
+data{i+1,5} = r;
+\end_layout
+
+\begin_layout LyX-Code
+
+data{i+1,6} = 99;
+\end_layout
+
+\begin_layout LyX-Code
+
+end
+\end_layout
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
 Am Ende der Hauptschleife werden Informationsanzeigen zum aktuellen Fortschritt
  definiert.
- Dazu gehört der akutell verwendete Seed, die Rechenzeit und eine prozentuale
+ Dazu gehört der aktuell verwendete Seed, die Rechenzeit und eine prozentuale
  Fortschrittsanzeige.
  Zudem werden - bis auf einige Ausnahmen - alle Variablen aus dem Workspace
  gelöscht, da spaceballs.m ohne diese Bereinigung nicht erneut funktionieren
@@ -493,56 +1065,320 @@ ert wurde.
 \end_layout
 
 \begin_layout LyX-Code
+\begin_inset listings
+inline false
+status open
+
+\begin_layout Plain Layout
+
 clearvars -except data Durchgaenge Farbe myName enemyName zw zwVar totalTime
  seedSource seedsFaulty seedsAll
 \end_layout
 
+\end_inset
+
+
+\end_layout
+
 \begin_layout Standard
 Damit die Ausnahmen des clearvars Befehls nicht überhandnehmen, werden erst
- nach der Hauptforschleife weitere Variablend eklariert, die zur Auswertung
+ nach der Hauptforschleife weitere Variablen deklariert, die zur Auswertung
  heran gezogen werden.
 \end_layout
 
 \begin_layout LyX-Code
-sumWins = 0; sumLose = 0; sumAttack = 0; sumDefense = 0; sumERROR = 0; gegErwisc
-ht = 0; MineGetr = 0; BandeGetr = 0; time = 0; loseSeeds = cell(sumLose,1);
- unentDefense = cell(sumDefense,1); unentAttack = cell(sumAttack,1);
+\begin_inset listings
+inline false
+status open
+
+\begin_layout Plain Layout
+
+sumWins = 0;
+\end_layout
+
+\begin_layout Plain Layout
+
+sumLose = 0;
+\end_layout
+
+\begin_layout Plain Layout
+
+sumAttack = 0;
+\end_layout
+
+\begin_layout Plain Layout
+
+sumDefense = 0;
+\end_layout
+
+\begin_layout Plain Layout
+
+sumERROR = 0;
+\end_layout
+
+\begin_layout Plain Layout
+
+gegErwischt = 0;
+\end_layout
+
+\begin_layout Plain Layout
+
+MineGetr = 0;
+\end_layout
+
+\begin_layout Plain Layout
+
+BandeGetr = 0;
+\end_layout
+
+\begin_layout Plain Layout
+
+time = 0;
+\end_layout
+
+\begin_layout Plain Layout
+
+loseSeeds = cell(sumLose,1);
+\end_layout
+
+\begin_layout Plain Layout
+
+unentDefense = cell(sumDefense,1);
+\end_layout
+
+\begin_layout Plain Layout
+
+unentAttack = cell(sumAttack,1);
+\end_layout
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
-In der anschließenden Auswertungsschleife werden die eingetretenden Eregnisse
+In der anschließenden Auswertungsschleife werden die eingetretenen Ereignisse
  jeweils aufsummiert, die Durchschnittszeit berechnet sowie problematische
  Seeds gespeichert.
 \end_layout
 
 \begin_layout LyX-Code
-% Auswertungsschleife for i = 1 : Durchgaenge % Ereignissummen Berechnen
- if data{i+1,6} == 1 sumWins = sumWins + 1; elseif data{i+1,6} == 1.1 sumWins
- = sumWins + 1; gegErwischt = gegErwischt + 1; elseif data{i+1,6} == 0 sumLose
- = sumLose + 1; elseif data{i+1,6} == 2 sumLose = sumLose + 1; MineGetr
- = MineGetr + 1; elseif data{i+1,6} == 3 sumLose = sumLose + 1; BandeGetr
- = BandeGetr + 1; elseif data{i+1,6} == 4 sumAttack = sumAttack + 1; elseif
- data{i+1,6} == 5 sumDefense = sumDefense + 1; elseif data{i+1,6} == 99
- sumERROR = sumERROR + 1; end % Durchschnittszeit berechnen if data{i+1,6}
- == 1 || 1.1 time = time + data{i+1,4}; end
+\begin_inset listings
+inline false
+status open
+
+\begin_layout LyX-Code
+
+% Auswertungsschleife 
 \end_layout
 
 \begin_layout LyX-Code
-medianTime = time/sumWins; % Relevante Seeds speichern if data{i+1,6} ==
- 0 loseSeeds{i,1} = data{i+1,5}; elseif data{i+1,6} == 2 loseSeeds{i,1}
- = data{i+1,5}; elseif data{i+1,6} == 3 loseSeeds{i,1} = data{i+1,5};
+
+for i = 1 : Durchgaenge % Ereignissummen Berechnen 
 \end_layout
 
 \begin_layout LyX-Code
-elseif data{i+1,6} == 4 unentAttack{i,1} = data{i+1,5};
+
+	if data{i+1,6} == 1
 \end_layout
 
 \begin_layout LyX-Code
-elseif data{i+1,6} == 5 unentDefense{i,1} = data{i+1,5}; end 
+
+		sumWins = sumWins + 1;
 \end_layout
 
 \begin_layout LyX-Code
+
+	elseif data{i+1,6} == 1.1
+\end_layout
+
+\begin_layout LyX-Code
+
+		sumWins = sumWins + 1;
+\end_layout
+
+\begin_layout LyX-Code
+
+		gegErwischt = gegErwischt + 1;
+\end_layout
+
+\begin_layout LyX-Code
+
+	elseif data{i+1,6} == 0
+\end_layout
+
+\begin_layout LyX-Code
+
+		sumLose = sumLose + 1;
+\end_layout
+
+\begin_layout LyX-Code
+
+	elseif data{i+1,6} == 2
+\end_layout
+
+\begin_layout LyX-Code
+
+		sumLose = sumLose + 1;
+\end_layout
+
+\begin_layout LyX-Code
+
+		MineGetr = MineGetr + 1;
+\end_layout
+
+\begin_layout LyX-Code
+
+	elseif data{i+1,6} == 3
+\end_layout
+
+\begin_layout LyX-Code
+
+		sumLose = sumLose + 1;
+\end_layout
+
+\begin_layout LyX-Code
+
+		BandeGetr = BandeGetr + 1;
+\end_layout
+
+\begin_layout LyX-Code
+
+	elseif data{i+1,6} == 4
+\end_layout
+
+\begin_layout LyX-Code
+
+		sumAttack = sumAttack + 1;
+\end_layout
+
+\begin_layout LyX-Code
+
+	elseif data{i+1,6} == 5
+\end_layout
+
+\begin_layout LyX-Code
+
+		sumDefense = sumDefense + 1;
+\end_layout
+
+\begin_layout LyX-Code
+
+	elseif data{i+1,6} == 99
+\end_layout
+
+\begin_layout LyX-Code
+
+		sumERROR = sumERROR + 1;
+\end_layout
+
+\begin_layout LyX-Code
+
+	end 
+\end_layout
+
+\begin_layout LyX-Code
+	
+\end_layout
+
+\begin_layout LyX-Code
+
+	% Durchschnittszeit berechnen
+\end_layout
+
+\begin_layout LyX-Code
+
+	if data{i+1,6} == 1 || 1.1 
+\end_layout
+
+\begin_layout LyX-Code
+
+		time = time + data{i+1,4};
+\end_layout
+
+\begin_layout LyX-Code
+
+	end
+\end_layout
+
+\begin_layout LyX-Code
+
+	
+\end_layout
+
+\begin_layout LyX-Code
+
+	medianTime = time/sumWins;
+\end_layout
+
+\begin_layout LyX-Code
+
+	% Relevante Seeds speichern
+\end_layout
+
+\begin_layout LyX-Code
+
+	if data{i+1,6} == 0
+\end_layout
+
+\begin_layout LyX-Code
+
+		loseSeeds{i,1} = data{i+1,5};
+\end_layout
+
+\begin_layout LyX-Code
+
+	elseif data{i+1,6} == 2
+\end_layout
+
+\begin_layout LyX-Code
+
+		loseSeeds{i,1} = data{i+1,5};
+\end_layout
+
+\begin_layout LyX-Code
+
+	elseif data{i+1,6} == 3
+\end_layout
+
+\begin_layout LyX-Code
+
+		loseSeeds{i,1} = data{i+1,5};
+\end_layout
+
+\begin_layout LyX-Code
+
+	elseif data{i+1,6} == 4
+\end_layout
+
+\begin_layout LyX-Code
+
+		unentAttack{i,1} = data{i+1,5};
+\end_layout
+
+\begin_layout LyX-Code
+
+	elseif data{i+1,6} == 5
+\end_layout
+
+\begin_layout LyX-Code
+
+		unentDefense{i,1} = data{i+1,5};
+\end_layout
+
+\begin_layout LyX-Code
+
+	end 
+\end_layout
+
+\begin_layout LyX-Code
+
 end
+\end_layout
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
@@ -556,24 +1392,86 @@ neten Zufallswert zw gespeichert.
 \end_layout
 
 \begin_layout LyX-Code
+\begin_inset listings
+inline false
+status open
+
+\begin_layout LyX-Code
+
 time = horzcat('Gesamtrechenzeit: ', num2str(round(totalTime/60,1)), ' Minuten')
-; Gegner = horzcat(myName, ' VS ', enemyName); SatzA = horzcat('Von ', num2str(D
-urchgaenge), ' Spielen wurden ', num2str(sumWins), ' gewonnen'); SatzAB
- = horzcat('Von ', num2str(Durchgaenge), ' Spielen wurden ', num2str(sumWins),
- ' in durchschnittlich ', num2str(medianTime), ' Sekunden gewonnen.'); Quote1
- = horzcat('Gewonnen: ', num2str(sumWins/Durchgaenge*100),' %'); Quote2
- = horzcat(' davon den Gegner erwischt: ', num2str(gegErwischt/sumWins*100),'
- %'); Quote3 = horzcat('Verloren: ', num2str(sumLose/Durchgaenge*100),'
- %'); Quote4 = horzcat(' davon in Mine gefahren: ', num2str(MineGetr/sumLose*100
-),' %'); Quote5 = horzcat(' davon in Bande gefahren: ', num2str(BandeGetr/sumLos
-e*100),' %'); Quote6 = horzcat('Unentschieden im Angriff: ', num2str(sumAttack/D
-urchgaenge*100),' %'); Quote7 = horzcat('Unentschieden in der Verteidigung:
- ', num2str(sumDefense/Durchgaenge*100),' %'); Quote8 = horzcat('Error:
- ', num2str(sumERROR/Durchgaenge*100),' %');
+;
 \end_layout
 
 \begin_layout LyX-Code
+
+Gegner = horzcat(myName, ' VS ', enemyName);
+\end_layout
+
+\begin_layout LyX-Code
+
+SatzA = horzcat('Von ', num2str(Durchgaenge), ' Spielen wurden ', num2str(sumWin
+s), ' gewonnen');
+\end_layout
+
+\begin_layout LyX-Code
+
+SatzAB = horzcat('Von ', num2str(Durchgaenge), ' Spielen wurden ', num2str(sumWi
+ns), ' in durchschnittlich ', num2str(medianTime), ' Sekunden gewonnen.');
+\end_layout
+
+\begin_layout LyX-Code
+
+Quote1 = horzcat('Gewonnen: ', num2str(sumWins/Durchgaenge*100),' %');
+\end_layout
+
+\begin_layout LyX-Code
+
+Quote2 = horzcat(' davon den Gegner erwischt: ', num2str(gegErwischt/sumWins*100
+),' %');
+\end_layout
+
+\begin_layout LyX-Code
+
+Quote3 = horzcat('Verloren: ', num2str(sumLose/Durchgaenge*100),' %');
+\end_layout
+
+\begin_layout LyX-Code
+
+Quote4 = horzcat(' davon in Mine gefahren: ', num2str(MineGetr/sumLose*100),'
+ %');
+\end_layout
+
+\begin_layout LyX-Code
+
+Quote5 = horzcat(' davon in Bande gefahren: ', num2str(BandeGetr/sumLose*100),'
+ %');
+\end_layout
+
+\begin_layout LyX-Code
+
+Quote6 = horzcat('Unentschieden im Angriff: ', num2str(sumAttack/Durchgaenge*100
+),' %');
+\end_layout
+
+\begin_layout LyX-Code
+
+Quote7 = horzcat('Unentschieden in der Verteidigung: ', num2str(sumDefense/Durch
+gaenge*100),' %');
+\end_layout
+
+\begin_layout LyX-Code
+
+Quote8 = horzcat('Error: ', num2str(sumERROR/Durchgaenge*100),' %');
+\end_layout
+
+\begin_layout LyX-Code
+
 Statistische_Erhebung = data(:,1:5);
+\end_layout
+
+\end_inset
+
+
 \end_layout
 
 \end_body
