@@ -149,6 +149,7 @@ Das Nodegrid
 
 \begin_layout Standard
 \begin_inset Float figure
+placement h
 wide false
 sideways false
 status collapsed
@@ -172,6 +173,10 @@ Nodegrid
 
 \end_layout
 
+\end_inset
+
+
+\begin_inset Newpage pagebreak
 \end_inset
 
 
@@ -291,6 +296,13 @@ Kosten
 
 \end_layout
 
+\begin_layout Standard
+\begin_inset Newpage pagebreak
+\end_inset
+
+
+\end_layout
+
 \begin_layout Subsection
 Simplify Path
 \end_layout
@@ -304,6 +316,7 @@ Aufgrund dessen, dass unser Spaceball bei jedem Knoten um ein gewisses Maß
 
 \begin_layout Standard
 \begin_inset Float figure
+placement h
 wide false
 sideways false
 status collapsed
