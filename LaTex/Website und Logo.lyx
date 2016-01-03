@@ -1,0 +1,285 @@
+#LyX 2.1 created this file. For more info see http://www.lyx.org/
+\lyxformat 474
+\begin_document
+\begin_header
+\textclass article
+\begin_preamble
+\usepackage{listings}
+\usepackage{color}
+\usepackage{hyperref} % Link Ränder weglassen
+\hypersetup{
+    colorlinks=true,
+    linkcolor=black,
+    citecolor=black,
+    filecolor=black,
+    urlcolor=black,
+}
+
+\definecolor{mygreen}{rgb}{0,0.6,0}
+\definecolor{bgcolor}{gray}{0.95}
+\definecolor{gray}{rgb}{0.5,0.5,0.5}
+\definecolor{lightgray}{gray}{0.8}
+\definecolor{mymauve}{rgb}{0.58,0,0.82}
+
+
+\lstset{ %
+  backgroundcolor=\color{bgcolor},   % choose the background color; you must add \usepackage{color} or \usepackage{xcolor}
+  basicstyle=\footnotesize,        % the size of the fonts that are used for the code
+  breakatwhitespace=false,         % sets if automatic breaks should only happen at whitespace
+  breaklines=true,                 % sets automatic line breaking
+  captionpos=b,                    % sets the caption-position to bottom
+  commentstyle=\color{mygreen},    % comment style
+  deletekeywords={...},            % if you want to delete keywords from the given language
+  escapeinside={\%*}{*)},          % if you want to add LaTeX within your code
+  extendedchars=true,              % lets you use non-ASCII characters; for 8-bits encodings only, does not work with UTF-8
+  frame=none,	                   % adds a frame around the code
+  keepspaces=true,                 % keeps spaces in text, useful for keeping indentation of code (possibly needs columns=flexible)
+  keywordstyle=\color{blue},       % keyword style
+  language=Matlab,                 % the language of the code
+  otherkeywords={*,...},           % if you want to add more keywords to the set
+  numbers=none,                    % where to put the line-numbers; possible values are (none, left, right)
+  numbersep=5pt,                   % how far the line-numbers are from the code
+  numberstyle=\tiny\color{gray}, % the style that is used for the line-numbers
+  rulecolor=\color{lightgray},         % if not set, the frame-color may be changed on line-breaks within not-black text (e.g. comments (green here))
+  showspaces=false,                % show spaces everywhere adding particular underscores; it overrides 'showstringspaces'
+  showstringspaces=false,          % underline spaces within strings only
+  showtabs=false,                  % show tabs within strings adding particular underscores
+  stepnumber=1,                    % the step between two line-numbers. If it's 1, each line will be numbered
+  stringstyle=\color{mymauve},     % string literal style
+  tabsize=2,	                   % sets default tabsize to 2 spaces
+  title=\lstname                   % show the filename of files included with \lstinputlisting; also try caption instead of title
+}
+\end_preamble
+\use_default_options true
+\begin_modules
+theorems-ams
+eqs-within-sections
+figs-within-sections
+\end_modules
+\maintain_unincluded_children false
+\language ngerman
+\language_package default
+\inputencoding auto
+\fontencoding global
+\font_roman default
+\font_sans default
+\font_typewriter default
+\font_math auto
+\font_default_family default
+\use_non_tex_fonts false
+\font_sc false
+\font_osf false
+\font_sf_scale 100
+\font_tt_scale 100
+\graphics default
+\default_output_format default
+\output_sync 0
+\bibtex_command default
+\index_command default
+\paperfontsize default
+\spacing single
+\use_hyperref true
+\pdf_bookmarks true
+\pdf_bookmarksnumbered false
+\pdf_bookmarksopen false
+\pdf_bookmarksopenlevel 1
+\pdf_breaklinks false
+\pdf_pdfborder false
+\pdf_colorlinks false
+\pdf_backref false
+\pdf_pdfusetitle true
+\papersize default
+\use_geometry false
+\use_package amsmath 1
+\use_package amssymb 1
+\use_package cancel 1
+\use_package esint 1
+\use_package mathdots 1
+\use_package mathtools 1
+\use_package mhchem 1
+\use_package stackrel 1
+\use_package stmaryrd 1
+\use_package undertilde 1
+\cite_engine basic
+\cite_engine_type default
+\biblio_style plain
+\use_bibtopic false
+\use_indices false
+\paperorientation portrait
+\suppress_date false
+\justification true
+\use_refstyle 1
+\index Index
+\shortcut idx
+\color #008000
+\end_index
+\secnumdepth 1
+\tocdepth 1
+\paragraph_separation indent
+\paragraph_indentation default
+\quotes_language german
+\papercolumns 1
+\papersides 1
+\paperpagestyle default
+\tracking_changes false
+\output_changes false
+\html_math_output 0
+\html_css_as_file 0
+\html_be_strict false
+\end_header
+
+\begin_body
+
+\begin_layout Section
+Website
+\begin_inset Foot
+status collapsed
+
+\begin_layout Plain Layout
+https://wedontcsharp.wordpress.com/
+\end_layout
+
+\end_inset
+
+ 
+\end_layout
+
+\begin_layout Standard
+Das Ziel der Internetseite ist zum Einen das Semesterprojekt - und viel
+ mehr den Fortschritt - zu dokumentieren.
+ Darüber hinaus soll nachfolgenden Kursen eine Möglichkeit geboten werden,
+ unsere Arbeiten als Informationsquelle heranziehen zu können, um eigene
+ Problematiken gezielter zu lösen.
+ Aufgrund dessen, dass Wordpress mit seinen vielfältigen Möglichkeiten bei
+ der Gestaltung einer Website besonders heraussticht, haben wir uns gegen
+ wix.com, stattdessen für Wordpress entschieden.
+ Wie es sich für professionelle Websites gehört, ist auch unsere Internetseite
+ für mobile Endgeräte ausgelegt.
+ So wird das Theme für Desktopcomputer, Tablets oder Smartphones optisch
+ entsprechend angepasst.
+\begin_inset Newline newline
+\end_inset
+
+Der grundlegende Aufbau der Website ist absichtlich schlicht gehalten.
+ Der Header ist mit unserem Teamnamen 
+\begin_inset Quotes gld
+\end_inset
+
+We don't C#, we MethLab
+\begin_inset Quotes grd
+\end_inset
+
+ versehen, welcher im Einklang mit dem Logo steht.
+ Der konische Farbverlauf von Magenta zu Cyan setzt den einzigen farblichen
+ Akzent.
+ Unter der horizontalen Navigationsleiste befindet sich der eigentliche
+ Content vor hellem Grund, welcher von dem anthraziten Footer geschlossen
+ wird.
+\begin_inset Newline newline
+\end_inset
+
+ Auf der rechten Seite befindet sich eine Suchmaske sowie eine Auflistung
+ der neusten Blogbeiträge, welche wir regelmäßig in Form von Statusupdates
+ veröffentlichten.
+ Ein Countdown timer zeigte die Tage bis zur Abgabe der KI an.
+ Außerdem richteten wir einen YouTube Kanal ein, auf dem wir unkompliziert
+ Videos unserer Spaceball KI hochladen konnten, um diese anschließend auf
+ unserer Internetseite einzubetten.
+ Neben Kontaktdaten und dem Impressum stehen außerdem Informationen über
+ das Spaceballsprojekt und über unser Team zum Abrufen bereit.
+ Selbstverständlich wird die Dokumentation nach Projektabschluss zum Download
+ bereit stehen.
+\begin_inset Newline newline
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section
+Logo und Teamname
+\end_layout
+
+\begin_layout Standard
+Das Logo basiert gänzlich auf den Informationen, die dem Teamnamen zu entnehmen
+ sind.
+ Im Grunde basiert das Logo auf einer Blindenplakette (
+\begin_inset Quotes gld
+\end_inset
+
+We don't see sharp
+\begin_inset Quotes grd
+\end_inset
+
+), wobei die gelb-orangefarbene Plakette mit einer Brille versehen ist,
+ sodass der mehrdeutige Name ("We don't C#, we MethLab") optimal im Logo
+ wieder erkennbar ist.
+ Dadurch erscheint das Logo nun in Smiley ähnlicher Gestalt.
+ Außerdem impliziert der Name, dass wir nicht in C# programmieren, sondern
+ in Matlabs Programmiersprache.
+ Gesprochen lässt der Name (Anfangsteil, Endteil) außerdem einen kausalen
+ Zusammenhang zu ("Wir programmieren nicht in C#, wir MatLab'ben"), wenn
+ man jedoch genau hinschaut, erweitert sich der Interpretationsspielraum
+ um ein Vielfaches.
+ Dazu haben wir dem Smiley die Strukturformel von 
+\emph on
+(S)-N-Methyl-1-phenylpropan-2-amin 
+\emph default
+oder kurz Chrystal Meth angefügt, welche den Korpus der Figur bildet.
+ Wir waren uns im Klaren darüber, dass der Name in Anlehnung an die Droge
+ zu Missverständnissen führen kann.
+ An dieser Stelle sei ausdrücklich gesagt, dass wir uns in jeglicher Form
+ von Crystal Meth und jeglichen anderen Drogen distanzieren und der Name
+ ausschließlich humoristisch zu verstehen ist.
+ 
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+placement h
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\begin_inset Graphics
+	filename D:/Daten (D)/Dropbox/escalators/INFO/Logo/Logo Vector high res + alpha.png
+	lyxscale 5
+	scale 20
+
+\end_inset
+
+
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+Logo 
+\begin_inset Quotes gld
+\end_inset
+
+We don't C#, we MethLab
+\begin_inset Quotes grd
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section
+GitHub
+\end_layout
+
+\end_body
+\end_document
