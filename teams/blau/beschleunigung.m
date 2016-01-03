@@ -191,7 +191,7 @@ function bes = beschleunigung(spiel, farbe)
     %registriert Änderungen im Spielfeld und handelt entsprechend
     function gameChangeHandler()
         
-        %Nodegrid beim Verschwinden einer Mine aktualisieren:
+        %Wegpunkte beim Verschwinden einer Mine aktualisieren:
         if spiel.n_mine < numel(p_ArrayOfMines)
             resimplifyWaypoints();
             p_ArrayOfMines = spiel.mine;
@@ -848,6 +848,7 @@ function bes = beschleunigung(spiel, farbe)
     function CreatePathAllTanken()
         p_cornerWaitForEnemy = false;
         if ~p_tankeCompetition && ~p_cancelCompetition
+            %Bestimmung, wie viele Tankstellen noch eingesammelt werden müssen
             ebenen = round(p_StartNumberOfTank/2)-me.getankt;
             if me.getankt >= round(p_StartNumberOfTank/2)
                 ebenen = spiel.n_tanke;
