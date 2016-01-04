@@ -73,6 +73,76 @@ Funktionsdokumentation
 \end_layout
 
 \begin_layout Subsection
+Funktion whatToDo
+\end_layout
+
+\begin_layout Subsubsection
+Syntax
+\end_layout
+
+\begin_layout LyX-Code
+whatToDo()
+\end_layout
+
+\begin_layout Subsubsection
+Beschreibung
+\end_layout
+
+\begin_layout Standard
+Diese Funktion entscheidet in jedem Rechenschritt, ob unser Spaceball tanken,
+ angreifen oder verteidigen soll.
+ Die entsprechenden Funktionen (attackEnemy(), fleeEnemy(), CreatePathAllTanken(
+) + doesEnemyGetTanke()) werden dann aufgerufen.
+\end_layout
+\begin_layout Subsection
+Funktion initSpaceall
+\end_layout
+
+\begin_layout Subsubsection
+Syntax
+\end_layout
+
+\begin_layout LyX-Code
+initSpaceBall()
+\end_layout
+
+\begin_layout Subsubsection
+Beschreibung
+\end_layout
+
+\begin_layout Standard
+Diese Funktion wird einmal am Anfang des Spiels aufgerufen und setzt die
+ Anfangswerte unserer persistend Variablen.
+ Außerdem werden unsere .mex-Dateien kompiliert, sofern dies erwünscht ist
+ (constCompiling==true).
+\end_layout
+
+\begin_layout Subsection
+Funktion gameChangeHandler
+\end_layout
+
+\begin_layout Subsubsection
+Syntax
+\end_layout
+
+\begin_layout LyX-Code
+gameChangeHandler()
+\end_layout
+
+\begin_layout Subsubsection
+Beschreibung
+\end_layout
+
+\begin_layout Standard
+Diese Funktion wird in jedem Rechenschritt aufgerufen.
+ Innerhalb dieser Funktion werden verschiedene Werte geprüft und bei Änderungen
+ dieser Werte werden Funktionen aufgerufen.
+ Unser aktueller Pfad wird beim Verschwinden einer Mine aktualisiert (resimplify
+Waypoints()) und beim Verschwinden einer Tankstelle wird CreatePathAllTanken()
+ ausgeführt.
+\end_layout
+
+\begin_layout Subsection
 Funktion esc_find_path
 \end_layout
 
@@ -2388,6 +2458,52 @@ boolean walkable
 \begin_layout Standard
 ist true, wenn sich keine Kollisionsobjekte im gegebenen Bereich befinden
  - ansonsten false
+\end_layout
+\begin_layout Subsection
+Funktion CreatePathAllTanken
+\end_layout
+
+\begin_layout Subsubsection
+Syntax
+\end_layout
+
+\begin_layout LyX-Code
+ CreatePathAllTanken()
+\end_layout
+
+\begin_layout Subsubsection
+Beschreibung
+\end_layout
+
+\begin_layout Standard
+Diese Funktion ruft die ausgelagerte Funktion esc_find_tanke auf, berechnet
+ den Weg zwischen den dort ausgegebenen Punkten und fügt diesen der p_waypointLi
+st Variable hinzu.
+ Außerdem wird geprüft, ob sich dadurch die erste Tankstelle ändert, was
+ bei Bedarf verhindert wird.
+\end_layout
+
+\begin_layout Subsection
+Funktion doesEnemyGetTanke
+\end_layout
+
+\begin_layout Subsubsection
+Syntax
+\end_layout
+
+\begin_layout LyX-Code
+ doesEnemyGetTanke()
+\end_layout
+
+\begin_layout Subsubsection
+Beschreibung
+\end_layout
+
+\begin_layout Standard
+Solange wir im Tank-Modus sind wird diese Funktion in jedem Rechenschritt
+ aufgerufen.
+ Bei Bedarf wird in den competitionMode geschaltet oder eine Tankstelle
+ ignoriert.
 \end_layout
 
 \end_body

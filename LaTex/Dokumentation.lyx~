@@ -3,10 +3,57 @@
 \begin_document
 \begin_header
 \textclass article
+\begin_preamble
+\usepackage{listings}
+\usepackage{color}
+\usepackage{hyperref} % Link Ränder weglassen
+\hypersetup{
+    colorlinks=true,
+    linkcolor=black,
+    citecolor=black,
+    filecolor=black,
+    urlcolor=black,
+}
+
+\definecolor{mygreen}{rgb}{0,0.6,0}
+\definecolor{bgcolor}{gray}{0.95}
+\definecolor{gray}{rgb}{0.5,0.5,0.5}
+\definecolor{lightgray}{gray}{0.8}
+\definecolor{mymauve}{rgb}{0.58,0,0.82}
+
+
+\lstset{ %
+  backgroundcolor=\color{bgcolor},   % choose the background color; you must add \usepackage{color} or \usepackage{xcolor}
+  basicstyle=\footnotesize,        % the size of the fonts that are used for the code
+  breakatwhitespace=false,         % sets if automatic breaks should only happen at whitespace
+  breaklines=true,                 % sets automatic line breaking
+  captionpos=b,                    % sets the caption-position to bottom
+  commentstyle=\color{mygreen},    % comment style
+  deletekeywords={...},            % if you want to delete keywords from the given language
+  escapeinside={\%*}{*)},          % if you want to add LaTeX within your code
+  extendedchars=true,              % lets you use non-ASCII characters; for 8-bits encodings only, does not work with UTF-8
+  frame=none,	                   % adds a frame around the code
+  keepspaces=true,                 % keeps spaces in text, useful for keeping indentation of code (possibly needs columns=flexible)
+  keywordstyle=\color{blue},       % keyword style
+  language=Matlab,                 % the language of the code
+  otherkeywords={*,...},           % if you want to add more keywords to the set
+  numbers=none,                    % where to put the line-numbers; possible values are (none, left, right)
+  numbersep=5pt,                   % how far the line-numbers are from the code
+  numberstyle=\tiny\color{gray}, % the style that is used for the line-numbers
+  rulecolor=\color{lightgray},         % if not set, the frame-color may be changed on line-breaks within not-black text (e.g. comments (green here))
+  showspaces=false,                % show spaces everywhere adding particular underscores; it overrides 'showstringspaces'
+  showstringspaces=false,          % underline spaces within strings only
+  showtabs=false,                  % show tabs within strings adding particular underscores
+  stepnumber=1,                    % the step between two line-numbers. If it's 1, each line will be numbered
+  stringstyle=\color{mymauve},     % string literal style
+  tabsize=2,	                   % sets default tabsize to 2 spaces
+  title=\lstname                   % show the filename of files included with \lstinputlisting; also try caption instead of title
+}
+\end_preamble
 \use_default_options true
 \maintain_unincluded_children false
-\language english
-\language_package default
+\language ngerman
+\language_package auto
 \inputencoding auto
 \fontencoding global
 \font_roman default
@@ -24,8 +71,19 @@
 \output_sync 0
 \bibtex_command default
 \index_command default
+\float_placement h
 \paperfontsize default
-\use_hyperref false
+\spacing single
+\use_hyperref true
+\pdf_bookmarks true
+\pdf_bookmarksnumbered false
+\pdf_bookmarksopen false
+\pdf_bookmarksopenlevel 1
+\pdf_breaklinks false
+\pdf_pdfborder false
+\pdf_colorlinks false
+\pdf_backref false
+\pdf_pdfusetitle true
 \papersize default
 \use_geometry false
 \use_package amsmath 1
@@ -55,7 +113,7 @@
 \tocdepth 3
 \paragraph_separation indent
 \paragraph_indentation default
-\quotes_language english
+\quotes_language german
 \papercolumns 1
 \papersides 1
 \paperpagestyle default
@@ -69,7 +127,7 @@
 \begin_body
 
 \begin_layout Title
-We don't c#, we Methlab
+We don't C#, we Methlab
 \end_layout
 
 \begin_layout Date
@@ -80,22 +138,43 @@ Eine Spaceballs KI für den Kurs Informatik an der Hochschule Bremen
 
 \begin_layout Date
 Bremen, xx.xx.xxxx
+\begin_inset Newline newline
+\end_inset
+
+
+\end_layout
+
+\begin_layout Title
+
+\size large
+\begin_inset Graphics
+	filename D:/Daten (D)/Dropbox/escalators/INFO/Logo/Logo Vector high res + alpha.png
+	lyxscale 2
+	scale 5
+
+\end_inset
+
+
+\begin_inset Newline newline
+\end_inset
+
+
 \end_layout
 
 \begin_layout Author
 Julian Wiggers
-\end_layout
+\begin_inset Newline newline
+\end_inset
 
-\begin_layout Author
 Tobias Kuhlenschmidt
-\end_layout
+\begin_inset Newline newline
+\end_inset
 
-\begin_layout Author
-Christopher Muth
-\end_layout
+ Christopher Muth
+\begin_inset Newline newline
+\end_inset
 
-\begin_layout Author
-Marcel Haupt
+ Marcel Haupt
 \end_layout
 
 \begin_layout Section
@@ -112,6 +191,10 @@ Globale und statische Variablen
 
 \begin_layout Section
 Funktionsdokumentation
+\end_layout
+
+\begin_layout Section
+Pathfinder
 \end_layout
 
 \begin_layout Section
