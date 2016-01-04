@@ -52,8 +52,8 @@
 \end_preamble
 \use_default_options true
 \maintain_unincluded_children false
-\language ngerman
-\language_package auto
+\language english
+\language_package default
 \inputencoding auto
 \fontencoding global
 \font_roman default
@@ -71,7 +71,6 @@
 \output_sync 0
 \bibtex_command default
 \index_command default
-\float_placement h
 \paperfontsize default
 \spacing single
 \use_hyperref true
@@ -113,7 +112,7 @@
 \tocdepth 3
 \paragraph_separation indent
 \paragraph_indentation default
-\quotes_language german
+\quotes_language english
 \papercolumns 1
 \papersides 1
 \paperpagestyle default
@@ -126,83 +125,232 @@
 
 \begin_body
 
-\begin_layout Title
-We don't C#, we Methlab
-\end_layout
-
-\begin_layout Date
-
-\size large
-Eine Spaceballs KI für den Kurs Informatik an der Hochschule Bremen
-\end_layout
-
-\begin_layout Date
-Bremen, xx.xx.xxxx
-\begin_inset Newline newline
-\end_inset
-
-
-\end_layout
-
-\begin_layout Title
-
-\size large
-\begin_inset Graphics
-	filename D:/Daten (D)/Dropbox/escalators/INFO/Logo/Logo Vector high res + alpha.png
-	lyxscale 2
-	scale 5
-
-\end_inset
-
-
-\begin_inset Newline newline
-\end_inset
-
-
-\end_layout
-
-\begin_layout Author
-Julian Wiggers
-\begin_inset Newline newline
-\end_inset
-
-Tobias Kuhlenschmidt
-\begin_inset Newline newline
-\end_inset
-
- Christopher Muth
-\begin_inset Newline newline
-\end_inset
-
- Marcel Haupt
-\end_layout
-
-\begin_layout Section
-Einleitung
-\end_layout
-
-\begin_layout Section
-Taktik
-\end_layout
-
-\begin_layout Section
-Globale und statische Variablen
-\end_layout
-
-\begin_layout Section
-Funktionsdokumentation
-\end_layout
-
 \begin_layout Section
 Pathfinder
 \end_layout
 
-\begin_layout Section
-Statistikprogramm
+\begin_layout Standard
+Der von uns geschriebene Pathfinder beruht auf dem A* Algorithmus, welcher
+ den effizientesten Weg zwischen zwei Knotenpunkten berechnet.
+ Im Folgenden wird die grundlegende Funktionsweise des Pathfinders erläutert:
 \end_layout
 
-\begin_layout Section
-Fazit
+\begin_layout Subsection
+Das Nodegrid
+\end_layout
+
+\begin_layout Standard
+Über das Spielfeld wird ein Raster aus kleinen Punkten gelegt, die gleiche
+ Abstände zueinander haben und gleich groß sind.
+ Dieses Raster wird von dem Pathfinder benötigt, welcher den günstigsten
+ Pfad zum Ziel berechnet.
+ 
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+placement h
+wide false
+sideways false
+status collapsed
+
+\begin_layout Plain Layout
+\begin_inset Graphics
+	filename D:/Daten (D)/Dropbox/Privat/Hochschule Bremen/3. Semester/Informatik/GitHub/escalators/LaTex/Bilder/SpaceBalls NodeGrid 1.jpg
+	lyxscale 20
+
+\end_inset
+
+
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+Nodegrid
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\begin_inset Newpage pagebreak
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Es ist außerdem notwendig unterscheiden zu können, ob ein Rasterpunkt (Gridnode)
+ auf der Koordinate einer Mine, Tankstelle oder auf der Bandenbegrenzung
+ liegt.
+ Die entsprechende 
+\emph on
+iswalkable
+\emph default
+ Information ist zu jedem Gridnode abrufbar.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+wide false
+sideways false
+status collapsed
+
+\begin_layout Plain Layout
+\begin_inset Graphics
+	filename D:/Daten (D)/Dropbox/Privat/Hochschule Bremen/3. Semester/Informatik/GitHub/escalators/LaTex/Bilder/SpaceBalls NodeGrid isWalkable.jpg
+	lyxscale 20
+	scale 50
+
+\end_inset
+
+
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+Node Informationen
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Um die schnellstmögliche und kürzeste Route zu fahren, werden die Gridnodes
+ nach individuellen Eigenschaften bewertet.
+ 
+\end_layout
+
+\begin_layout Description
+f-Kosten: Für jeden Knoten K beschreibt jeweils ein Wert die Pfadlänge zwischen
+ Start und Ziel unter Benutzung dieses Knotens.
+ Die g- und h-Kosten ergeben die f-Kosten
+\end_layout
+
+\begin_layout Description
+g-Kosten: Kosten vom Startpunkt bis zum Knoten K
+\end_layout
+
+\begin_layout Description
+h-Kosten: Geschätzte Kosten vom Knoten K bis zum Zielpunkt 
+\emph on
+(hier: Tankstelle)
+\emph default
+.
+\end_layout
+
+\begin_layout Standard
+Beispielsweise soll der Weg zwischen der Position des blauen Spaceballs
+ und der ersten Tankstelle berechnet werden:
+\begin_inset Newline newline
+\end_inset
+
+Zunächst einmal sind alle Rasterpunkte, bis auf den Startpunkt, unbekannt
+ (in schwarz dargestellt).
+ Mit laufender Berechnung werden diese zu bekannten Rasterpunkten und stellen
+ einen potenziellen Weg zum Ziel dar, der mit zunehmender Grünfärbung geeigneter
+ wird.
+ Alle bekannten Knoten werden in einer Liste gespeichert, von denen immer
+ der bestmögliche für weitere Pfaduntersuchungen herangezogen wird.
+ Sobald der abschließende und damit dem Ziel entsprechenden Knoten untersucht
+ wird, kann der Weg durch verbinden der einzelnen Knoten rekonstruiert werden.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+wide false
+sideways false
+status collapsed
+
+\begin_layout Plain Layout
+\begin_inset Graphics
+	filename D:/Daten (D)/Dropbox/Privat/Hochschule Bremen/3. Semester/Informatik/GitHub/escalators/LaTex/Bilder/SpaceBalls Pathfinder Detail.jpg
+	lyxscale 20
+	scale 50
+
+\end_inset
+
+
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+Kosten
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Newpage pagebreak
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsection
+Simplify Path
+\end_layout
+
+\begin_layout Standard
+Aufgrund dessen, dass unser Spaceball bei jedem Knoten um ein gewisses Maß
+ abbremst und neu beschleunigen muss, ist es notwendig den Knotenpfad zu
+ vereinfachen, um Geschwindigkeit generieren zu können.
+ Funktionsweise siehe Kapitel XXXX (Link zur Funktionsdoku einfügen)
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+placement h
+wide false
+sideways false
+status collapsed
+
+\begin_layout Plain Layout
+\begin_inset Graphics
+	filename D:/Daten (D)/Dropbox/Privat/Hochschule Bremen/3. Semester/Informatik/GitHub/escalators/LaTex/Bilder/SpaceBalls simplifyPath.jpg
+	lyxscale 50
+	scale 50
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+Wegpunktreduzierung des Pfades
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
 \end_layout
 
 \end_body
