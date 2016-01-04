@@ -51,9 +51,14 @@
 }
 \end_preamble
 \use_default_options true
+\begin_modules
+theorems-ams
+eqs-within-sections
+figs-within-sections
+\end_modules
 \maintain_unincluded_children false
 \language ngerman
-\language_package auto
+\language_package default
 \inputencoding auto
 \fontencoding global
 \font_roman default
@@ -71,7 +76,6 @@
 \output_sync 0
 \bibtex_command default
 \index_command default
-\float_placement h
 \paperfontsize default
 \spacing single
 \use_hyperref true
@@ -109,8 +113,8 @@
 \shortcut idx
 \color #008000
 \end_index
-\secnumdepth 3
-\tocdepth 3
+\secnumdepth 1
+\tocdepth 1
 \paragraph_separation indent
 \paragraph_indentation default
 \quotes_language german
@@ -126,83 +130,155 @@
 
 \begin_body
 
-\begin_layout Title
-We don't C#, we Methlab
+\begin_layout Section
+Website
+\begin_inset Foot
+status collapsed
+
+\begin_layout Plain Layout
+https://wedontcsharp.wordpress.com/
 \end_layout
 
-\begin_layout Date
+\end_inset
 
-\size large
-Eine Spaceballs KI für den Kurs Informatik an der Hochschule Bremen
+ 
 \end_layout
 
-\begin_layout Date
-Bremen, xx.xx.xxxx
+\begin_layout Standard
+Das Ziel der Internetseite ist zum Einen das Semesterprojekt - und viel
+ mehr den Fortschritt - zu dokumentieren.
+ Darüber hinaus soll nachfolgenden Kursen eine Möglichkeit geboten werden,
+ unsere Arbeiten als Informationsquelle heranziehen zu können, um eigene
+ Problematiken gezielter zu lösen.
+ Aufgrund dessen, dass Wordpress mit seinen vielfältigen Möglichkeiten bei
+ der Gestaltung einer Website besonders heraussticht, haben wir uns gegen
+ wix.com, stattdessen für Wordpress entschieden.
+ Wie es sich für professionelle Websites gehört, ist auch unsere Internetseite
+ für mobile Endgeräte ausgelegt.
+ So wird das Theme für Desktopcomputer, Tablets oder Smartphones optisch
+ entsprechend angepasst.
+\begin_inset Newline newline
+\end_inset
+
+Der grundlegende Aufbau der Website ist absichtlich schlicht gehalten.
+ Der Header ist mit unserem Teamnamen 
+\begin_inset Quotes gld
+\end_inset
+
+We don't C#, we MethLab
+\begin_inset Quotes grd
+\end_inset
+
+ versehen, welcher im Einklang mit dem Logo steht.
+ Der konische Farbverlauf von Magenta zu Cyan setzt den einzigen farblichen
+ Akzent.
+ Unter der horizontalen Navigationsleiste befindet sich der eigentliche
+ Content vor hellem Grund, welcher von dem anthraziten Footer geschlossen
+ wird.
+\begin_inset Newline newline
+\end_inset
+
+ Auf der rechten Seite befindet sich eine Suchmaske sowie eine Auflistung
+ der neusten Blogbeiträge, welche wir regelmäßig in Form von Statusupdates
+ veröffentlichten.
+ Ein Countdown timer zeigte die Tage bis zur Abgabe der KI an.
+ Außerdem richteten wir einen YouTube Kanal ein, auf dem wir unkompliziert
+ Videos unserer Spaceball KI hochladen konnten, um diese anschließend auf
+ unserer Internetseite einzubetten.
+ Neben Kontaktdaten und dem Impressum stehen außerdem Informationen über
+ das Spaceballsprojekt und über unser Team zum Abrufen bereit.
+ Selbstverständlich wird die Dokumentation nach Projektabschluss zum Download
+ bereit stehen.
 \begin_inset Newline newline
 \end_inset
 
 
 \end_layout
 
-\begin_layout Title
+\begin_layout Section
+Logo und Teamname
+\end_layout
 
-\size large
+\begin_layout Standard
+Das Logo basiert gänzlich auf den Informationen, die dem Teamnamen zu entnehmen
+ sind.
+ Im Grunde basiert das Logo auf einer Blindenplakette (
+\begin_inset Quotes gld
+\end_inset
+
+We don't see sharp
+\begin_inset Quotes grd
+\end_inset
+
+), wobei die gelb-orangefarbene Plakette mit einer Brille versehen ist,
+ sodass der mehrdeutige Name ("We don't C#, we MethLab") optimal im Logo
+ wieder erkennbar ist.
+ Dadurch erscheint das Logo nun in Smiley ähnlicher Gestalt.
+ Außerdem impliziert der Name, dass wir nicht in C# programmieren, sondern
+ in Matlabs Programmiersprache.
+ Gesprochen lässt der Name (Anfangsteil, Endteil) außerdem einen kausalen
+ Zusammenhang zu ("Wir programmieren nicht in C#, wir MatLab'ben"), wenn
+ man jedoch genau hinschaut, erweitert sich der Interpretationsspielraum
+ um ein Vielfaches.
+ Dazu haben wir dem Smiley die Strukturformel von 
+\emph on
+(S)-N-Methyl-1-phenylpropan-2-amin 
+\emph default
+oder kurz Chrystal Meth angefügt, welche den Korpus der Figur bildet.
+ Wir waren uns im Klaren darüber, dass der Name in Anlehnung an die Droge
+ zu Missverständnissen führen kann.
+ An dieser Stelle sei ausdrücklich gesagt, dass wir uns in jeglicher Form
+ von Crystal Meth und jeglichen anderen Drogen distanzieren und der Name
+ ausschließlich humoristisch zu verstehen ist.
+ 
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+placement h
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
 \begin_inset Graphics
 	filename D:/Daten (D)/Dropbox/escalators/INFO/Logo/Logo Vector high res + alpha.png
-	lyxscale 2
-	scale 5
+	lyxscale 5
+	scale 20
 
 \end_inset
 
 
-\begin_inset Newline newline
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+Logo 
+\begin_inset Quotes gld
+\end_inset
+
+We don't C#, we MethLab
+\begin_inset Quotes grd
 \end_inset
 
 
 \end_layout
 
-\begin_layout Author
-Julian Wiggers
-\begin_inset Newline newline
 \end_inset
 
-Tobias Kuhlenschmidt
-\begin_inset Newline newline
+
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
 \end_inset
 
- Christopher Muth
-\begin_inset Newline newline
-\end_inset
 
- Marcel Haupt
 \end_layout
 
 \begin_layout Section
-Einleitung
-\end_layout
-
-\begin_layout Section
-Taktik
-\end_layout
-
-\begin_layout Section
-Globale und statische Variablen
-\end_layout
-
-\begin_layout Section
-Funktionsdokumentation
-\end_layout
-
-\begin_layout Section
-Pathfinder
-\end_layout
-
-\begin_layout Section
-Statistikprogramm
-\end_layout
-
-\begin_layout Section
-Fazit
+GitHub
 \end_layout
 
 \end_body
