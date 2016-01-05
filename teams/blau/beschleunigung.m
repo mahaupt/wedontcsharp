@@ -379,7 +379,7 @@ function bes = beschleunigung(spiel, farbe)
         
         %no velocity
         if (norm(me.ges) < 0.01)
-            bes = toGes;
+            bes = zentp * vecNorm(toMine) + toGes;
         end
         
         %emergencybreaking
