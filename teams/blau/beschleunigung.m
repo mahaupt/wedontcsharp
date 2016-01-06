@@ -878,6 +878,7 @@ function bes = beschleunigung(spiel, farbe)
                     for i=1:spiel.n_tanke
                         if p_firstTankePositionPersistent==spiel.tanke(i).pos
                             keepFirstTanke=true;
+                            break;
                         end
                     end
                 end
