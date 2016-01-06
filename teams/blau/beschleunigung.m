@@ -191,7 +191,7 @@ function bes = beschleunigung(spiel, farbe)
     %registriert Änderungen im Spielfeld und handelt entsprechend
     function gameChangeHandler()
         
-        %Nodegrid beim Verschwinden einer Mine aktualisieren:
+        %Wegpunkte beim Verschwinden einer Mine aktualisieren:
         if spiel.n_mine < numel(p_ArrayOfMines)
             resimplifyWaypoints();
             p_ArrayOfMines = spiel.mine;
@@ -201,6 +201,7 @@ function bes = beschleunigung(spiel, farbe)
         
         if p_currentNumberOfTank ~= spiel.n_tanke && p_dispWhatToDo == 3
             p_ignoreTanke = 0;
+            p_cancelCompetition = false;
             CreatePathAllTanken();
             p_currentNumberOfTank = spiel.n_tanke;
         end
@@ -379,7 +380,7 @@ function bes = beschleunigung(spiel, farbe)
         
         %no velocity
         if (norm(me.ges) < 0.01)
-            bes = toGes;
+            bes = zentp * vecNorm(toMine) + toGes;
         end
         
         %emergencybreaking
@@ -848,6 +849,7 @@ function bes = beschleunigung(spiel, farbe)
     function CreatePathAllTanken()
         p_cornerWaitForEnemy = false;
         if ~p_tankeCompetition && ~p_cancelCompetition
+            %Bestimmung, wie viele Tankstellen noch eingesammelt werden müssen
             ebenen = round(p_StartNumberOfTank/2)-me.getankt;
             if me.getankt >= round(p_StartNumberOfTank/2)
                 ebenen = spiel.n_tanke;
@@ -870,6 +872,16 @@ function bes = beschleunigung(spiel, farbe)
                     end
                 end
                 
+                %check if first tanke is still a member of spiel.tanke
+                if keepFirstTanke && spiel.n_tanke > 0
+                    keepFirstTanke=false;
+                    for i=1:spiel.n_tanke
+                        if p_firstTankePositionPersistent==spiel.tanke(i).pos
+                            keepFirstTanke=true;
+                            break;
+                        end
+                    end
+                end
                 
                 if (keepFirstTanke)
                     debugDisp('Tanken: calculating Path - keeping first Tanke');
@@ -922,7 +934,7 @@ function bes = beschleunigung(spiel, farbe)
                 %Ist diese Tanke unsere nächste Tanke und brauchen wir nicht mehr lange dorthin?
                 %oder ist nur noch eine Tanke da und keine Mine im Weg
                 %UND wir sind noch nicht im compMode
-                if ((ClosestEnemyTanke == p_TankList{1} && timeMeToTanke < constIgnoreTankeTime + 0.5) || spiel.n_tanke == 1 && ~ownColliding) && ~p_tankeCompetition && ~p_cancelCompetition && timeMeToTanke < EnemyTimeToClosestTanke + 0.2
+                if enemy.getankt-me.getankt <= 1 && ((ClosestEnemyTanke == p_TankList{1} && timeMeToTanke < constIgnoreTankeTime + 0.5) || spiel.n_tanke == 1 && ~ownColliding) && ~p_tankeCompetition && ~p_cancelCompetition && timeMeToTanke < EnemyTimeToClosestTanke + 0.2
                     debugDisp('Tanken: compMode activated!');
                     p_tankeCompetition = true;
                     accpos = getAccPos(spiel.tanke(ClosestEnemyTanke).pos);
@@ -937,7 +949,7 @@ function bes = beschleunigung(spiel, farbe)
                     CreatePathAllTanken;
                 end
                 
-                %comMode mit Vollbremsung abbrechen:
+                %compMode mit Vollbremsung abbrechen:
                 if p_tankeCompetition
                     DistanceToStop = calcBreakDistance(norm(me.ges), 0);
                     DistanceToTanke = norm(me.pos-spiel.tanke(ClosestEnemyTanke).pos)-spiel.tanke_radius-spiel.spaceball_radius;
@@ -951,8 +963,9 @@ function bes = beschleunigung(spiel, farbe)
                 end
                 
                 %CancelComp beenden
-                if p_cancelCompetition && EnemyTimeToClosestTanke > constIgnoreTankeTime
+                if p_cancelCompetition && (EnemyTimeToClosestTanke > constIgnoreTankeTime || norm(me.ges) < 0.2)
                     p_cancelCompetition = false;
+                    CreatePathAllTanken;
                 end
             end
         end
@@ -1351,7 +1364,7 @@ function bes = beschleunigung(spiel, farbe)
             end
         end
                  
-        if  spiel.n_mine > 4 %&& checktime > -1 % ggf. noch Zeit beachten? 
+        if  spiel.n_mine > 4  
             mineTricking;
             changePathForDefence();
         elseif spiel.n_mine < 5 && spiel.n_mine > 0 && ~p_cornerTrick
@@ -1360,7 +1373,7 @@ function bes = beschleunigung(spiel, farbe)
                 for i=1:spiel.n_mine 
                     checktime = defMineTime(spiel.mine(i).pos); %Zeitdiff. für alle Ecken berechnen 
                     if (savetime_mine < checktime) %Zeit für Ecke 1 überschreibt savetime und wir als neue savetime gespeichert. Die neue Savetime wird nur von größeren Zeitdiffs überschrieben. 
-                    savetime_mine = checktime
+                    savetime_mine = checktime;
                     end
                 end
             
@@ -1429,7 +1442,6 @@ function bes = beschleunigung(spiel, farbe)
     end
 
     function tMine = bestDefMine() 
-%         mineList = [spiel.n_mine]
         tMine = [0, 0];
         savetime_mine = -Inf;
         
