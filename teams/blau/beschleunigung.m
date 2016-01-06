@@ -379,7 +379,7 @@ function bes = beschleunigung(spiel, farbe)
         
         %no velocity
         if (norm(me.ges) < 0.01)
-            bes = toGes;
+            bes = zentp * vecNorm(toMine) + toGes;
         end
         
         %emergencybreaking
@@ -1348,7 +1348,7 @@ function bes = beschleunigung(spiel, farbe)
         for i=1:spiel.n_mine 
             checktime = defMineTime(spiel.mine(i).pos); %Zeitdiff. für alle Ecken berechnen 
             if (savetime_mine < checktime) %Zeit für Ecke 1 überschreibt savetime und wir als neue savetime gespeichert. Die neue Savetime wird nur von größeren Zeitdiffs überschrieben. 
-                savetime_mine = checktime
+                savetime_mine = checktime;
             end
         end
                  
