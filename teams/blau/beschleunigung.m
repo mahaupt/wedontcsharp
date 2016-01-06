@@ -1364,7 +1364,7 @@ function bes = beschleunigung(spiel, farbe)
             end
         end
                  
-        if  spiel.n_mine > 4 %&& checktime > -1 % ggf. noch Zeit beachten? 
+        if  spiel.n_mine > 4  
             mineTricking;
             changePathForDefence();
         elseif spiel.n_mine < 5 && spiel.n_mine > 0 && ~p_cornerTrick
@@ -1442,7 +1442,6 @@ function bes = beschleunigung(spiel, farbe)
     end
 
     function tMine = bestDefMine() 
-%         mineList = [spiel.n_mine]
         tMine = [0, 0];
         savetime_mine = -Inf;
         

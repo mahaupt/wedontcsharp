@@ -14,6 +14,7 @@
     filecolor=black,
     urlcolor=black,
 }
+\setcounter{page}{0} % Seitennummerierung ohne Titelseite
 
 \definecolor{mygreen}{rgb}{0,0.6,0}
 \definecolor{bgcolor}{gray}{0.95}
@@ -51,6 +52,11 @@
 }
 \end_preamble
 \use_default_options true
+\begin_modules
+theorems-ams
+eqs-within-sections
+figs-within-sections
+\end_modules
 \maintain_unincluded_children false
 \language ngerman
 \language_package auto
@@ -128,20 +134,18 @@
 
 \begin_layout Title
 We don't C#, we Methlab
+\size large
+ 
 \end_layout
 
-\begin_layout Date
+\begin_layout Title
 
 \size large
 Eine Spaceballs KI für den Kurs Informatik an der Hochschule Bremen
 \end_layout
 
 \begin_layout Date
-Bremen, xx.xx.xxxx
-\begin_inset Newline newline
-\end_inset
-
-
+Bremen, 12/30/15
 \end_layout
 
 \begin_layout Title
@@ -149,13 +153,9 @@ Bremen, xx.xx.xxxx
 \size large
 \begin_inset Graphics
 	filename D:/Daten (D)/Dropbox/escalators/INFO/Logo/Logo Vector high res + alpha.png
-	lyxscale 2
-	scale 5
+	lyxscale 5
+	scale 10
 
-\end_inset
-
-
-\begin_inset Newline newline
 \end_inset
 
 
@@ -170,19 +170,124 @@ Tobias Kuhlenschmidt
 \begin_inset Newline newline
 \end_inset
 
- Christopher Muth
+Christopher Muth
 \begin_inset Newline newline
 \end_inset
 
- Marcel Haupt
+Marcel Haupt
+\begin_inset Newline newline
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+thispagestyle{empty}
+\end_layout
+
+\end_inset
+
+
+\begin_inset Newpage pagebreak
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset CommandInset toc
+LatexCommand tableofcontents
+
+\end_inset
+
+
+\begin_inset Newpage newpage
+\end_inset
+
+
 \end_layout
 
 \begin_layout Section
 Einleitung
 \end_layout
 
+\begin_layout Subsection
+Vorwort - check/JW
+\end_layout
+
+\begin_layout Subsection
+Vorlesungen - Julian
+\end_layout
+
+\begin_layout Subsection
+Notengebung - Julian
+\end_layout
+
+\begin_layout Subsection
+Termine - Julian
+\end_layout
+
+\begin_layout Subsection
+Das Team - Jeder
+\end_layout
+
 \begin_layout Section
-Taktik
+Das Spiel 
+\end_layout
+
+\begin_layout Subsection
+Spielfeld - check/JW
+\end_layout
+
+\begin_layout Subsection
+Spielregeln - check/JW
+\end_layout
+
+\begin_layout Subsection
+Spielablauf - check/JW
+\end_layout
+
+\begin_layout Subsection
+Turnierablauf - check/JW
+\end_layout
+
+\begin_layout Section
+Strategien
+\end_layout
+
+\begin_layout Subsection
+Blockschaltbild - check/MH
+\end_layout
+
+\begin_layout Subsection
+Minen und Banden 
+\begin_inset Quotes gld
+\end_inset
+
+Ausweichstrategie
+\begin_inset Quotes grd
+\end_inset
+
+ - Marcel/Tobias
+\end_layout
+
+\begin_layout Subsection
+Tankstrategie - Chris
+\end_layout
+
+\begin_layout Subsection
+Angriffsstrategie - Marcel
+\end_layout
+
+\begin_layout Subsection
+Verteidiungsstrategie - Julian
 \end_layout
 
 \begin_layout Section
@@ -193,16 +298,71 @@ Globale und statische Variablen
 Funktionsdokumentation
 \end_layout
 
-\begin_layout Section
-Pathfinder
+\begin_layout Subsection
+Allgemeine Funktionen - Check
+\end_layout
+
+\begin_layout Subsection
+Tankfunktionen - Check/CM
+\end_layout
+
+\begin_layout Subsection
+Angriffsfunktion - Check/MH
+\end_layout
+
+\begin_layout Subsection
+Verteidigungsfunktionen - Check/JW
 \end_layout
 
 \begin_layout Section
-Statistikprogramm
+Pathfinder - Tobias
 \end_layout
 
 \begin_layout Section
-Fazit
+Statistikprogramm - Tobias
+\end_layout
+
+\begin_layout Section
+Website & Dokumentation 
+\end_layout
+
+\begin_layout Subsection
+Website - Tobias
+\end_layout
+
+\begin_layout Subsection
+Dokumentation - ? 
+\end_layout
+
+\begin_layout Section
+Logo & Sound 
+\end_layout
+
+\begin_layout Subsection
+Logo - Chris
+\end_layout
+
+\begin_layout Subsection
+Soundtrack - Chris 
+\end_layout
+
+\begin_layout Section
+Fazit - ? Julian/Tobias 
+\end_layout
+
+\begin_layout Section
+Turnierergebnisse und -platzierung 
+\end_layout
+
+\begin_layout Section
+Literatur
+\end_layout
+
+\begin_layout Standard
+\begin_inset Newpage pagebreak
+\end_inset
+
+
 \end_layout
 
 \end_body
