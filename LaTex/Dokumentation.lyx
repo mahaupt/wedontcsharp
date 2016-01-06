@@ -201,12 +201,93 @@ thispagestyle{empty}
 
 \end_layout
 
+\begin_layout Standard
+\begin_inset CommandInset toc
+LatexCommand tableofcontents
+
+\end_inset
+
+
+\begin_inset Newpage newpage
+\end_inset
+
+
+\end_layout
+
 \begin_layout Section
 Einleitung
 \end_layout
 
+\begin_layout Subsection
+Vorwort - check/JW
+\end_layout
+
+\begin_layout Subsection
+Vorlesungen - Julian
+\end_layout
+
+\begin_layout Subsection
+Notengebung - Julian
+\end_layout
+
+\begin_layout Subsection
+Termine - Julian
+\end_layout
+
+\begin_layout Subsection
+Das Team - Jeder
+\end_layout
+
 \begin_layout Section
-Spielregeln und Taktik
+Das Spiel 
+\end_layout
+
+\begin_layout Subsection
+Spielfeld - check/JW
+\end_layout
+
+\begin_layout Subsection
+Spielregeln - check/JW
+\end_layout
+
+\begin_layout Subsection
+Spielablauf - check/JW
+\end_layout
+
+\begin_layout Subsection
+Turnierablauf - check/JW
+\end_layout
+
+\begin_layout Section
+Strategien
+\end_layout
+
+\begin_layout Subsection
+Blockschaltbild - check/MH
+\end_layout
+
+\begin_layout Subsection
+Minen und Banden 
+\begin_inset Quotes gld
+\end_inset
+
+Ausweichstrategie
+\begin_inset Quotes grd
+\end_inset
+
+ - Marcel/Tobias
+\end_layout
+
+\begin_layout Subsection
+Tankstrategie - Chris
+\end_layout
+
+\begin_layout Subsection
+Angriffsstrategie - Marcel
+\end_layout
+
+\begin_layout Subsection
+Verteidiungsstrategie - Julian
 \end_layout
 
 \begin_layout Section
@@ -217,16 +298,68 @@ Globale und statische Variablen
 Funktionsdokumentation
 \end_layout
 
-\begin_layout Section
-Pathfinder
+\begin_layout Subsection
+Allgemeine Funktionen - Check
+\end_layout
+
+\begin_layout Subsection
+Auslagerung in C - ?/MH
+\end_layout
+
+\begin_layout Subsection
+Tankfunktionen - Check/CM
+\end_layout
+
+\begin_layout Subsection
+Angriffsfunktion - Check/MH
+\end_layout
+
+\begin_layout Subsection
+Verteidigungsfunktionen - Check/JW
 \end_layout
 
 \begin_layout Section
-Statistikprogramm
+Pathfinder - Tobias
 \end_layout
 
 \begin_layout Section
-Fazit
+Statistikprogramm - Tobias
+\end_layout
+
+\begin_layout Section
+Website & Dokumentation 
+\end_layout
+
+\begin_layout Subsection
+Website - Tobias
+\end_layout
+
+\begin_layout Subsection
+Dokumentation - ? 
+\end_layout
+
+\begin_layout Section
+Logo & Sound 
+\end_layout
+
+\begin_layout Subsection
+Logo - Chris
+\end_layout
+
+\begin_layout Subsection
+Soundtrack - Chris 
+\end_layout
+
+\begin_layout Section
+Fazit - ? Julian/Tobias 
+\end_layout
+
+\begin_layout Section
+Turnierergebnisse und -platzierung 
+\end_layout
+
+\begin_layout Section
+Literatur
 \end_layout
 
 \begin_layout Standard
