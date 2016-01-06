@@ -1,0 +1,20 @@
+{\rtf1\ansi\ansicpg1252\cocoartf1404\cocoasubrtf340
+{\fonttbl\f0\fswiss\fcharset0 Helvetica;}
+{\colortbl;\red255\green255\blue255;}
+\paperw11900\paperh16840\margl1440\margr1440\vieww10800\viewh8400\viewkind0
+\deftab720
+\pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardeftab720\partightenfactor0
+
+\f0\b\fs60 \cf0 \expnd0\expndtw0\kerning0
+Angriffsdoku\
+\pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardeftab720\partightenfactor0
+
+\b0\fs22 \cf0 \
+\
+Der KI besitzt zwei verschiedene Angriffsmodi: den auf extrapolation basierenden Angriff und den aufschaltbaren Angriff. Beim auf extrapolation basierenden Angriff - auch direkter Angriffsmodus genannt - berechnet die KI die Position des Gegners in der nahen Zukunft. \'dcber den Pathfinder l\'e4sst sich daraufhin der Weg zur Kollision mit dem Gegner berechnen und abfliegen. Da sich die Position, Geschwindigkeit und Beschleunigung des Gegners st\'e4ndig \'e4ndern, muss diese Berechnung regelm\'e4\'dfig durchgef\'fchrt werden. Ist der Pfad zwischen unserem Spaceball und der extrapolierten Position nicht durch eine Mine blockiert, kann ein Wegpunkt direkt auf die extrapolierte Position gesetzt werden um schneller dort zu sein. Diese Angriffsmethode wird verwendet, wenn sich der Gegner zwischen oder hinter Minen versteckt. Leider ist diese Methode auf offenem Spielfeld leicht abzuwehren, in dem man seinen Spaceball schnell von Ecke zu Ecke beschleunigen l\'e4sst. Daher \'fcbernimmt bei offenem Spielfeld der zweite Angriffsmodus.\
+\
+Die zweite Angriffsmethode nennen wir Lock-on Angriff. Der Name ist angelehnt an das Aufschalten von Luftfahrzeugen mithilfe eines Radars. Diese Angriffsmethode w\'e4hlt eine Achse die durch beide Spaceballs verl\'e4uft und versucht die eigene Transversalgeschwindigkeiten an den Gegner anzugleichen. Beide Spaceballs befinden sich nun stets parallel zu der vorher festgelegten Achse.\
+\
+[BILD]\
+\
+Nun hat die KI den Gegner aufgeschaltet. Um mit dem Gegner zu kollidieren muss unser Spaceball Axialgeschwindigkeit in Richtung des Gegners aufbauen. Da jeder Spaceball nur eine beschr\'e4nkte Beschleunigung zur Verf\'fcgung hat wird zuerst die n\'f6tige Transversalbeschleunigung berechnet und eingesetzt, um den Gegner weiterhin aufgeschaltet zu behalten. Falls daf\'fcr noch nicht die maximale Beschleunigung verwendet wurde, kann die restliche Beschleunigung in Richtung des Gegners eingesetzt werden. Somit erh\'f6hen wir die Axialgeschwindigkeit, um den Gegner schneller zu treffen. Zus\'e4tzlich wird bereits vor dem Aufschalten eine Geschwindigkeitskomponente in Richtung des Gegners aufgebaut. Leider behindern Minen das Aufschalten und stellen eine hohe Kollisionsgefahr dar. Jedoch werden damit Gegner mit den besten Verteidigungstaktiken bei offenem Spielfeld in k\'fcrzester Zeit aufgeschaltet und besiegt. Daher ist dieser Modus eine gute Erg\'e4nzung zum direkten Angriff und wird nur angewendet, wenn in einem bestimmten Sicherheitsradius keine Minen um beide Spaceballs zu finden sind oder keine Mine mehr vorhanden ist.}
