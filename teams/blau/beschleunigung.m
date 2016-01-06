@@ -42,7 +42,7 @@ function bes = beschleunigung(spiel, farbe)
     
     %DEBUG MODE
     %true: ermöglicht ausgabe von Text und Zeichnen von gizmos
-    constDebugMode = true;
+    constDebugMode = false;
     
     %COMPILING
     %true = force compiling, false = not compiling
@@ -872,6 +872,15 @@ function bes = beschleunigung(spiel, farbe)
                     end
                 end
                 
+                %check if first tanke is still a member of spiel.tanke
+                if keepFirstTanke && spiel.n_tanke > 0
+                    keepFirstTanke=false;
+                    for i=1:spiel.n_tanke
+                        if p_firstTankePositionPersistent==spiel.tanke(i).pos
+                            keepFirstTanke=true;
+                        end
+                    end
+                end
                 
                 if (keepFirstTanke)
                     debugDisp('Tanken: calculating Path - keeping first Tanke');
