@@ -210,19 +210,210 @@ Vorwort - check/JW
 \end_layout
 
 \begin_layout Subsection
-Vorlesungen - Julian
+Vorlesungen - check/JW
+\end_layout
+
+\begin_layout Standard
+Vorlesungen fanden im Modul INFO nicht wie gewohnt statt - stattdessen haben
+ wir zu Beginn des Semesters eine Erklärung zur Idee, der Funktionsweise
+ und dem Ablauf des Projekts bekommen.
+ Von da an gab es keine weiteren regulären Vorlesungen.
+ Die Arbeit fand in den Gruppen statt und wurde eigenständig organisiert.
+ Einmal pro Woche musste jeder Student einen Tagebucheintrag in einer Onlinemask
+e
+\begin_inset Foot
+status open
+
+\begin_layout Plain Layout
+Projekttagebuch: http://www.fbm.hs-bremen.de/projekttagebuch/
+\end_layout
+
+\end_inset
+
+ verfassen, sodass unser Professor sehen konnte, woran gerade gearbeitet
+ wird und welche Fortschritte gemacht wurden.
+ Darüber hinaus muss jeder Student fünf 15-minütige Präsentationen, aus
+ denen sich meistens Gespräche über das vorgestellte Thema entwickelten,
+ abhalten.
+ Diese können alleine oder als Team
+\begin_inset Foot
+status open
+
+\begin_layout Plain Layout
+Die Dauer richtet sich nach der Personenanzahl multipliziert mit 15 Minuten
+\end_layout
+
+\end_inset
+
+ gehalten werden.
+ Bei Fragen und Problemen stand uns unser Professor, nahezu rund um die
+ Uhr, kompetent zur Seite.
+ 
+\begin_inset Newline newline
+\end_inset
+
+
 \end_layout
 
 \begin_layout Subsection
-Notengebung - Julian
+Notengebung - check/JW
+\end_layout
+
+\begin_layout Standard
+Die Endnote ist eine Teamnote, sprich jeder in einem Team hat die gleiche
+ Note.
+ Inhalte des Tagebuchs und der Präsentationen tragen nicht zur Note bei.
+ Folgende Bestandteile tragen zur Endnote bei:
+\end_layout
+
+\begin_layout Itemize
+Turniernote: 50%
+\end_layout
+
+\begin_layout Itemize
+Dokumentation: 25%
+\end_layout
+
+\begin_layout Itemize
+Website: 20%
+\end_layout
+
+\begin_layout Itemize
+Portraits, Intro, Logo: 5% 
+\end_layout
+
+\begin_layout Standard
+Die Turniernote errechnet sich aus der Platzierung, der erste Platz startet
+ mit einer 1.0, der Zweitplatzierte erhält eine 1.1 usw.
+ Pro Platz, welcher schlechter als der erste, wird also 0.1 zu der Anfangsnote
+ von 1.0 addiert.
+ Teilen sich mehrere Team einen Platz, erhalten diese auch die gleiche Turnierno
+te - sollten also alle Teams die gleiche Punktzahl erreichen, erhalten alle
+ die Bestnote 1.0.
+ 
+\begin_inset Newline newline
+\end_inset
+
+
 \end_layout
 
 \begin_layout Subsection
-Termine - Julian
+Termine - check/JW
+\end_layout
+
+\begin_layout Standard
+
+\series bold
+12.01.2016:
+\series default
+ Abgabetermin der für das Turnier relevanten Dateien
+\begin_inset Newline newline
+\end_inset
+
+
+\series bold
+19.01.2016:
+\series default
+ Turnier
+\begin_inset Newline newline
+\end_inset
+
+
+\series bold
+29.01.2016:
+\series default
+ Abgabe von Dokumentation und Website 
+\begin_inset Newline newline
+\end_inset
+
+
 \end_layout
 
 \begin_layout Subsection
 Das Team - Jeder
+\begin_inset Newline newline
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Tabular
+<lyxtabular version="3" rows="2" columns="2">
+<features rotate="0" tabularvalignment="middle">
+<column alignment="center" valignment="top" width="8cm">
+<column alignment="center" valignment="top" width="8cm">
+<row>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Marcel Haupt - 22 - Angriff & Navigation
+\begin_inset Newline newline
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Tobias Kuhlenschmidt - 20 - Statistikfunktion
+\begin_inset Newline newline
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Christopher Muth - 21 - Tanken
+\begin_inset Newline newline
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Graphics
+	filename M:/Pictures/FW1_0589.JPG
+	scale 5
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+Julian Wiggers - 19 - Verteidigung 
+\begin_inset Newline newline
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+</row>
+</lyxtabular>
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Section
@@ -233,16 +424,185 @@ Das Spiel
 Ziel des Spiels - check/JW
 \end_layout
 
+\begin_layout Standard
+
+\lang english
+Ziel des Spiel ist es, mehr Tankstellen abzufahren, somit zu „tanken“ und
+ mit einer höheren Anzahl an Tankstellen den Gegner zu treffen.
+ Hierbei dürfen die Minen und die Banden nicht berührt werden.
+ Für den Fall, dass man weniger getankt hat als der Gegner, dieser einen
+ Angreift und/oder man keine Chance mehr hat gleich viele oder mehr Tankstellen
+ als der Gegner einzusammeln, so ist es wichtig, eine ausgefeilte Verteidigungss
+trategie zu besitzen, damit der Gegner unseren, 
+\begin_inset Quotes eld
+\end_inset
+
+schwächeren
+\begin_inset Quotes erd
+\end_inset
+
+, Spaceball nicht trifft.
+ 
+\end_layout
+
 \begin_layout Subsection
 Spielfeld - check/JW
+\end_layout
+
+\begin_layout Standard
+In einem Spiel treten jeweils zwei, von verschiedenen Mannschaften programmierte
+, künstliche Intelligenzen in Form von Spaceballs (Rot und Blau) an.
+ Das Spielfeld (Abb.
+ 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "Spielfeld"
+
+\end_inset
+
+) ist quadratisch.
+ Der rote Spaceball startet in der unteren linke und der blaue Spaceball
+ in der unteren rechten Ecke.
+ Auf dem Spielfeld sind 9 Tankstellen und 12 Minen verteilt.
+ Die Verteilung erfolgt zufällig und das Spielfeld wird nach der Hälfte
+ der x-Achse gespiegelt, sodass jeweils 6 Minen auf einer Hälfte symmetrisch
+ zur anderen verteilt sind.
+ Das gleiche gilt für die Tankstellen, wobei die neunte Tankstelle irgendwo
+ auf der y-Achse bei x=0,5 liegt.
+ Durch diese Verteilung wird sichergestellt, dass kein Nachteil für eins
+ der beiden Teams entsteht.
+ Ein Spiel dauert maximal 60 Sekunden.
+ 
+\begin_inset Newline newline
+\end_inset
+
+
+\begin_inset Newline newline
+\end_inset
+
+
+\begin_inset Float figure
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\begin_inset Graphics
+	filename C:/Users/Julian Wiggers/Documents/escalators/LaTex/Bilder/Spielfeld.PNG
+	scale 47
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+Spielfeld
+\end_layout
+
+\end_inset
+
+
+\begin_inset CommandInset label
+LatexCommand label
+name "Spielfeld"
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Subsection
 Punktevergabe - check/JW
 \end_layout
 
+\begin_layout Standard
+
+\series bold
+\lang english
+1 Punkt: 
+\end_layout
+
+\begin_layout Itemize
+
+\lang english
+Kollision mit dem Gegner und mehr getankt als dieser 
+\end_layout
+
+\begin_layout Itemize
+
+\lang english
+Gegner kollidiert mit Bande 
+\end_layout
+
+\begin_layout Itemize
+
+\lang english
+Gegner kollidiert mit Mine 
+\end_layout
+
+\begin_layout Standard
+
+\series bold
+\lang english
+0 Punkte: 
+\end_layout
+
+\begin_layout Itemize
+
+\lang english
+Zeit läuft ab (Anzahl der aufgesammelten Tankstellen ist hierbei irrelevant)
+ 
+\end_layout
+
+\begin_layout Standard
+
+\series bold
+\lang english
+1 Punkt für den Gegner:
+\end_layout
+
+\begin_layout Itemize
+
+\lang english
+Kollision mit Mine 
+\end_layout
+
+\begin_layout Itemize
+
+\lang english
+Kollision mit Bande 
+\end_layout
+
+\begin_layout Itemize
+
+\lang english
+Kollision mit dem Gegner und weniger getankt als dieser 
+\end_layout
+
 \begin_layout Subsection
 Turnierablauf - check/JW
+\end_layout
+
+\begin_layout Standard
+
+\lang english
+Im Rahmen des Turniers am 19.01.2016 treten alle 15 Teams gegeneinander an,
+ anders als im letzten Jahr gibt es – aufgrund der großen Anzahl an Team
+ – dieses Jahr keine Rückrunde mehr.
+ Es werden also 105 Spiele gespielt.
+ Die maximal zu erreichende Punktzahl sind 15 Punkte.
+ Auf Basis der erreichten Punkte errechnet sich der Platz in der Wertung
+ des Turniers.
+ 
 \end_layout
 
 \begin_layout Section
@@ -274,7 +634,144 @@ Angriffsstrategie - Marcel
 \end_layout
 
 \begin_layout Subsection
-Verteidiungsstrategie - Julian
+Verteidiungsstrategie - check/JW
+\end_layout
+
+\begin_layout Standard
+Für den unwahrscheinlichen Fall, dass unser Spaceball es nicht schafft mehr
+ als die Hälfte aller Tankstellen vor dem Gegner einzusammeln geht er in
+ den Verteidigungsmodus über.
+ Primärziel der Verteidigung ist das fliehen vor dem Gegner und ein daraus
+ resultierendes Unentschieden, Sekundärziel ist es, die Gefahr, einer Kollision,
+ durch banden- und minennahe Manöver, für den Gegner zu erhöhen.
+ Unsere Verteidigung ist in zwei Hauptmanöver aufgeteilt, welche sich in
+ Teil miteinerander kombinieren lassen.
+\end_layout
+
+\begin_layout Subsubsection
+Eckenverteidigung - 
+\family typewriter
+cornerTricking()
+\end_layout
+
+\begin_layout Standard
+Die erste Strategie sieht - wie der Name vermutlich schon induziert - vor,
+ dass wir die Ecken als Teil unserer Verteidigung nutzen, genauergesagt
+ fahren wir mit einem Abstand von 0.01 Spielfeldbreiten von den Banden von
+ Ecke zu Ecke.
+ Wir verwenden diese Art der Verteidigung, wenn nur noch 4 oder weniger
+ Minen vorhanden sind.
+ Gegen Gegner mit einem guten Angriff, welcher auch Kamikaze fährt, ist
+ diese Verteidigung nicht 100%-tig sicher und kann uns, aber auch dem Angreifer
+ zum Verhängnis werden.
+ Gegner welche über einen defensiven Angriff verfügen (sprich niemal die
+ Gefahr eines Bandencrashes eingehen), haben bei dieser Art der Verteidigung
+ keine Chance uns zu treffen, da wir aus einer Ecke immer gerade so losfahren,
+ dass der Gegner uns nicht erwischt - Voraussetzung dafür ist allerdings,
+ dass der Gegner rechtzeitig bremst und vor der Bande zu stehen kommen würde.
+\begin_inset Newline newline
+\end_inset
+
+
+\family typewriter
+cornerTricking
+\family default
+ ist in 2 Parts aufgeteilt: 
+\end_layout
+
+\begin_layout Subsubsection*
+
+\family typewriter
+cornerTricking Pt.1:
+\end_layout
+
+\begin_layout Standard
+Die Aufgabe des ersten Teils der Eckenverteidigung ist es, die für uns beste
+ Ecke zum starten der Flucht entlang der Banden zu finden.
+ Hierzu berechnen wir die Zeitdifferenz von der Zeit, welche wir zu der
+ jeweiligen Ecke brauchen und der Zeit, welche der Gegner in die selbige
+ Ecke benötigt.
+ Wichtig hierbei ist, dass wir die Ecke erreichen, bevor der Gegner den
+ Bremspunkt zum rechtzeitigen anhalten vor der Bande überschreitet.
+ Nur so ist gewährleistet, dass wir rechtzeitig in Richtung der nächsten
+ Ecke beschleunigen.
+ Für den Fall, dass der Gegner uns sehr dicht auf den Fersen ist und seinen
+ Bremspunkt erreicht, bevor wir in unserer ausgewählten Ecke ankommen, so
+ biegen wir bereits vor dem erreichen dieser zur nächsten ab.
+\end_layout
+
+\begin_layout Subsubsection*
+
+\family typewriter
+cornerTricking Pt.
+ 2:
+\end_layout
+
+\begin_layout Standard
+Haben wir eine Ecke erreicht oder sind in der Nähe einer und der Gegner
+ hat den Bremspunkt für die Ecke überschritten wird
+\family typewriter
+ cornerTricking Pt.2
+\family default
+ aktiviert.
+ Wie auch in 
+\family typewriter
+Pt.
+ 1
+\family default
+ berechnen wir die Zeitdifferenz für beide Spaceballs und die jeweiligen
+ Ecken.
+ Damit wir nicht in die Ecke (zurück) fahren, aus der der Gegner gerade
+ kommt (die Zeitdifferenz ist hier ja besser, da der Gegner länger braucht
+ um seinen Geschwindigkeitsvektor um über 90° zu drehen), überprüfen wir
+ mit Hilfe des Winkels zwischen der Verbindungslinie von uns und der überprüften
+ Ecke und der Verbindungslinie der Position des Gegners und unserer Position
+ (s.
+ Abb.
+ XY) ob der Gegner aus der gerade geprüften Ecke kommt - ist die der Fall,
+ so addieren wir 100 Strafsekunden auf die errechnete Zeitdifferenz.
+ Auf diesem Wege ist sichergestellt, dass wir immer in die richtige Ecke
+ fahren.
+\end_layout
+
+\begin_layout Subsubsection
+Minenverteidigung - 
+\family typewriter
+mineTricking()
+\end_layout
+
+\begin_layout Standard
+Die Minenverteidigung ist das effizienteste Mittel zur Verteidigung, setzt
+ allerdings voraus, dass noch Minen vorhanden sind.
+ Sobald der Gegner mehr als die Hälfte aller Tankstellen eingesammelt hat,
+ begeben wir uns zu der Mine, welche wir mit dem größten Zeitvorsprung vor
+ dem Gegner erreichen (wie bei der Eckenverteidigung auch).
+ Nach dem erreichen der besten Mine spiegeln wir die gegnerische Position
+ am Minenmittelpunkt und begeben uns auf die dem Gegner gegenüberliegende
+ Seite der Mine im Abstand von ca 0.02 Spielfeldbreiten.
+ Durch unsere Minenbeschleunigung halten wir den gewählten Abstand und bewegen
+ uns auf einer kreisrunden Bahn, mit der größmöglichen Geschwindigkeit,
+ um die Mine, sodass der Gegner erst mit uns kollidieren kann, wenn die
+ Mine verschwindet.
+ Sammelt der Gegner also nicht alle noch vorhandenen Minen ein, so hat der
+ Angreifer - wenn wir einmal im Minenmodus sind - keine Chance mehr uns
+ zu erwischen (außer er sammelt aus Gründen doch noch die restlichen Minen
+ ein).
+ Ist keine Tankstelle mehr vorhanden, verschwindet alle 3 Sekunden ein Mine
+ - da der Wechsel von einer Mine zu nächsten, trotz der Zeitberechnung,
+ relativ riskant ist, haben wir beschlossen, dass wir bei vier verbleibenden
+ Minen prüfen, ob - nach dem verschwinden der Mine um welche wir gerade
+ kreisen - eine weitere Mine verfügbar ist, welche wir vor dem Gegner erreichen.
+ Sollte dies der Fall sein, fahren wir zu dieser Mine (und nach dem Verschwinden
+ dieser ggf.
+ noch zur nächsten).
+ Sollte die Mine auf dem Weg zu ihr verschwinden, so prüfen wir erneut,
+ ob noch Minen vorhanden sind, welche unsere Anforderungen erfüllen.
+ Erst wenn keine Mine mehr vorhanden ist, welche wir vor dem Gegner erreichen,
+ gehen wir in die Bandenverteidigung.
+ Dieses Vorgehen ist in unseren Augen die beste Kombination aus der Effizienz
+ der Minenverteidigung und dem dabei unter Umständen auftretenden Wechsel
+ zwischen Minen.
 \end_layout
 
 \begin_layout Section
@@ -303,6 +800,773 @@ Angriffsfunktion - Check/MH
 
 \begin_layout Subsection
 Verteidigungsfunktionen - Check/JW
+\end_layout
+
+\begin_layout Subsubsection
+
+\family typewriter
+defCornerTime
+\begin_inset CommandInset label
+LatexCommand label
+name "sub:defCornerTime"
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Description
+Syntax
+\end_layout
+
+\begin_layout LyX-Code
+time = defCornerTime(
+\shape italic
+Vector
+\shape default
+ pos)
+\end_layout
+
+\begin_layout Description
+Beschreibung
+\end_layout
+
+\begin_layout Standard
+Diese Funktion berechnet die Differenz aus der Zeit, welche wir in eine
+ ausgewählte Ecke benötigen und der Zeit, welche der Gegner in die gleiche
+ Ecke braucht.
+ Hierzu berechnen wir die Zeit, welche benötigt wird, um den Geschwindigkeitsvek
+tor genau auf die Ecke auszurichten (dazu greifen wir auf die Funktion 
+\family typewriter
+getTimeToAlginVelocity
+\family default
+ zu) und addieren diese zu der Zeit, welche wir von dem Punkt, an dem wir
+ den Geschwindkeitsvektor ausgerichtet haben, bis zu Ecke benötigen.
+\begin_inset Newline newline
+\end_inset
+
+Zusätzlich zu dieser Zeitberechnung vergeben wir noch Strafsekunden, für
+ den Fall, dass der Gegner sich in der Richtung der Ecke befindet.
+ 100 Strafsekunden werden verteilt, wenn der Gegner im Bereich von 
+\begin_inset Formula $\pm25\text{°}$
+\end_inset
+
+des Vektors von unserer Position zu Ecke ist, weitere 100 Strafsekunden
+ werden vergeben, wenn der Gegner im Bereich von 
+\begin_inset Formula $\pm12,5\text{°}$
+\end_inset
+
+ist - so wird sichergestellt, dass wir nicht in die Ecke fahren, aus der
+ der Gegner kommt.
+ Wie man in Abbildung 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:Überprüfung:-Gegner-en"
+
+\end_inset
+
+ erkennen kann, befindet sich der Gegner im erweitereten Sicherheitsbereich
+ um den Vektor von unserer Position zur Ecke.
+ Der innere Sicherheitsbereich wird nicht verletzt - es werden also 100
+ Strafsekunden erteilt.
+ 
+\begin_inset Newline newline
+\end_inset
+
+
+\begin_inset Float figure
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\noindent
+\align right
+\begin_inset Graphics
+	filename C:/Users/Julian Wiggers/Documents/escalators/LaTex/Bilder/SpaceBalls CornerTricking.jpg
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+
+\lang english
+Überprüfung: Gegner en Route? 
+\begin_inset CommandInset label
+LatexCommand label
+name "fig:Überprüfung:-Gegner-en"
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Description
+Parameter
+\end_layout
+
+\begin_layout Standard
+
+\series bold
+Vector pos:
+\series default
+ Position der Ecke.
+ 
+\end_layout
+
+\begin_layout Description
+Rückgabewert 
+\end_layout
+
+\begin_layout Paragraph
+time:
+\series medium
+ Zeitdifferenz aus meiner und der gegnerischen Zeit zur Ecke.
+\end_layout
+
+\begin_layout Subsubsection
+
+\family typewriter
+bestDefCorner
+\begin_inset CommandInset label
+LatexCommand label
+name "sub:bestDefCorner"
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Description
+Syntax
+\end_layout
+
+\begin_layout LyX-Code
+
+\shape italic
+vector 
+\shape default
+tEcke = bestDefCorner()
+\end_layout
+
+\begin_layout Description
+Beschreibung
+\end_layout
+
+\begin_layout Standard
+Diese Funktion berechnet die Zeitdifferenzen für alle vier Ecken, dabei
+ greift sie auf die Funktion 
+\family typewriter
+
+\begin_inset CommandInset ref
+LatexCommand nameref
+reference "sub:defCornerTime"
+
+\end_inset
+
+
+\family default
+ zu.
+ Die Zeiten werden dann sortiert und die Ecke der besten (größten positiven)
+ Zeitdifferenz ausgegeben.
+ 
+\end_layout
+
+\begin_layout Description
+Parameter
+\end_layout
+
+\begin_layout Standard
+-
+\end_layout
+
+\begin_layout Description
+Rückgabewert 
+\end_layout
+
+\begin_layout Standard
+
+\series bold
+vector tEcke: 
+\series default
+Koordinaten der besten Ecke
+\end_layout
+
+\begin_layout Subsubsection
+
+\family typewriter
+fleeEnemy
+\family default
+
+\begin_inset CommandInset label
+LatexCommand label
+name "xy"
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Description
+Syntax
+\end_layout
+
+\begin_layout LyX-Code
+fleeEnemy()
+\end_layout
+
+\begin_layout Description
+Beschreibung
+\end_layout
+
+\begin_layout Standard
+Die Funktion 
+\family typewriter
+
+\begin_inset CommandInset ref
+LatexCommand nameref
+reference "xy"
+
+\end_inset
+
+
+\family default
+ wird als allererstes aufgerufen, sobald unser Spaceball in die Verteidigung
+ wechselt.
+ Hier wird entschieden in welchen Verteidigungsmodus wir gehen.
+ 
+\family typewriter
+
+\begin_inset CommandInset ref
+LatexCommand nameref
+reference "xy"
+
+\end_inset
+
+ 
+\family default
+wird in der Funktion 
+\family typewriter
+whatToDo
+\family default
+ aufgerufen.
+\end_layout
+
+\begin_layout Itemize
+
+\series bold
+Minenverteidigung:
+\series default
+
+\begin_inset Newline newline
+\end_inset
+
+
+\begin_inset Newline newline
+\end_inset
+
+Wir nutzen die Minenverteidigung, wenn noch mehr als 4 Tankstellen auf dem
+ Spielfeld vorhanden sind.
+\end_layout
+
+\begin_layout Itemize
+
+\series bold
+Minenverteidigung 2.0:
+\begin_inset Newline newline
+\end_inset
+
+
+\series default
+
+\begin_inset Newline newline
+\end_inset
+
+Dieser Teil der Minenverteidigung wird aktiviert (bzw.
+ die Minenverteidigung bleibt aktiv), wenn noch 1-4 Tankstellen auf dem
+ Spielfeld vorhanden sind und wir diese vor dem Gegner erreichen können.
+ Um dies zu berechnen, greifen wir auf die Funktionen 
+\family typewriter
+
+\begin_inset CommandInset ref
+LatexCommand nameref
+reference "sub:bestDefCorner"
+
+\end_inset
+
+ 
+\family default
+und
+\family typewriter
+ 
+\begin_inset CommandInset ref
+LatexCommand nameref
+reference "sub:defCornerTime"
+
+\end_inset
+
+
+\family default
+ zu.
+ 
+\end_layout
+
+\begin_layout Itemize
+
+\series bold
+CornerTricking:
+\begin_inset Newline newline
+\end_inset
+
+
+\series default
+
+\begin_inset Newline newline
+\end_inset
+
+Wenn alle Minen verschwunden sind, oder wir keine Mine mehr vor dem Gegner
+ erreichen (um die Minenverteidigung durchzuführen), gehen wir in die Bandenvert
+eidigung.
+ 
+\end_layout
+
+\begin_layout Description
+Parameter
+\end_layout
+
+\begin_layout Standard
+-
+\end_layout
+
+\begin_layout Description
+Rückgabewert 
+\end_layout
+
+\begin_layout Standard
+-
+\end_layout
+
+\begin_layout Subsubsection
+
+\family typewriter
+cornerTricking
+\begin_inset CommandInset label
+LatexCommand label
+name "sub:cornerTricking"
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Description
+Syntax
+\end_layout
+
+\begin_layout LyX-Code
+cornerTricking()
+\end_layout
+
+\begin_layout Description
+Beschreibung
+\end_layout
+
+\begin_layout Standard
+Diese Funktion ist das Herzstück der Bandenverteidigung und ist in zwei
+ Teile aufgeteilt: 
+\end_layout
+
+\begin_layout Itemize
+
+\series bold
+cornerTricking Pt.
+ 1
+\series default
+
+\begin_inset Newline newline
+\end_inset
+
+
+\begin_inset Newline newline
+\end_inset
+
+Der erste Teil beschäftigt sich mit der Phase vom Spielfeld bis zum erreichen
+ der ersten Ecke.
+ Hierbei wird mit den bereitsvorhandenen Funktionen 
+\family typewriter
+
+\begin_inset CommandInset ref
+LatexCommand nameref
+reference "sub:bestDefCorner"
+
+\end_inset
+
+ 
+\family default
+und
+\family typewriter
+ 
+\begin_inset CommandInset ref
+LatexCommand nameref
+reference "sub:defCornerTime"
+
+\end_inset
+
+ 
+\family default
+die Ecke ausgewählt, welche Strategisch am günstigsten ist.
+ Nach der Auswahl der Ecke wird die Waypointlist gelöscht und als einziger
+ Wegpunkt die Ecke gesetzt.
+ Diese wird - da ggf.
+ noch Minen im Weg sein könnten - unter Verwendung des 
+\family typewriter
+pathFinders
+\family default
+ angefahren.
+ 
+\begin_inset Newline newline
+\end_inset
+
+In der Ecke angekommen wartet unser Spaceball nun darauf, dass der Gegner
+ uns nahe kommt, oder dass dieser seinen Bremspunkt für die ausgewählte
+ Ecke erreicht und überschreitet.
+ Ist eine der beiden Bedingungen erfüllt, so fahren wird 
+\family typewriter
+
+\begin_inset CommandInset ref
+LatexCommand nameref
+reference "sub:cornerTricking"
+
+\end_inset
+
+  Pt.
+ 2
+\family default
+ aktiviert und wir fahren zu nächsten Ecke.
+ Sollte eine der Bedingungen für 
+\family typewriter
+
+\begin_inset CommandInset ref
+LatexCommand nameref
+reference "sub:cornerTricking"
+
+\end_inset
+
+ Pt.
+ 2 
+\family default
+bereits erfüllt sein, bevor wir die Ecke erreichen, so gehen wir schon in
+ 
+\family typewriter
+
+\begin_inset CommandInset ref
+LatexCommand nameref
+reference "sub:cornerTricking"
+
+\end_inset
+
+ Pt.
+ 2
+\family default
+ über und fahren direkt die nächste Ecke an.
+\end_layout
+
+\begin_layout Itemize
+
+\series bold
+cornerTricking Pt.
+ 2 
+\series default
+
+\begin_inset Newline newline
+\end_inset
+
+
+\begin_inset Newline newline
+\end_inset
+
+Der zweite Teil wird aktiviert, sobald unser Spaceball die in 
+\family typewriter
+Pt.
+ 1
+\family default
+ ausgewählte Ecke erreicht hat, wenn der Gegner uns auf dem Weg in diese
+ bereits zu nahe kommt oder seinen Bremspunkt auf die Ecke überschreitet.
+ Unter Verwendung der Funktion 
+\family typewriter
+
+\begin_inset CommandInset ref
+LatexCommand nameref
+reference "sub:defCornerTime"
+
+\end_inset
+
+
+\family default
+ werden die entsprechenden Zeitdifferenzen errechnet.
+ Aus diesen und der Nummer der Mine erstellen wir eine Tabelle, welche wir
+ nach der Zeit sortieren.
+ Um die gewünschte (beste) Ecke zu erhalten wählen wir dementsprechend die
+ Ecke zu ersten (in diesem Fall größten) Element der Zeit aus.
+ 
+\begin_inset Newline newline
+\end_inset
+
+Da wir so dicht wie möglich an der Bande entlangfahren, werden wir keine
+ Probleme mit potentiellen Minenkollisionen haben - aus diesem Grund wird
+ der Pathfinder für die Fahrten entlang der Bande deaktiviert, so wird unser
+ Spaceball noch ein Ticken schneller.
+ Damit wir rechtzeitig abbremsen und um die nächste Kurve kommen greifen
+ wir auf die 
+\family typewriter
+emergencyBreak
+\family default
+ Funktion zu.
+ 
+\end_layout
+
+\begin_layout Description
+Parameter
+\end_layout
+
+\begin_layout Standard
+-
+\end_layout
+
+\begin_layout Description
+Rückgabewert 
+\end_layout
+
+\begin_layout Standard
+-
+\end_layout
+
+\begin_layout Subsubsection
+
+\family typewriter
+defMineTime
+\begin_inset CommandInset label
+LatexCommand label
+name "sub:defMineTime"
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Description
+Syntax
+\end_layout
+
+\begin_layout LyX-Code
+time_m = defMineTime(
+\shape italic
+Vector 
+\shape default
+pos)
+\end_layout
+
+\begin_layout Description
+Beschreibung
+\end_layout
+
+\begin_layout Standard
+Diese Funktion berechnet die Differenz aus der Zeit, welche wir zu einer
+ ausgewählten Mine benötigen und der Zeit, welche der Gegner zu gleichen
+ Mine Ecke braucht.
+ Hierzu berechnen wir die Zeit, welche benötigt wird, um den Geschwindigkeitsvek
+tor genau auf die Mine auszurichten (dazu greifen wir auf die Funktion 
+\family typewriter
+getTimeToAlginVelocity
+\family default
+ zu) und addieren diese zu der Zeit, welche wir von dem Punkt, an dem wir
+ den Geschwindkeitsvektor ausgerichtet haben, bis zu Mine benötigen.
+\end_layout
+
+\begin_layout Description
+Parameter
+\end_layout
+
+\begin_layout Standard
+
+\series bold
+Vector pos: 
+\series default
+Position der Mine.
+ 
+\end_layout
+
+\begin_layout Description
+Rückgabewert 
+\end_layout
+
+\begin_layout Standard
+
+\series bold
+time_m:
+\series default
+ Zeitdifferenz aus meiner und der gegnerischen Zeit zur Mine.
+\end_layout
+
+\begin_layout Subsubsection
+
+\family typewriter
+bestDefMine
+\begin_inset CommandInset label
+LatexCommand label
+name "sub:bestDefMine"
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Description
+Syntax
+\end_layout
+
+\begin_layout LyX-Code
+
+\shape italic
+Vector 
+\shape default
+tMine = bestDefMine()
+\end_layout
+
+\begin_layout Description
+Beschreibung
+\end_layout
+
+\begin_layout Standard
+Diese Funktion berechnet die Zeitdifferenzen für alle n Minen, dabei greift
+ sie auf die Funktion 
+\begin_inset CommandInset ref
+LatexCommand nameref
+reference "sub:defMineTime"
+
+\end_inset
+
+ zu.
+ Die Zeiten werden dann sortiert und die Mine der besten (größten positiven)
+ Zeitdifferenz ausgegeben.
+ 
+\end_layout
+
+\begin_layout Description
+Parameter
+\end_layout
+
+\begin_layout Standard
+-
+\end_layout
+
+\begin_layout Description
+Rückgabewert 
+\end_layout
+
+\begin_layout Standard
+
+\series bold
+vector tMine: 
+\series default
+Koordinaten der besten Mine
+\end_layout
+
+\begin_layout Subsubsection
+
+\family typewriter
+mineTricking
+\begin_inset CommandInset label
+LatexCommand label
+name "sub:mineTricking"
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Description
+Syntax
+\end_layout
+
+\begin_layout LyX-Code
+mineTricking()
+\end_layout
+
+\begin_layout Description
+Beschreibung
+\end_layout
+
+\begin_layout Standard
+Diese Funktion berechnet den Wegpunkt, welchen wir anfahren müssen um uns
+ hinter einer Mine vor dem Gegner zu verstecken.
+ Idealerweise ginge dafür eine 
+\begin_inset Quotes eld
+\end_inset
+
+Verbindungslinie
+\begin_inset Quotes erd
+\end_inset
+
+ vom gegnerischen Spaceball zu unserem genau durch den Mittelpunkt der Mine
+ - deshalb spiegeln und normieren wir den Vektor des Gegners zum Minenmittelpunk
+t in jedem 
+\begin_inset Quotes eld
+\end_inset
+
+Step
+\begin_inset Quotes erd
+\end_inset
+
+, sofern die Minenverteidigung aktiv ist.
+ Somit jagen wir durch unsere Minenbeschleunigung den Wegpunkten hinterher
+ und sind im Idealfall genau auf der gegenüberliegenden Seite der Mine.
+ Es kann natürlich passieren, dass wir nur knapp vor dem Gegner an der Mine
+ ankommen und er uns deshalb immer knapp auf den Fersen ist - durch unsere
+ Minenbeschleunigung wird er uns aber nicht kriegen, da wir auf einer nahezu
+ perfekten Kreisbahn um die Mine fahren.
+ 
+\begin_inset Newline newline
+\end_inset
+
+Der Waypoint berechnet sich aus dem normierten, gespiegelten Vektors des
+ Gegners zu Mine, multipliziert mit der Summe aus einer Sicherheit, dem
+ Minenradius und unserem Radius.
+ Durch das normieren des Vektors wird sichergestellt, dass wir uns stets
+ auf einer runden Kreisbahn um die Mine befinden und unser Abstand von der
+ Mine unabhängig von dem des Gegners ist.
+ 
+\end_layout
+
+\begin_layout Description
+Parameter
+\end_layout
+
+\begin_layout Standard
+-
+\end_layout
+
+\begin_layout Description
+Rückgabewert 
+\end_layout
+
+\begin_layout Standard
+-
 \end_layout
 
 \begin_layout Section
