@@ -148,19 +148,6 @@ Eine Spaceballs KI für den Kurs Informatik an der Hochschule Bremen
 Bremen, 12/30/15
 \end_layout
 
-\begin_layout Title
-
-\size large
-\begin_inset Graphics
-	filename D:/Daten (D)/Dropbox/escalators/INFO/Logo/Logo Vector high res + alpha.png
-	lyxscale 5
-	scale 10
-
-\end_inset
-
-
-\end_layout
-
 \begin_layout Author
 Julian Wiggers
 \begin_inset Newline newline
@@ -243,15 +230,15 @@ Das Spiel
 \end_layout
 
 \begin_layout Subsection
+Ziel des Spiels - check/JW
+\end_layout
+
+\begin_layout Subsection
 Spielfeld - check/JW
 \end_layout
 
 \begin_layout Subsection
-Spielregeln - check/JW
-\end_layout
-
-\begin_layout Subsection
-Spielablauf - check/JW
+Punktevergabe - check/JW
 \end_layout
 
 \begin_layout Subsection
