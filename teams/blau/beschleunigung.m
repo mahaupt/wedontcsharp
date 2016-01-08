@@ -42,7 +42,7 @@ function bes = beschleunigung(spiel, farbe)
     
     %DEBUG MODE
     %true: ermöglicht ausgabe von Text und Zeichnen von gizmos
-    constDebugMode = false;
+    constDebugMode = true;
     
     %COMPILING
     %true = force compiling, false = not compiling
@@ -578,6 +578,21 @@ function bes = beschleunigung(spiel, farbe)
             vec2 = p_waypointList{i+1} - p_waypointList{i};
             length = norm(vec1);
             minVel = getMaxVelocityToAlignInTime(vec1, vec2, constCornerBreaking);
+            
+            if (~p_cornerVerteidigung && numel(p_waypointList) >= i+3)
+                minVelMine = Inf;
+                for j=1:spiel.n_mine
+                    if (norm(spiel.mine(j).pos-p_waypointList{i}) < constMineProxRadius && ...
+                            norm(spiel.mine(j).pos-p_waypointList{i+1}) < constMineProxRadius && ...
+                            norm(spiel.mine(j).pos-p_waypointList{i+2}) < constMineProxRadius)
+                        minVelMine = spiel.bes*norm(spiel.mine(j).pos-p_waypointList{i});
+                        break;
+                    end
+                end
+                if (minVelMine < minVel)
+                    minVel = minVelMine;
+                end
+            end
             
             tway = sqrt(erg^2+2*spiel.bes*length)-erg;
             erg = erg + tway;
