@@ -69,7 +69,7 @@ close all
              r = round(rand(1)*1000000);
          end   
 
-        rng(r);
+         rng(r);
         
 % Rechenzeit und Schritt zum aktuellen Zeitpunkt ausgeben
         if totalTime >= 60
