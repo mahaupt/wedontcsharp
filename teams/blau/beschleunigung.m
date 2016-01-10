@@ -46,7 +46,7 @@ function bes = beschleunigung(spiel, farbe)
     
     %COMPILING
     %true = force compiling, false = not compiling
-    constCompiling = false;
+    constCompiling = true;
     
     %statische Variablen definieren
     persistent p_waypointList; %Liste mit Wegpunkten. Werden automatisch nacheinander abgefahren
@@ -578,6 +578,21 @@ function bes = beschleunigung(spiel, farbe)
             vec2 = p_waypointList{i+1} - p_waypointList{i};
             length = norm(vec1);
             minVel = getMaxVelocityToAlignInTime(vec1, vec2, constCornerBreaking);
+            
+            if (~p_cornerVerteidigung && numel(p_waypointList) >= i+3)
+                minVelMine = Inf;
+                for j=1:spiel.n_mine
+                    if (norm(spiel.mine(j).pos-p_waypointList{i}) < constMineProxRadius && ...
+                            norm(spiel.mine(j).pos-p_waypointList{i+1}) < constMineProxRadius && ...
+                            norm(spiel.mine(j).pos-p_waypointList{i+2}) < constMineProxRadius)
+                        minVelMine = spiel.bes*norm(spiel.mine(j).pos-p_waypointList{i});
+                        break;
+                    end
+                end
+                if (minVelMine < minVel)
+                    minVel = minVelMine;
+                end
+            end
             
             tway = sqrt(erg^2+2*spiel.bes*length)-erg;
             erg = erg + tway;
@@ -1524,7 +1539,7 @@ function bes = beschleunigung(spiel, farbe)
         end
         
         for i = 1 : numel(p_waypointList)
-            drawHandles(i) = rectangle ('Parent', spiel.spielfeld_handle, 'Position', [p_waypointList{i}-0.0025, 0.005, 0.005], 'Curvature', [1 1], 'FaceColor', dcolor, 'EdgeColor', [0, 0, 0]);
+            %drawHandles(i) = rectangle ('Parent', spiel.spielfeld_handle, 'Position', [p_waypointList{i}-0.0025, 0.005, 0.005], 'Curvature', [1 1], 'FaceColor', dcolor, 'EdgeColor', [0, 0, 0]);
         end
     end
 
@@ -1560,7 +1575,7 @@ function bes = beschleunigung(spiel, farbe)
         end
         
         if (rad > 0)
-            mineDraw(index) = rectangle ('Parent', spiel.spielfeld_handle, 'Position', [pos-rad, rad*2, rad*2], 'Curvature', [1 1], 'FaceColor', 'none', 'EdgeColor', dcolor);
+            %mineDraw(index) = rectangle ('Parent', spiel.spielfeld_handle, 'Position', [pos-rad, rad*2, rad*2], 'Curvature', [1 1], 'FaceColor', 'none', 'EdgeColor', dcolor);
         end
     end
 
@@ -1569,7 +1584,7 @@ function bes = beschleunigung(spiel, farbe)
             return;
         end
         
-        disp(str);
+        %disp(str);
     end
 
 
