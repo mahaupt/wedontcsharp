@@ -42,7 +42,7 @@ function bes = beschleunigung(spiel, farbe)
     
     %DEBUG MODE
     %true: ermöglicht ausgabe von Text und Zeichnen von gizmos
-    constDebugMode = true;
+    constDebugMode = false;
     
     %COMPILING
     %true = force compiling, false = not compiling
@@ -1539,7 +1539,7 @@ function bes = beschleunigung(spiel, farbe)
         end
         
         for i = 1 : numel(p_waypointList)
-            drawHandles(i) = rectangle ('Parent', spiel.spielfeld_handle, 'Position', [p_waypointList{i}-0.0025, 0.005, 0.005], 'Curvature', [1 1], 'FaceColor', dcolor, 'EdgeColor', [0, 0, 0]);
+            %drawHandles(i) = rectangle ('Parent', spiel.spielfeld_handle, 'Position', [p_waypointList{i}-0.0025, 0.005, 0.005], 'Curvature', [1 1], 'FaceColor', dcolor, 'EdgeColor', [0, 0, 0]);
         end
     end
 
@@ -1575,7 +1575,7 @@ function bes = beschleunigung(spiel, farbe)
         end
         
         if (rad > 0)
-            mineDraw(index) = rectangle ('Parent', spiel.spielfeld_handle, 'Position', [pos-rad, rad*2, rad*2], 'Curvature', [1 1], 'FaceColor', 'none', 'EdgeColor', dcolor);
+            %mineDraw(index) = rectangle ('Parent', spiel.spielfeld_handle, 'Position', [pos-rad, rad*2, rad*2], 'Curvature', [1 1], 'FaceColor', 'none', 'EdgeColor', dcolor);
         end
     end
 
@@ -1584,7 +1584,7 @@ function bes = beschleunigung(spiel, farbe)
             return;
         end
         
-        disp(str);
+        %disp(str);
     end
 
 
