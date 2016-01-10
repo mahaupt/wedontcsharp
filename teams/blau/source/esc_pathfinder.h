@@ -6,7 +6,7 @@ public:
         Node &endNode = nodegrid.getValidNode(nodegrid.worldPosToGridPos(end));
         
         if (startNode == endNode || !startNode.is_walkable || !endNode.is_walkable) {
-            mexPrintf("Invalid start or end node \n");
+            //mexPrintf("Invalid start or end node \n");
             return vector<Vector2>();
         }
         
@@ -64,7 +64,7 @@ public:
             
             return waypoints2;
         } else {
-            mexPrintf("Path not found! \n");
+            //mexPrintf("Path not found! \n");
             return vector<Vector2>();
         }
     }
