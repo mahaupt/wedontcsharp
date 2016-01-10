@@ -46,7 +46,7 @@ function bes = beschleunigung(spiel, farbe)
     
     %COMPILING
     %true = force compiling, false = not compiling
-    constCompiling = true;
+    constCompiling = false;
     
     %statische Variablen definieren
     persistent p_waypointList; %Liste mit Wegpunkten. Werden automatisch nacheinander abgefahren
