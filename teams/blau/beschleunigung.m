@@ -173,8 +173,8 @@ function bes = beschleunigung(spiel, farbe)
         end
         
         if (constCompiling)
-            mex source/esc_find_path.cpp
-            mex source/esc_find_tanke.cpp
+            mex COMPFLAGS='$COMPFLAGS /MT -static' source/esc_find_path.cpp
+            mex COMPFLAGS='$COMPFLAGS /MT -static' source/esc_find_tanke.cpp
         end
         
         %%clear static variables
