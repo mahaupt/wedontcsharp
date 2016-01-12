@@ -1,4 +1,4 @@
-# escalators
+# We don't c#, we Methlab
 
 Die KI befindet sich in teams/blau
 
@@ -9,7 +9,7 @@ Authoren der KI:
 - **Christopher Muth**
 - **Marcel Haupt**
 
-Abgabe: 19.01.2016
+Abgabe: 12.01.2016
 
 ##Spaceballs
 Originales Spiel und Lehrprojekt von **J.J. Buchholz**
