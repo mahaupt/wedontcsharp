@@ -2,6 +2,8 @@
 
 Die KI befindet sich in teams/blau
 
+Das Statistikprogramm befindet sich in stats.m und statistics.m
+
 Authoren der KI:
 
 - **Julian Wiggers**
