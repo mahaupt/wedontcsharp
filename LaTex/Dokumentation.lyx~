@@ -939,7 +939,7 @@ time:
  Zeitdifferenz aus meiner und der gegnerischen Zeit zur Ecke.
 \end_layout
 
-\begin_layout Subsection
+\begin_layout Subsubsection
 
 \family typewriter
 bestDefCorner
@@ -1007,7 +1007,7 @@ vector tEcke:
 Koordinaten der besten Ecke
 \end_layout
 
-\begin_layout Subsection
+\begin_layout Subsubsection
 
 \family typewriter
 fleeEnemy
@@ -1161,7 +1161,7 @@ Rückgabewert
 -
 \end_layout
 
-\begin_layout Subsection
+\begin_layout Subsubsection
 
 \family typewriter
 cornerTricking
@@ -1356,7 +1356,7 @@ Rückgabewert
 -
 \end_layout
 
-\begin_layout Subsection
+\begin_layout Subsubsection
 
 \family typewriter
 defMineTime
@@ -1423,7 +1423,7 @@ time_m:
  Zeitdifferenz aus meiner und der gegnerischen Zeit zur Mine.
 \end_layout
 
-\begin_layout Subsection
+\begin_layout Subsubsection
 
 \family typewriter
 bestDefMine
@@ -1487,7 +1487,7 @@ vector tMine:
 Koordinaten der besten Mine
 \end_layout
 
-\begin_layout Subsection
+\begin_layout Subsubsection
 
 \family typewriter
 mineTricking
