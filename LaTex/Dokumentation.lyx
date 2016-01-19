@@ -77,7 +77,7 @@ figs-within-sections
 \output_sync 0
 \bibtex_command default
 \index_command default
-\float_placement h
+\float_placement H
 \paperfontsize default
 \spacing single
 \use_hyperref true
@@ -86,11 +86,11 @@ figs-within-sections
 \pdf_bookmarksopen false
 \pdf_bookmarksopenlevel 1
 \pdf_breaklinks false
-\pdf_pdfborder false
+\pdf_pdfborder true
 \pdf_colorlinks false
 \pdf_backref false
 \pdf_pdfusetitle true
-\papersize default
+\papersize a4paper
 \use_geometry false
 \use_package amsmath 1
 \use_package amssymb 1
@@ -146,6 +146,18 @@ Eine Spaceballs KI für den Kurs Informatik an der Hochschule Bremen
 
 \begin_layout Date
 Bremen, 12/30/15
+\end_layout
+
+\begin_layout Standard
+\align center
+\begin_inset Graphics
+	filename Bilder/Logo Vector high res + alpha.png
+	lyxscale 10
+	scale 10
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Author
@@ -339,20 +351,16 @@ Das Team - Jeder
 
 \begin_layout Standard
 \begin_inset Tabular
-<lyxtabular version="3" rows="2" columns="2">
+<lyxtabular version="3" rows="6" columns="2">
 <features rotate="0" tabularvalignment="middle">
-<column alignment="center" valignment="top" width="8cm">
-<column alignment="center" valignment="top" width="8cm">
+<column alignment="center" valignment="top" width="5cm">
+<column alignment="center" valignment="top" width="5cm">
 <row>
 <cell alignment="center" valignment="top" usebox="none">
 \begin_inset Text
 
 \begin_layout Plain Layout
-Marcel Haupt - 22 - Angriff & Navigation
-\begin_inset Newline newline
-\end_inset
-
-
+Marcel Haupt - 22 - 
 \end_layout
 
 \end_inset
@@ -361,11 +369,7 @@ Marcel Haupt - 22 - Angriff & Navigation
 \begin_inset Text
 
 \begin_layout Plain Layout
-Tobias Kuhlenschmidt - 20 - Statistikfunktion
-\begin_inset Newline newline
-\end_inset
-
-
+Tobias Kuhlenschmidt - 20 - 
 \end_layout
 
 \end_inset
@@ -376,8 +380,30 @@ Tobias Kuhlenschmidt - 20 - Statistikfunktion
 \begin_inset Text
 
 \begin_layout Plain Layout
-Christopher Muth - 21 - Tanken
-\begin_inset Newline newline
+Angriff & Navigation
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Statistik & Website
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Graphics
+	filename D:/Daten (D)/Dropbox/Privat/Hochschule Bremen/3. Semester/Informatik/GitHub/wedontcsharp/teams/blau/media/Marcel Haupt.JPG
+	scale 200
+
 \end_inset
 
 
@@ -390,17 +416,81 @@ Christopher Muth - 21 - Tanken
 
 \begin_layout Plain Layout
 \begin_inset Graphics
-	filename M:/Pictures/FW1_0589.JPG
-	scale 5
+	filename D:/Daten (D)/Dropbox/Privat/Hochschule Bremen/3. Semester/Informatik/GitHub/wedontcsharp/teams/blau/media/Tobias Kuhlenschmidt.JPG
+	scale 200
 
 \end_inset
 
 
 \end_layout
 
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
 \begin_layout Plain Layout
-Julian Wiggers - 19 - Verteidigung 
-\begin_inset Newline newline
+Christopher Muth - 21 - 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Julian Wiggers - 19 - 
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Tanken
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Verteidigung
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Graphics
+	filename D:/Daten (D)/Dropbox/Privat/Hochschule Bremen/3. Semester/Informatik/GitHub/wedontcsharp/teams/blau/media/Christopher Muth.JPG
+	scale 200
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Graphics
+	filename D:/Daten (D)/Dropbox/Privat/Hochschule Bremen/3. Semester/Informatik/GitHub/wedontcsharp/teams/blau/media/Julian Wiggers.JPG
+	scale 200
+
 \end_inset
 
 
@@ -411,6 +501,10 @@ Julian Wiggers - 19 - Verteidigung
 </row>
 </lyxtabular>
 
+\end_inset
+
+
+\begin_inset Newpage pagebreak
 \end_inset
 
 
@@ -425,8 +519,6 @@ Ziel des Spiels - check/JW
 \end_layout
 
 \begin_layout Standard
-
-\lang english
 Ziel des Spiel ist es, mehr Tankstellen abzufahren, somit zu „tanken“ und
  mit einer höheren Anzahl an Tankstellen den Gegner zu treffen.
  Hierbei dürfen die Minen und die Banden nicht berührt werden.
@@ -482,14 +574,17 @@ reference "Spielfeld"
 
 
 \begin_inset Float figure
+placement H
 wide false
 sideways false
 status open
 
 \begin_layout Plain Layout
+\align center
 \begin_inset Graphics
-	filename C:/Users/Julian Wiggers/Documents/escalators/LaTex/Bilder/Spielfeld.PNG
-	scale 47
+	filename D:/Daten (D)/Dropbox/Privat/Hochschule Bremen/3. Semester/Informatik/GitHub/wedontcsharp/LaTex/Bilder/Spielfeld.PNG
+	lyxscale 50
+	scale 50
 
 \end_inset
 
@@ -527,38 +622,28 @@ Punktevergabe - check/JW
 \begin_layout Standard
 
 \series bold
-\lang english
 1 Punkt: 
 \end_layout
 
 \begin_layout Itemize
-
-\lang english
 Kollision mit dem Gegner und mehr getankt als dieser 
 \end_layout
 
 \begin_layout Itemize
-
-\lang english
 Gegner kollidiert mit Bande 
 \end_layout
 
 \begin_layout Itemize
-
-\lang english
 Gegner kollidiert mit Mine 
 \end_layout
 
 \begin_layout Standard
 
 \series bold
-\lang english
 0 Punkte: 
 \end_layout
 
 \begin_layout Itemize
-
-\lang english
 Zeit läuft ab (Anzahl der aufgesammelten Tankstellen ist hierbei irrelevant)
  
 \end_layout
@@ -566,25 +651,18 @@ Zeit läuft ab (Anzahl der aufgesammelten Tankstellen ist hierbei irrelevant)
 \begin_layout Standard
 
 \series bold
-\lang english
 1 Punkt für den Gegner:
 \end_layout
 
 \begin_layout Itemize
-
-\lang english
 Kollision mit Mine 
 \end_layout
 
 \begin_layout Itemize
-
-\lang english
 Kollision mit Bande 
 \end_layout
 
 \begin_layout Itemize
-
-\lang english
 Kollision mit dem Gegner und weniger getankt als dieser 
 \end_layout
 
@@ -593,8 +671,6 @@ Turnierablauf - check/JW
 \end_layout
 
 \begin_layout Standard
-
-\lang english
 Im Rahmen des Turniers am 19.01.2016 treten alle 15 Teams gegeneinander an,
  anders als im letzten Jahr gibt es – aufgrund der großen Anzahl an Team
  – dieses Jahr keine Rückrunde mehr.
@@ -603,6 +679,10 @@ Im Rahmen des Turniers am 19.01.2016 treten alle 15 Teams gegeneinander an,
  Auf Basis der erreichten Punkte errechnet sich der Platz in der Wertung
  des Turniers.
  
+\begin_inset Newpage pagebreak
+\end_inset
+
+
 \end_layout
 
 \begin_layout Section
@@ -611,6 +691,43 @@ Strategien
 
 \begin_layout Subsection
 Blockschaltbild - check/MH
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+placement H
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\align center
+\begin_inset Graphics
+	filename D:/Daten (D)/Dropbox/Privat/Hochschule Bremen/3. Semester/Informatik/GitHub/wedontcsharp/LaTex/Bilder/Blockschaltbild 1.jpg
+	lyxscale 20
+	scale 60
+
+\end_inset
+
+
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+Blockschaltbild
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Subsection
@@ -629,8 +746,399 @@ Ausweichstrategie
 Tankstrategie - Chris
 \end_layout
 
+\begin_layout Standard
+Intensiv hat uns die Frage beschäftigt, wie die KI am günstigsten tanken
+ fahren kann.
+ Hierbei handelt es sich um den wichtigsten und gleichzeitig auch komplexesten
+ Teil der KI.
+ Es gibt mehrere Möglichkeiten, die wir auch alle im Laufe unserer Programmierun
+g ausprobiert haben:
+\end_layout
+
+\begin_layout Enumerate
+Die einfachste Methode: Unsere KI findet die dichteste Tankstelle (Luftlinie)
+ und fährt sie an.
+ Sobald diese eingesammelt wurde, wir die nächst-dichteste Tankstelle angefahren
+ und so weiter.
+\end_layout
+
+\begin_layout Enumerate
+Die etwas kompliziertere Methode: Unsere KI bewertet alle Tankstellen nach
+ mehreren Kriterien und fährt dann die günstigste an:
+\end_layout
+
+\begin_deeper
+\begin_layout Enumerate
+Entfernung (Luftlinie)
+\end_layout
+
+\begin_layout Enumerate
+Liegt eine Mine im Weg?
+\end_layout
+
+\begin_layout Enumerate
+Wie nahe ist der Gegner an dieser Tankstelle?
+\end_layout
+
+\begin_layout Enumerate
+Liegen noch weitere Tankstellen in einem gewissen Winkel hinter dieser Tanke?
+ Wenn ja, wie viele?
+\end_layout
+
+\end_deeper
+\begin_layout Enumerate
+Die beste / komplexeste Methode: Unsere KI durchläuft alle möglichen Wege,
+ fünf Tankstellen anzufahren und bewertet diese Wege nach folgenden Kriterien:
+\end_layout
+
+\begin_deeper
+\begin_layout Enumerate
+Entfernung (Luftlinie)
+\end_layout
+
+\begin_layout Enumerate
+Notwendige Geschwindigkeitsänderung (je größer der Winkel zur nächsten Tankstell
+e, desto mehr Strafpunkte)
+\end_layout
+
+\begin_layout Enumerate
+Liegt eine Mine im Weg?
+\end_layout
+
+\end_deeper
+\begin_layout Standard
+Hierbei ist zu beachten, dass ein recht großer Rechenaufwand notwendig ist,
+ da es bei fünf Tankstellen schon 120 mögliche Reihenfolgen gibt, diese
+ anzufahren.
+ Anfangs hatten wir noch mit allen 9 Tankstellen (362.880 Möglichkeiten)
+ gerechnet, was allerdings strategisch ungünstig ist (siehe weiter unten).
+\begin_inset Newline newline
+\end_inset
+
+Für die Berechnung der Tankstellen benutzen wir eine Abwandlung des sogenannten
+ Minimax- Algorithmus
+\begin_inset Foot
+status open
+
+\begin_layout Plain Layout
+https://de.wikipedia.org/wiki/Minimax-Algorithmus
+\end_layout
+
+\end_inset
+
+.
+ Eine detailliertere Beschreibung befindet sich in der Funktionsdokumentation
+ (LINK zur Funktionsdoku).
+ Nachdem alle Wege bewertet wurden, gibt unser Programm eine Liste mit den
+ Nummern der Tankstellen aus, die wir am besten in dieser Reihenfolge anfahren.
+ Der besondere Clou ist, immer nur den besten Weg für die Anzahl Tankstellen,
+ die wir noch einsammeln müssen, zu suchen.
+ Liegen beispielsweise drei Tankstellen auf einem Haufen und wir benötigen
+ nur noch drei, dann ist es günstiger zu dieser Häufung Tankstellen zu fahren,
+ als den Weg rechts herum (Abb.
+ X).
+ Unser Algorithmus würde aber als besten Weg für fünf Tankstellen den ersten
+ wählen, da es für fünf Tankstellen tatsächlich günstiger wäre, dort lang
+ zu fahren.
+\end_layout
+
+\begin_layout Standard
+\align center
+\begin_inset Float figure
+placement H
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\align center
+\begin_inset Graphics
+	filename D:/Daten (D)/Dropbox/Privat/Hochschule Bremen/3. Semester/Informatik/GitHub/wedontcsharp/LaTex/eingefügt1.emf
+	lyxscale 20
+	scale 10
+
+\end_inset
+
+
+\begin_inset Graphics
+	filename D:/Daten (D)/Dropbox/Privat/Hochschule Bremen/3. Semester/Informatik/GitHub/wedontcsharp/LaTex/eingefügt2.emf
+	lyxscale 20
+	scale 10
+
+\end_inset
+
+
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+Anzufahrende Tankstellen
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Dieser „Tank-Pfad-Findungs-Algorithmus“ wird zu folgenden Zeitpunkten erneut
+ ausgeführt:
+\end_layout
+
+\begin_layout Itemize
+Bei Spielbeginn
+\end_layout
+
+\begin_layout Itemize
+Wir schalten vom Angriffs- oder Verteidigungsmodus zurück in den Tankmodus
+\end_layout
+
+\begin_layout Itemize
+Eine Tankstelle verschwindet (wird eingesammelt, egal, von wem)
+\end_layout
+
+\begin_layout Itemize
+Der competitionMode wird beendet 
+\end_layout
+
+\begin_layout Itemize
+ignoreTanke wird gesetzt, d.h.
+ wir ignorieren eine Tankstelle, da der Gegner diese bald einsammeln wird
+\end_layout
+
+\begin_layout Standard
+Damit ist der wichtigste Teil des Tankprozesses fertig.
+ Wir benutzen den Pathfinder, um den tatsächlichen Pfad zwischen den Tankstellen
+ zu berechnen und geben die Wegpunkte in die waypointList.
+ Den Rest erledigt calculateBES().
+\end_layout
+
+\begin_layout Subsubsection
+doesEnemyGetTanke()
+\end_layout
+
+\begin_layout Standard
+Diese Funktion wird während des Tankens in jedem Rechenschritt aufgerufen.
+ Sie besteht inhaltlich aus mehreren Teilen.
+\end_layout
+
+\begin_layout Subsubsection*
+ignoreTanke
+\end_layout
+
+\begin_layout Standard
+Häufig kommt es vor, dass der Gegner eine Tankstelle vor uns erreicht, die
+ auf unserer p_TankList steht.
+ Wie finden wir heraus, welche Tankstelle das ist? Wir berechnen bei jedem
+ Rechendurchgang die Zeit, die der Gegner zu allen Tankstellen benötigt
+ und suchen die geringste, die auch noch unter einem bestimmten Threshold
+ liegen muss (constIgnoreTankeTime).
+ Wenn es sich nicht um die erste Tankstelle handelt (der Gegner also nicht
+ auf die Tankstelle zufährt, auf die wir auch gerade zufahren), und keine
+ Mine zwischen Gegner und Tankstelle liegt, wird diese von uns ignoriert.
+ Dazu schreiben wir den Index dieser Tankstelle in die Variable p_ignoreTanke
+ und Abb.
+ X berechnen die Reihenfolge der Tankstellen neu, wobei die in p_ignoreTanke
+ gespeicherte Tankstelle ignoriert wird.
+\end_layout
+
+\begin_layout Subsubsection*
+keepFirstTanke
+\end_layout
+
+\begin_layout Standard
+Sollte es vorkommen, dass sich durch die Neuberechnung die erste Tankstelle
+ ändert, unser Spaceball also eine neue Tankstelle zuerst anfahren soll,
+ dann kann dies dazu führen, dass wir eine Tankstelle knapp verfehlen und
+ wertvolle Zeit verlieren.
+ Zwar mag es sein, dass die neue Reihenfolge zeitlich günstiger ist, allerdings
+ wird der Gegner nicht in die Überlegung mit einbezogen.
+ In der Zeit, die wir benötigen, um unsere „neue“ erste Tankstelle einzusammeln,
+ hat der Gegner oft schon eine andere Tankstelle eingesammelt und unser
+ Algorithmus entscheidet sich wieder um.
+ Dann sammeln wir wieder keine Tankstelle ein und verlieren wertvolle Zeit.
+ Daher gibt es nach dem Ausführen von CreatePathAllTanken() eine Überprüfung,
+ ob sich die erste Tankstelle in unserer p_TankList geändert hat.
+ Ist dies der Fall und wir befinden uns zeitlich nahe an dieser Tankstelle,
+ wird diese in der p_waypointList an erster Stelle erhalten.
+\end_layout
+
+\begin_layout Subsubsection*
+compMode
+\end_layout
+
+\begin_layout Standard
+Sollten wir merken, dass der Gegner dieselbe Tankstelle anfährt, wie wir,
+ berechnen wir zuerst, ob wir diese etwa gleichzeitig erreichen.
+ Ist dies der Fall, wechselt unsere KI in den sogenannten „competition Mode“.
+ Dafür wird die gesamte p_waypointList gelöscht und zwei neue Wegpunkte
+ eingesetzt:
+\end_layout
+
+\begin_layout Enumerate
+Die Position der Tankstelle, um die wir konkurrieren
+\end_layout
+
+\begin_layout Enumerate
+Ein Punkt hinter der Tankstelle in einer Flucht mit dieser und unserem Spaceball
+\end_layout
+
+\begin_layout Standard
+Der zweite Punkt wird mithilfe der Funktion getAccPos() berechnet.
+ Dadurch hält unser Spaceball mit voller Beschleunigung auf die Tankstelle
+ zu und wir erhöhen unsere Chance, diese vor dem Gegner zu erreichen, enorm.
+ Oftmals ist dies spielentscheidend, da der Unterlegene meist sofort getroffen
+ wird und das Spiel verliert.
+\begin_inset Newline newline
+\end_inset
+
+Aufgrund gewisser Toleranzen in der Berechnung kommt es vor, dass der Gegner
+ die Tankstelle vor uns erreicht.
+ Wir versuchen, dies rechtzeitig zu merken und dann mit einer Vollbremsung
+ die Kollision zu vermeiden.
+ Dies klappt leider nicht immer.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+placement H
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+\align center
+\begin_inset Graphics
+	filename D:/Daten (D)/Dropbox/Privat/Hochschule Bremen/3. Semester/Informatik/GitHub/wedontcsharp/LaTex/eingefügt3.emf
+	lyxscale 20
+	scale 10
+
+\end_inset
+
+
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+Tankstelle schneller erreichen, als der Gener
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
 \begin_layout Subsection
 Angriffsstrategie - Marcel
+\end_layout
+
+\begin_layout Standard
+Der KI besitzt zwei verschiedene Angriffsmodi: den auf extrapolation basierenden
+ Angriff und den aufschaltbaren Angriff.
+ Beim auf extrapolation basierenden Angriff - auch direkter Angriffsmodus
+ genannt - berechnet die KI die Position des Gegners in der nahen Zukunft.
+ Über den Pathfinder lässt sich daraufhin der Weg zur Kollision mit dem
+ Gegner berechnen und abfliegen.
+ Da sich die Position, Geschwindigkeit und Beschleunigung des Gegners ständig
+ ändern, muss diese Berechnung regelmäßig durchgeführt werden.
+ Ist der Pfad zwischen unserem Spaceball und der extrapolierten Position
+ nicht durch eine Mine blockiert, kann ein Wegpunkt direkt auf die extrapolierte
+ Position gesetzt werden um schneller dort zu sein.
+ Diese Angriffsmethode wird verwendet, wenn sich der Gegner zwischen oder
+ hinter Minen versteckt.
+ Leider ist diese Methode auf offenem Spielfeld leicht abzuwehren, in dem
+ man seinen Spaceball schnell von Ecke zu Ecke beschleunigen lässt.
+ Daher übernimmt bei offenem Spielfeld der zweite Angriffsmodus.
+\begin_inset Newline newline
+\end_inset
+
+Die zweite Angriffsmethode nennen wir Lock-on Angriff.
+ Der Name ist angelehnt an das Aufschalten von Luftfahrzeugen mithilfe eines
+ Radars.
+ Diese Angriffsmethode wählt eine Achse die durch beide Spaceballs verläuft
+ und versucht die eigene Transversalgeschwindigkeiten an den Gegner anzugleichen.
+ Beide Spaceballs befinden sich nun stets parallel zu der vorher festgelegten
+ Achse.
+ 
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+placement H
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+\align center
+\begin_inset Graphics
+	filename D:/Daten (D)/Dropbox/Privat/Hochschule Bremen/3. Semester/Informatik/GitHub/wedontcsharp/LaTex/Bilder/SpaceBalls Angriff.jpg
+	lyxscale 20
+	scale 30
+
+\end_inset
+
+
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+Lock-on Angriff
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Nun hat die KI den Gegner aufgeschaltet.
+ Um mit dem Gegner zu kollidieren muss unser Spaceball Axialgeschwindigkeit
+ in Richtung des Gegners aufbauen.
+ Da jeder Spaceball nur eine beschränkte Beschleunigung zur Verfügung hat
+ wird zuerst die nötige Transversalbeschleunigung berechnet und eingesetzt,
+ um den Gegner weiterhin aufgeschaltet zu behalten.
+ Falls dafür noch nicht die maximale Beschleunigung verwendet wurde, kann
+ die restliche Beschleunigung in Richtung des Gegners eingesetzt werden.
+ Somit erhöhen wir die Axialgeschwindigkeit, um den Gegner schneller zu
+ treffen.
+ Zusätzlich wird bereits vor dem Aufschalten eine Geschwindigkeitskomponente
+ in Richtung des Gegners aufgebaut.
+ Leider behindern Minen das Aufschalten und stellen eine hohe Kollisionsgefahr
+ dar.
+ Jedoch werden damit Gegner mit den besten Verteidigungstaktiken bei offenem
+ Spielfeld in kürzester Zeit aufgeschaltet und besiegt.
+ Daher ist dieser Modus eine gute Ergänzung zum direkten Angriff und wird
+ nur angewendet, wenn in einem bestimmten Sicherheitsradius keine Minen
+ um beide Spaceballs zu finden sind oder keine Mine mehr vorhanden ist.
 \end_layout
 
 \begin_layout Subsection
@@ -774,8 +1282,22 @@ Die Minenverteidigung ist das effizienteste Mittel zur Verteidigung, setzt
  zwischen Minen.
 \end_layout
 
+\begin_layout Standard
+\begin_inset Newpage pagebreak
+\end_inset
+
+
+\end_layout
+
 \begin_layout Section
 Globale und statische Variablen
+\end_layout
+
+\begin_layout Standard
+\begin_inset Newpage pagebreak
+\end_inset
+
+
 \end_layout
 
 \begin_layout Section
@@ -783,26 +1305,2438 @@ Funktionsdokumentation
 \end_layout
 
 \begin_layout Subsection
-Allgemeine Funktionen - Check
+ whatToDo
+\end_layout
+
+\begin_layout Subsubsection*
+Syntax
+\end_layout
+
+\begin_layout LyX-Code
+whatToDo()
+\end_layout
+
+\begin_layout Subsubsection*
+Beschreibung
+\end_layout
+
+\begin_layout Standard
+Diese Funktion entscheidet in jedem Rechenschritt, ob unser Spaceball tanken,
+ angreifen oder verteidigen soll.
+ Die entsprechenden Funktionen (attackEnemy(), fleeEnemy(), CreatePathAllTanken(
+) + doesEnemyGetTanke()) werden dann aufgerufen.
 \end_layout
 
 \begin_layout Subsection
-Auslagerung in C - ?/MH
+ initSpaceall
+\end_layout
+
+\begin_layout Subsubsection*
+Syntax
+\end_layout
+
+\begin_layout LyX-Code
+initSpaceBall()
+\end_layout
+
+\begin_layout Subsubsection*
+Beschreibung
+\end_layout
+
+\begin_layout Standard
+Diese  wird einmal am Anfang des Spiels aufgerufen und setzt die Anfangswerte
+ unserer persistend Variablen.
+ Außerdem werden unsere .mex-Dateien kompiliert, sofern dies erwünscht ist
+ (constCompiling==true).
 \end_layout
 
 \begin_layout Subsection
-Tankfunktionen - Check/CM
+ gameChangeHandler
+\end_layout
+
+\begin_layout Subsubsection*
+Syntax
+\end_layout
+
+\begin_layout LyX-Code
+gameChangeHandler()
+\end_layout
+
+\begin_layout Subsubsection*
+Beschreibung
+\end_layout
+
+\begin_layout Standard
+Diese Funktion wird in jedem Rechenschritt aufgerufen.
+ Innerhalb dieser Funktion werden verschiedene Werte geprüft und bei Änderungen
+ dieser Werte werden Funktionen aufgerufen.
+ Unser aktueller Pfad wird beim Verschwinden einer Mine aktualisiert (resimplify
+Waypoints()) und beim Verschwinden einer Tankstelle wird CreatePathAllTanken()
+ ausgeführt.
 \end_layout
 
 \begin_layout Subsection
-Angriffsfunktion - Check/MH
+ esc_find_path
+\end_layout
+
+\begin_layout Subsubsection*
+Syntax
+\end_layout
+
+\begin_layout LyX-Code
+
+\shape italic
+CellArray
+\shape default
+ waypoints = esc_find_path(
+\shape italic
+StructArray
+\shape default
+ mineList, 
+\shape italic
+Vector
+\shape default
+ startpoint, 
+\shape italic
+Vector
+\shape default
+ endpoint)
+\end_layout
+
+\begin_layout Subsubsection*
+Beschreibung
+\end_layout
+
+\begin_layout Standard
+Diese Funktion nutzt den A* Algorithmus, um Wegpunkte vom Startpunkt zum
+ Zielpunkt um die Minen herum zu finden.
+ Dazu wird erst mithilfe der Minen ein Grid auf dem Spielfeld erzeugt, das
+ Informationen über die Begehbarkeit der einzelnen Spielfeldkoordinaten
+ enthält.
+ Dann wird der optimale Weg zwischen Startpunkt und Zielpunkt gefunden.
+ Ale Rückgabewert erhält man die Wegpunkte vom Start zum Ziel.
+\end_layout
+
+\begin_layout Subsubsection*
+Parameter
+\end_layout
+
+\begin_layout Paragraph
+StructArray mineList
+\end_layout
+
+\begin_layout Standard
+Das Structarray spiel.mine, um die Minen an das Nodegrid zu übergeben
+\end_layout
+
+\begin_layout Paragraph
+Vector startpoint
+\end_layout
+
+\begin_layout Standard
+Der Startpunkt
+\end_layout
+
+\begin_layout Paragraph*
+Vector endpoint
+\end_layout
+
+\begin_layout Standard
+Der Endpunkt oder das Ziel
+\end_layout
+
+\begin_layout Subsubsection*
+Rückgabewert
+\end_layout
+
+\begin_layout Paragraph*
+CellArray waypoints
+\end_layout
+
+\begin_layout Standard
+Die Wegpunkte vom Start zum Ziel um die Minen herum.
+ Die Wegpunkte sind sehr nah beieinander.
+ Durch SimplifyPath lässt sich die Wegpunktliste auf das Wesentliche kürzen.
 \end_layout
 
 \begin_layout Subsection
-Verteidigungsfunktionen - Check/JW
+ esc_find_tanke
 \end_layout
 
-\begin_layout Subsubsection
+\begin_layout Subsubsection*
+Syntax
+\end_layout
+
+\begin_layout LyX-Code
+
+\shape italic
+CellArray
+\shape default
+ tankList = esc_find_tanke(
+\shape italic
+StructArray
+\shape default
+ mineList, 
+\shape italic
+StructArray
+\shape default
+ tankList, 
+\shape italic
+Vector2
+\shape default
+ mepos, 
+\shape italic
+Vector2
+\shape default
+ meges, 
+\shape italic
+Vector2
+\shape default
+ enemypos, 
+\shape italic
+Vector2
+\shape default
+ enemyges, 
+\shape italic
+double
+\shape default
+ ignoreTanke)
+\end_layout
+
+\begin_layout Subsubsection*
+Beschreibung
+\end_layout
+
+\begin_layout Standard
+Diese Funktion findet über einen Bruteforcealgorithmus die beste Tankreihenfolge.
+ Berücksichtigt werden eigene sowie gegnerische Position und Geschwindigkeit,
+ als auch die Minen als Hindernisse zwischen den einzelnen Tankstellen.
+ Als Basis für unsere Berechnung verwenden wir den MinMax Algorithmus ohne
+ Spielerwechsel.
+ Als Rückgabewert erhält man die Tankliste als IDs der Tankstellen
+\end_layout
+
+\begin_layout Subsubsection*
+Parameter
+\end_layout
+
+\begin_layout Paragraph
+StructArray mineList
+\end_layout
+
+\begin_layout Standard
+Das Structarray spiel.mine
+\end_layout
+
+\begin_layout Paragraph
+StructArray tankList
+\end_layout
+
+\begin_layout Standard
+Das Structarray spiel.tanke
+\end_layout
+
+\begin_layout Paragraph*
+Vector mepos
+\end_layout
+
+\begin_layout Standard
+Die Position des eigenen Spaceballs
+\end_layout
+
+\begin_layout Paragraph*
+Vector meges
+\end_layout
+
+\begin_layout Standard
+Die Geschwindigkeit des eigenen Spaceballs
+\end_layout
+
+\begin_layout Paragraph*
+Vector enemypos
+\end_layout
+
+\begin_layout Standard
+Die Position des gegnerischen Spaceballs
+\end_layout
+
+\begin_layout Paragraph*
+Vector enemyges
+\end_layout
+
+\begin_layout Standard
+Die Geschwindigkeit des gegnerischen Spaceballs
+\end_layout
+
+\begin_layout Paragraph*
+double ignoreTanke
+\end_layout
+
+\begin_layout Standard
+Der Index der Tankstelle, die ignoriert werden soll
+\end_layout
+
+\begin_layout Subsubsection*
+Rückgabewert
+\end_layout
+
+\begin_layout Paragraph*
+CellArray tankList
+\end_layout
+
+\begin_layout Standard
+Die Liste der Arrayschlüssel von spiel.tanke in der Reihenfolge, in der das
+ Abfahren der Tankstellen optimal ist.
+\end_layout
+
+\begin_layout Subsection
+ calculateBES
+\end_layout
+
+\begin_layout Subsubsection*
+Syntax
+\end_layout
+
+\begin_layout LyX-Code
+calculateBES(
+\shape italic
+boolean 
+\shape default
+disableMineMode)
+\end_layout
+
+\begin_layout Subsubsection*
+Beschreibung
+\end_layout
+
+\begin_layout Standard
+Diese Funktion berechnet die benötigte Beschleunigung um die gegebenen Wegpunkte
+ abzufahren und setzt den berechneten Wert in die Ausgabevariable bes der
+ Funktion 
+\begin_inset Quotes eld
+\end_inset
+
+beschleunigung
+\begin_inset Quotes erd
+\end_inset
+
+.
+ Je nachdem ob der Spaceball gerade um eine Mine herum manövrieren muss,
+ wird der Minenmodus automatisch aktiviert.
+ Eine Dekativierung des Minenmodus erfolgt manuell, indem mal die Funktion
+ mit dem Parameter disableMineMode = false aufruft.
+ Dann findet keine Berechnung statt, es wird lediglich auf den normalen
+ Modus zurück geschaltet.
+\end_layout
+
+\begin_layout Subsubsection*
+Parameter
+\end_layout
+
+\begin_layout Paragraph
+boolean disableMineMode
+\end_layout
+
+\begin_layout Standard
+Deaktivierung des Minen Modus
+\end_layout
+
+\begin_layout Subsection
+ calculateMineBes
+\end_layout
+
+\begin_layout Subsubsection*
+Syntax
+\end_layout
+
+\begin_layout LyX-Code
+calcMineBes()
+\end_layout
+
+\begin_layout Subsubsection*
+Beschreibung
+\end_layout
+
+\begin_layout Standard
+Diese Funktion wird von calculateBes aufgerufen und berechnet die Beschleunigung
+ in Minennähe.
+ Es wird ein Radius berechnet, um diesen der Spaceball um die Mine navigiert.
+ Die nötige Zentripetalbeschlunigung, Korrektutbeschleunigung und Vorwärtsbeschl
+eunigung werden addiert, um das Ergebnis als Momentanbeschleunigung zu verwenden.
+ Da die Zentripetalbeschleunigung durch spiel.bes begrenzt ist, wird ebenfalls
+ darauf geachtet die maximale Kreisbeschleunigung nicht zu überschreiten.
+ Um die Navigation nochmals zu beschleunigen wird die Kreisbahn beim Einfahren
+ tangentiert und rechtzeitig in den Linienbeschleunigungsmodus geschaltet,
+ um nicht unnötig lange im Orbit der Mine zu bleiben.
+\end_layout
+
+\begin_layout Subsection
+ calculateLineBes
+\end_layout
+
+\begin_layout Subsubsection*
+Syntax
+\end_layout
+
+\begin_layout LyX-Code
+calcLineBes()
+\end_layout
+
+\begin_layout Subsubsection*
+Beschreibung
+\end_layout
+
+\begin_layout Standard
+Diese Funktion wird von calculateBes aufgerufen und berechnet die Beschleunigung
+ auf gerader Strecke.
+ Die Beschleunigung wird so gesteuert, dass der momentane Geschwindigkeitsvektor
+ in Richtung des nächsten Wegpunktes liegt.
+ Die Wegpunkte werden beim Erreichen rechtzeitig gelöscht, um mit einer
+ gleichmäßigen Kurve zum nachfolgenden Wegpunkt zu lenken.
+ Bevor der Wegpunkt erreicht wird, wird die Geschwindigkeit auf ein sicheres
+ Maß reduziert.
+ Zusätzlich werden mit Sicherheitsfunktionen geprüft ob sich der Spaceball
+ auf Kollisionskurs mit einer Bande oder Mine befindet.
+ Diese Funktion ist vor allem dann Notwendig, wenn der Pathfinder umgangen
+ wird.
+\end_layout
+
+\begin_layout Subsection
+ checkIfTooFast
+\end_layout
+
+\begin_layout Subsubsection*
+Syntax
+\end_layout
+
+\begin_layout LyX-Code
+
+\shape italic
+boolean
+\shape default
+ tooFast = checkIfTooFast()
+\end_layout
+
+\begin_layout Subsubsection*
+Beschreibung
+\end_layout
+
+\begin_layout Standard
+In dieser Funktion wird überprüft, ob der nächste Wegpunkt mit Steuerkorrekturen
+ erreicht werden kann, oder ob der Spaceball abbremsen muss.
+ Diese Funktion ist nötig, wenn sich der Zielwegpunkt z.B.
+ im Angriff ständig bewegt.
+ Ist der Spaceball zu schnell um den nächsten Wegpunkt zu erreichen, gibt
+ die Funktion true zurück.
+\end_layout
+
+\begin_layout Subsubsection*
+Rückgabewert
+\end_layout
+
+\begin_layout Paragraph*
+boolean tooFast
+\end_layout
+
+\begin_layout Standard
+Dieser Wert ist true, wenn der Spaceball zu schnell ist und den nächsten
+ Wegpunkt überschießt
+\end_layout
+
+\begin_layout Subsection
+ emergencyBreaking
+\end_layout
+
+\begin_layout Subsubsection*
+Syntax
+\end_layout
+
+\begin_layout LyX-Code
+
+\shape italic
+boolean
+\shape default
+ emergency = emergencyBreaking(
+\shape italic
+Vector
+\shape default
+ customv = me.ges, 
+\shape italic
+Vector
+\shape default
+ customa = me.bes)
+\end_layout
+
+\begin_layout Subsubsection*
+Beschreibung
+\end_layout
+
+\begin_layout Standard
+In dieser Funktion wird überprüft, ob der Spaceball sich kurz vor einer
+ Kollision befinden und eine Notbremsung durchführen muss.
+ Hierfür wird die Position berechnet, bei der unser Spaceball bei einer
+ sofortigen Notbremsung stehen bleiben würde.
+ Befindet sich diese Position in einer Mine oder in einer Bande, wird der
+ Rückgabewert auf true gesetzt.
+ Die Berechnung wird einmal mit und einmal ohne Transversalbeschleunigung
+ durchgeführt.
+ Zusätzlich werden Beschleunigung und Geschwindigkeit vorher mit einer Konstante
+ multipliziert, um die Empfindlichkeit der Notbremsschaltung einzustellen.
+ Die Geschwindigkeit muss dabei mit einem Wert größer als 1 multipliziert
+ werden.
+ Da die Beschleunigung nur einen geringen Wert für eine Notbremsung spielt,
+ ist hier ein Wert ab 0.1 sinnvoll.
+ Auf Wunsch lassen sich Benutzerdefinierte Beschleunigungs und Geschwindigkeitsw
+erte durch die Parameter eingeben.
+\end_layout
+
+\begin_layout Subsubsection*
+Parameter
+\end_layout
+
+\begin_layout Paragraph*
+Vector cuytomv
+\end_layout
+
+\begin_layout Standard
+Benutzerdefinierte Geschwindigkeit (Optional)
+\end_layout
+
+\begin_layout Paragraph*
+Vector customa
+\end_layout
+
+\begin_layout Standard
+Benutzerdefinierte Beschleunigung (Optional)
+\end_layout
+
+\begin_layout Subsubsection*
+Rückgabewert
+\end_layout
+
+\begin_layout Paragraph*
+boolean emergency
+\end_layout
+
+\begin_layout Standard
+Dieser Wert ist true, wenn der Spaceball kurz vor einer Kollision steht
+ und Notbremsen muss.
+\end_layout
+
+\begin_layout Subsection
+ calcBreakingEndVel
+\end_layout
+
+\begin_layout Subsubsection*
+Syntax
+\end_layout
+
+\begin_layout LyX-Code
+
+\shape italic
+double
+\shape default
+ safeVelocity = calcBreakingEndVel()
+\end_layout
+
+\begin_layout Subsubsection*
+Beschreibung
+\end_layout
+
+\begin_layout Standard
+Diese Funktion berechnet die sichere Höchstgeschwindigkeit beim nächsten
+ Wegpunkt.
+ Die Funktion berücksichtigt die Zwischendistanzen und die Winkel aller
+ nachfolgenden Wegpunkte.
+ Die Geschwindigkeit ermöglicht ein Ausrichten der Beschleunigung in einer
+ konstanten vorgegebenen Zeit, um nicht zu weit zu überschießen und nicht
+ jedes mal vollständig abbremsen zu müssen.
+\end_layout
+
+\begin_layout Subsubsection*
+Rückgabewert
+\end_layout
+
+\begin_layout Paragraph*
+double safeVelocity
+\end_layout
+
+\begin_layout Standard
+Die sichere Höchstgeschwindigkeit beim nächsten Wegpunkt
+\end_layout
+
+\begin_layout Subsection
+ calcBreakDistance
+\end_layout
+
+\begin_layout Subsubsection*
+Syntax
+\end_layout
+
+\begin_layout LyX-Code
+
+\shape italic
+double
+\shape default
+ breakDistance = calcBreakDistance(double vel, double endvel)
+\end_layout
+
+\begin_layout Subsubsection*
+Beschreibung
+\end_layout
+
+\begin_layout Standard
+Diese Funktion berechnet die Bremsdistanz, um von der Geschwindigkeit vel
+ auf die Geschwindigkeit endvel abzubremsen.
+\end_layout
+
+\begin_layout Subsubsection*
+Parameter
+\end_layout
+
+\begin_layout Paragraph*
+double vel
+\end_layout
+
+\begin_layout Standard
+die Anfangsgeschwindigkeit
+\end_layout
+
+\begin_layout Paragraph*
+double endvel
+\end_layout
+
+\begin_layout Standard
+die gewünschte Endgeschwindigkeit
+\end_layout
+
+\begin_layout Subsubsection*
+Rückgabewert
+\end_layout
+
+\begin_layout Paragraph*
+double breakDistance
+\end_layout
+
+\begin_layout Standard
+der benötigte Bremsweg
+\end_layout
+
+\begin_layout Subsection
+ calcWaypointReachedRadius
+\end_layout
+
+\begin_layout Subsubsection*
+Syntax
+\end_layout
+
+\begin_layout LyX-Code
+
+\shape italic
+double
+\shape default
+ radius = calcWaypointReachedRadius(
+\shape italic
+double
+\shape default
+ endvel)
+\end_layout
+
+\begin_layout Subsubsection*
+Beschreibung
+\end_layout
+
+\begin_layout Standard
+Diese Funktion berechnet den Radius, in dem ein Wegpunkt als erreicht markiert
+ werden soll.
+ Der Radius wird anhand der Geschwindigkeit dynamisch berechnet, um eine
+ definierte Kreisbahnkurve beim Ansteuern des nachfolgenden Wegpunktes zu
+ gewährleisten.
+\end_layout
+
+\begin_layout Subsubsection*
+Parameter
+\end_layout
+
+\begin_layout Paragraph*
+double endvel
+\end_layout
+
+\begin_layout Standard
+die Geschwindigkeit beim Erreichen des Wegpunktes
+\end_layout
+
+\begin_layout Subsubsection*
+Rückgabewert
+\end_layout
+
+\begin_layout Paragraph*
+double radius
+\end_layout
+
+\begin_layout Standard
+der Radius des Wegpunktes
+\end_layout
+
+\begin_layout Subsection
+ findPath
+\end_layout
+
+\begin_layout Subsubsection*
+Syntax
+\end_layout
+
+\begin_layout LyX-Code
+
+\shape italic
+CellArray
+\shape default
+ waypoints = findPath(
+\shape italic
+Vector
+\shape default
+ start, 
+\shape italic
+Vector
+\shape default
+ end)
+\end_layout
+
+\begin_layout Subsubsection*
+Beschreibung
+\end_layout
+
+\begin_layout Standard
+Diese Funktion berechnet die Wegpunkte mithilfe der Funktion esc_find_path
+ vom Startpunkt 
+\begin_inset Quotes eld
+\end_inset
+
+start
+\begin_inset Quotes erd
+\end_inset
+
+ und Ziel 
+\begin_inset Quotes eld
+\end_inset
+
+end
+\begin_inset Quotes erd
+\end_inset
+
+ und vereinfacht die Wegpunkte mit der Funktion simplifyPath.
+ Als Rückgabewert erhält man die auf ein minimum redizierten Wegpunkte,
+ die man anschließend an die Wegpunktliste anfügen kann
+\end_layout
+
+\begin_layout Subsubsection*
+Parameter
+\end_layout
+
+\begin_layout Paragraph*
+Vector start
+\end_layout
+
+\begin_layout Standard
+die Startposition
+\end_layout
+
+\begin_layout Paragraph*
+Vector end
+\end_layout
+
+\begin_layout Standard
+das Ziel
+\end_layout
+
+\begin_layout Subsubsection*
+Rückgabewert
+\end_layout
+
+\begin_layout Paragraph*
+CellArray waypoints
+\end_layout
+
+\begin_layout Standard
+die auf ein minimum reduzierten Wegpunkte
+\end_layout
+
+\begin_layout Subsection
+ clamp
+\end_layout
+
+\begin_layout Subsubsection*
+Syntax
+\end_layout
+
+\begin_layout LyX-Code
+
+\shape italic
+mixed 
+\shape default
+value = clamp(
+\shape italic
+mixed
+\shape default
+ startvalue, 
+\shape italic
+double
+\shape default
+ min, double max)
+\end_layout
+
+\begin_layout Subsubsection*
+Beschreibung
+\end_layout
+
+\begin_layout Standard
+Mit der Funktion clamp lässt sich ein Wert (Skalat oder Vektor) zwischen
+ min und max zuschneiden.
+ Ist der Wert über max, wird er zu max gesetzt.
+ Ist der Wert unter min, wird er zu min gesetzt.
+\end_layout
+
+\begin_layout Subsubsection*
+Parameter
+\end_layout
+
+\begin_layout Paragraph*
+mixed startvalue
+\end_layout
+
+\begin_layout Standard
+der Ursprungswert
+\end_layout
+
+\begin_layout Paragraph*
+double min
+\end_layout
+
+\begin_layout Standard
+das Minimum des Ausgabewertes
+\end_layout
+
+\begin_layout Paragraph*
+double max
+\end_layout
+
+\begin_layout Standard
+das Maximum des Ausgabewertes
+\end_layout
+
+\begin_layout Subsubsection*
+Rückgabewert
+\end_layout
+
+\begin_layout Paragraph*
+mixed value
+\end_layout
+
+\begin_layout Standard
+der beschnittene Wert
+\end_layout
+
+\begin_layout Subsection
+ simplifyPath
+\end_layout
+
+\begin_layout Subsubsection*
+Syntax
+\end_layout
+
+\begin_layout LyX-Code
+
+\shape italic
+CellArray 
+\shape default
+waypoints = simplifyPath(
+\shape italic
+CellArray
+\shape default
+ inwaypoints)
+\end_layout
+
+\begin_layout Subsubsection*
+Beschreibung
+\end_layout
+
+\begin_layout Standard
+Diese Funktion reduziert alle unnötigen Wegpunkte in inwaypoints und gibt
+ die auf ein minimum reduzierten Punkte als Cellarray aus.
+ Dafür führt diese Funktion einen Kollisionscheck durch, um zu schaun ob
+ jeder Wegpunkt nötig ist, um nicht gegen eine Bande oder Mine zu fahren.
+ So geht diese Funktion vor: Falls zwischen zwei Wegpunkten kein Hindernis
+ liegt, löscht diese Funktion alle Wegpunkte, die zwischen den beiden Wegpunkten
+ liegen.
+ Diese Prüfung wird für jeden Wegpunkt midestens einmal durchgeführt.
+ 
+\end_layout
+
+\begin_layout Subsubsection*
+Parameter
+\end_layout
+
+\begin_layout Paragraph*
+CellArray inwaypoints
+\end_layout
+
+\begin_layout Standard
+die Wegpunkte die durch den Pathfinder generiert wurden
+\end_layout
+
+\begin_layout Subsubsection*
+Rückgabewert
+\end_layout
+
+\begin_layout Paragraph*
+CellArray waypoints
+\end_layout
+
+\begin_layout Standard
+der auf ein minimum reduzierten Wegpunkte
+\end_layout
+
+\begin_layout Subsection
+ resimplifyWaypoints
+\end_layout
+
+\begin_layout Subsubsection*
+Syntax
+\end_layout
+
+\begin_layout LyX-Code
+
+\shape italic
+CellArray 
+\shape default
+waypoints = resimplifyWaypoints()
+\end_layout
+
+\begin_layout Subsubsection*
+Beschreibung
+\end_layout
+
+\begin_layout Standard
+Nach dem Verschwinden einer Mine reduziert diese Funktion unnötig gesetzte
+ Wegpunkte.
+ Hierfür wird als erster Wegpunkt die momentane Spaceballposition eingefügt
+ und anschließend simplifyPath() auf die Wegpunktliste angewendet.
+ Das Resultat erhält man als Rückgabewert.
+\end_layout
+
+\begin_layout Subsubsection*
+Rückgabewert
+\end_layout
+
+\begin_layout Paragraph*
+CellArray waypoints
+\end_layout
+
+\begin_layout Standard
+der auf ein minimum reduzierten Wegpunkte
+\end_layout
+
+\begin_layout Subsection
+ attackEnemy
+\end_layout
+
+\begin_layout Subsubsection*
+Syntax
+\end_layout
+
+\begin_layout LyX-Code
+attackEnemy()
+\end_layout
+
+\begin_layout Subsubsection*
+Beschreibung
+\end_layout
+
+\begin_layout Standard
+Diese Funktion wählt aus, welcher Angriffsmodus gewählt werden soll.
+ Sind noch Minen im Weg zwischen unserem Spaceball und dem gegner, so wird
+ die Extrapolierende Angriffsmethode ausgewählt.
+ Ist der Weg frei so wird der Lockon Angriff gewählt.
+\end_layout
+
+\begin_layout Subsection
+ directAttack
+\end_layout
+
+\begin_layout Subsubsection*
+Syntax
+\end_layout
+
+\begin_layout LyX-Code
+directAttack()
+\end_layout
+
+\begin_layout Subsubsection*
+Beschreibung
+\end_layout
+
+\begin_layout Standard
+Diese Funktion setzt Wegpunkte manuell, um bestmöglich und schnellstmöglich
+ zum Gegner zu kommen.
+ Die Position des Gegners wird extrapoliert und auf diese Position wird
+ entweder bei freiem Weg ein Wegpunkt direkt gesetzt oder bei Hindernissen
+ mithilfe des Pathfinders als Weg gefunden.
+ Um nicht direkt vor dem Gegner abzubremsen wird die Zielposition um eine
+ kleine Strecke in Fahrtrichtung unseres Spaceballs soweit wie es die umliegende
+n Hindernisse zulassen verlängert.
+ Für die Extrapolationsberechnungen wird die Zeit abgeschätzt, die gebraucht
+ wird um mit dem gegner zu kollidieren.
+ Anschließend wird auf der allgemeinen Bewegungsgleichung und der geschätzten
+ Kollisionszeit die extrapolierte Position berechnet.
+ 
+\end_layout
+
+\begin_layout Subsection
+ lockonAttack
+\end_layout
+
+\begin_layout Subsubsection*
+Syntax
+\end_layout
+
+\begin_layout LyX-Code
+lockonAttack()
+\end_layout
+
+\begin_layout Subsubsection*
+Beschreibung
+\end_layout
+
+\begin_layout Standard
+Auf diese Funktion sind wir besonders stolz.
+ Das Ziel dieser Funktion ist es die eigene Spaceballgeschwindigkeit an
+ die des Gegners anzugleichen und zusätzlich eine Geschwindigkeitskomponente
+ in Richtung des Gegners zu erzeugen.
+ Wenn keine Minen oder Banden mehr im Weg sind ist es dem gegnerischen Spaceball
+ nicht mehr möglich auszuweichen, da die Beschleunigung des Gegners einfach
+ kopiert wird.
+ Gegen die Verteidigungsmethode in Ecken zu warten bis der gegnerische Spaceball
+ ankommt um dann schnell zu einer anderen Ecke zu flüchten ist diese Angriffsmet
+hode höchst effizient.
+ Leider hat diese Methode den Nachteil dass je nach Strategie des Gegners
+ lange gebraucht wird um die Geschwindigkeit anzugleichen.
+ Außerdem muss der Weg zwischen beiden Spaceballs frei von Hindernissen
+ sein.
+\end_layout
+
+\begin_layout Subsection
+ calcEnemyHitPosition
+\end_layout
+
+\begin_layout Subsubsection*
+Syntax
+\end_layout
+
+\begin_layout LyX-Code
+
+\shape italic
+Vector
+\shape default
+ extrapPos = calcEnemyHitPosition(
+\shape italic
+double
+\shape default
+ interpolationMode)
+\end_layout
+
+\begin_layout Subsubsection*
+Beschreibung
+\end_layout
+
+\begin_layout Standard
+Diese Funktion berechnet die extrapolierte gegnerische Position, auf die
+ beim Angriff zugesteuert werden soll.
+ Anhand der Variable interpolationMode wird eingestellt, ob bei dieser Berechnun
+g Beschleunigungswerte berücksichtigt werden sollen.
+ Da sich die Beschleunigung oft und schnell ändert, ist es gegebenfalls
+ bei einigen Anwendungen klüger, darauf zu verzichten.
+ Die Extrapolation wird dafür leider ungenauer, schwankt aber nicht so stark.
+\end_layout
+
+\begin_layout Subsubsection*
+Parameter
+\end_layout
+
+\begin_layout Paragraph*
+double interpolationMode
+\end_layout
+
+\begin_layout Standard
+dieser Parameter stellt den Berechnungsmodus um:
+\end_layout
+
+\begin_layout Itemize
+0 : normale Berechnung mit Berücksichtigung der Beschleunigung
+\end_layout
+
+\begin_layout Itemize
+1 : nur Berechnung anhand der Geschwindigkeiten
+\end_layout
+
+\begin_layout Subsubsection*
+Rückgabewerte
+\end_layout
+
+\begin_layout Paragraph*
+Vector extraPos
+\end_layout
+
+\begin_layout Standard
+die extrapolierte Position des Gegners
+\end_layout
+
+\begin_layout Subsection
+ getAccPos
+\end_layout
+
+\begin_layout Subsubsection*
+Syntax
+\end_layout
+
+\begin_layout LyX-Code
+
+\shape italic
+Vector
+\shape default
+ accPos = getAccPos(
+\shape italic
+Vector
+\shape default
+ extrapolPos)
+\end_layout
+
+\begin_layout Subsubsection*
+Beschreibung
+\end_layout
+
+\begin_layout Standard
+Diese Funktion versetzt die gegebene Position nach 
+\begin_inset Quotes eld
+\end_inset
+
+hinten
+\begin_inset Quotes erd
+\end_inset
+
+, um mit voller Geschwindigkeit zu dieser Position zu gelangen und den Spaceball
+ erst nach Erreichen dieser Position abbremsen zu lassen.
+ 
+\begin_inset Quotes eld
+\end_inset
+
+Hinten
+\begin_inset Quotes erd
+\end_inset
+
+ bezieht sich dabei auf der Geraden die auf der gegebenen Position und unserem
+ Spaceball liegt.
+ Die Funktion setzt den gegebenen Punkt so weit nach hinten, wie es die
+ Hindernisse zulassen, maximal jedoch um 0.2 Längeneinheiten.
+\end_layout
+
+\begin_layout Subsubsection*
+Parameter
+\end_layout
+
+\begin_layout Paragraph*
+Vector extrapolPos
+\end_layout
+
+\begin_layout Standard
+die gegebene Position auf die zugesteuert werden soll
+\end_layout
+
+\begin_layout Subsubsection*
+Rückgabewerte
+\end_layout
+
+\begin_layout Paragraph*
+Vector extraPos
+\end_layout
+
+\begin_layout Standard
+die Position die als Wegpunkt gesetzt werden kann.
+\end_layout
+
+\begin_layout Subsection
+ getSmoothedAccelerationValues
+\end_layout
+
+\begin_layout Subsubsection*
+Syntax
+\end_layout
+
+\begin_layout LyX-Code
+[
+\shape italic
+Vector
+\shape default
+ meacc, 
+\shape italic
+Vector
+\shape default
+ enemyacc] = getSmoothedAccelerationValues()
+\end_layout
+
+\begin_layout Subsubsection*
+Beschreibung
+\end_layout
+
+\begin_layout Standard
+Diese Funktion mittelt die einzelnen Beschleunigungswerte vom eigenen und
+ gegnerischen Spaceball über eine per Konstante festgelegte Anzahl an Durchläufe
+n und gibt die gemittelten Beschleunigungswerte aus.
+ Da sich die direkten Beschleunigungswerte oft und stark ändern, ist es
+ sinnvoll bei Extrapolationsberechnungen oder Abschätzungen gemittelte Beschleun
+igungswerte zu verwenden.
+\end_layout
+
+\begin_layout Subsubsection*
+Rückgabewerte
+\end_layout
+
+\begin_layout Paragraph*
+Vector meacc
+\end_layout
+
+\begin_layout Standard
+der gemittelte Beschleunigungswert des eigenen Spaceballs
+\end_layout
+
+\begin_layout Paragraph*
+Vector enemyacc
+\end_layout
+
+\begin_layout Standard
+der gemittelte Beschleunigungswert des gegnerischen Spaceballs
+\end_layout
+
+\begin_layout Subsection
+ calculateSmoothHitTime
+\end_layout
+
+\begin_layout Subsubsection*
+Syntax
+\end_layout
+
+\begin_layout LyX-Code
+
+\shape italic
+double
+\shape default
+ time = calculateSmoothHitTime(
+\shape italic
+boolean
+\shape default
+ includeAcceleration)
+\end_layout
+
+\begin_layout Subsubsection*
+Beschreibung
+\end_layout
+
+\begin_layout Standard
+Diese Funktion mittelt die geschätzte Abfangzeit die der eigene Spaceball
+ braucht, um mit dem gegnerischen Spaceball zu kollidieren.
+ Über den Parameter lässt sich einstellen, ob in der Berechnung Beschleunigungsw
+erte einbezogen werden sollen.
+\end_layout
+
+\begin_layout Subsubsection*
+Parameter
+\end_layout
+
+\begin_layout Paragraph*
+boolean includeAcceleration
+\end_layout
+
+\begin_layout Standard
+Dieser Wert wird auf true gesetzt, falls die Beschleunigung in der Berechnung
+ betrachtet werden soll.
+ Andernfalls wird dieser Parameter auf false gesetzt.
+\end_layout
+
+\begin_layout Subsubsection*
+Rückgabewerte
+\end_layout
+
+\begin_layout Paragraph*
+double time
+\end_layout
+
+\begin_layout Standard
+die voraussichtliche Abfangzeit
+\end_layout
+
+\begin_layout Subsection
+ debugDRAW
+\end_layout
+
+\begin_layout Subsubsection*
+Syntax
+\end_layout
+
+\begin_layout LyX-Code
+debugDRAW()
+\end_layout
+
+\begin_layout Subsubsection*
+Beschreibung
+\end_layout
+
+\begin_layout Standard
+Diese Funktion dient dem Debugging und zeichnet alle Wegpunkte als kleine
+ Punkte ein.
+ Wird die Wegpunktliste geändert muss diese Funktion erneut aufgerufen werden.
+\end_layout
+
+\begin_layout Subsection
+ debugDrawCircle
+\end_layout
+
+\begin_layout Subsubsection*
+Syntax
+\end_layout
+
+\begin_layout LyX-Code
+debugDrawCircle(
+\shape italic
+double
+\shape default
+ index, 
+\shape italic
+Vector
+\shape default
+ pos, 
+\shape italic
+double
+\shape default
+ rad, 
+\shape italic
+boolean
+\shape default
+ clearall = false)
+\end_layout
+
+\begin_layout Subsubsection*
+Beschreibung
+\end_layout
+
+\begin_layout Standard
+Diese Funktion dient dem Debugging und zeichnet einen Kreis mit dem gegebenen
+ Radius an der gegebenen Position.
+ Um mehrere Kreise gleichzeitig zeichnen zu können muss der Index des Kreises
+ bestimmt werden.
+ Jede Spielrunde werden die Kreise entfernt und müssen erneut gezeichnet
+ werden.
+\end_layout
+
+\begin_layout Subsubsection*
+Parameter
+\end_layout
+
+\begin_layout Paragraph*
+double index
+\end_layout
+
+\begin_layout Standard
+der Index des Kreises, jeder Kreis braucht einen unterschiedlichen Index
+\end_layout
+
+\begin_layout Paragraph*
+double rad
+\end_layout
+
+\begin_layout Standard
+der Radius des Kreises
+\end_layout
+
+\begin_layout Paragraph*
+Vector pos
+\end_layout
+
+\begin_layout Standard
+die Position des Kreises
+\end_layout
+
+\begin_layout Paragraph*
+boolean clearall
+\end_layout
+
+\begin_layout Standard
+beim Setzen dieser Variablen auf true wird kein Kreis gezeichnet.
+ Stattdessen werden alle Kreise gelöscht und die Handles werden freigegeben.
+\end_layout
+
+\begin_layout Subsection
+ debugDisp
+\end_layout
+
+\begin_layout Subsubsection*
+Syntax
+\end_layout
+
+\begin_layout LyX-Code
+ debugDisp(
+\shape italic
+string str
+\shape default
+)
+\end_layout
+
+\begin_layout Subsubsection*
+Beschreibung
+\end_layout
+
+\begin_layout Standard
+Diese Funktion dient dem Debugging und schreibt einen String in die Konsole.
+ Im Gegensatz zur gewöhnlichen disp() Funktion lässt sich die Ausgaben mit
+ der Konstanten 
+\shape italic
+constDebugMode
+\shape default
+ ein und aus schalten.
+\end_layout
+
+\begin_layout Subsubsection*
+Parameter
+\end_layout
+
+\begin_layout Paragraph*
+string str
+\end_layout
+
+\begin_layout Standard
+der String der in der Konsole dargestellt werden soll
+\end_layout
+
+\begin_layout Subsection
+ vecNorm
+\end_layout
+
+\begin_layout Subsubsection*
+Syntax
+\end_layout
+
+\begin_layout LyX-Code
+ 
+\shape italic
+Vector
+\shape default
+ erg = vecNorm(
+\shape italic
+Vector 
+\shape default
+input)
+\end_layout
+
+\begin_layout Subsubsection*
+Beschreibung
+\end_layout
+
+\begin_layout Standard
+Diese Funktion macht den Vektor 
+\begin_inset Quotes eld
+\end_inset
+
+input
+\begin_inset Quotes erd
+\end_inset
+
+ zum Einheitsvektor mit der Länge eins und der Richtung von 
+\begin_inset Quotes eld
+\end_inset
+
+input
+\begin_inset Quotes erd
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Subsubsection*
+Parameter
+\end_layout
+
+\begin_layout Paragraph*
+Vector input
+\end_layout
+
+\begin_layout Standard
+der Eingangsvektor
+\end_layout
+
+\begin_layout Subsubsection*
+Rückgabewerte
+\end_layout
+
+\begin_layout Paragraph*
+Vektor erg
+\end_layout
+
+\begin_layout Standard
+der Einheitsvektor von 
+\begin_inset Quotes eld
+\end_inset
+
+input
+\begin_inset Quotes erd
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsection
+ appendToArray
+\end_layout
+
+\begin_layout Subsubsection*
+Syntax
+\end_layout
+
+\begin_layout LyX-Code
+ 
+\shape italic
+CellArray
+\shape default
+ ergarray = appendToArray(
+\shape italic
+CellArray 
+\shape default
+array1, 
+\shape italic
+CellArray
+\shape default
+ array2)
+\end_layout
+
+\begin_layout Subsubsection*
+Beschreibung
+\end_layout
+
+\begin_layout Standard
+Diese Funktion fügt die Arrays array1 und array2 hintereinander zusammen
+ und gibt das resultierende Array als ergarray aus.
+\end_layout
+
+\begin_layout Subsubsection*
+Parameter
+\end_layout
+
+\begin_layout Paragraph*
+CellArray array1
+\end_layout
+
+\begin_layout Standard
+das erste Array
+\end_layout
+
+\begin_layout Paragraph*
+CellArray array2
+\end_layout
+
+\begin_layout Standard
+das zweite Array
+\end_layout
+
+\begin_layout Subsubsection*
+Rückgabewerte
+\end_layout
+
+\begin_layout Paragraph*
+Cellarray ergarray
+\end_layout
+
+\begin_layout Standard
+das Zusammengefügte Array
+\end_layout
+
+\begin_layout Subsection
+ corridorColliding
+\end_layout
+
+\begin_layout Subsubsection*
+Syntax
+\end_layout
+
+\begin_layout LyX-Code
+ 
+\shape italic
+boolean
+\shape default
+ colliding = corridorColliding(
+\shape italic
+Vector 
+\shape default
+startp, 
+\shape italic
+Vector
+\shape default
+ endp, 
+\shape italic
+double
+\shape default
+ radius)
+\end_layout
+
+\begin_layout Subsubsection*
+Beschreibung
+\end_layout
+
+\begin_layout Standard
+Diese Überprüft eine Linie zwischen 
+\begin_inset Quotes eld
+\end_inset
+
+startp
+\begin_inset Quotes erd
+\end_inset
+
+ und 
+\begin_inset Quotes eld
+\end_inset
+
+endp
+\begin_inset Quotes erd
+\end_inset
+
+ mit dem Radius 
+\begin_inset Quotes eld
+\end_inset
+
+radius
+\begin_inset Quotes erd
+\end_inset
+
+ auf Hindernisfreiheit.
+ Liegen Hindernisse im gegebenen Bereich gibt diese Funktion true zurück.
+ Ansonsten erhält man false.
+\end_layout
+
+\begin_layout Subsubsection*
+Parameter
+\end_layout
+
+\begin_layout Paragraph*
+Vector startp
+\end_layout
+
+\begin_layout Standard
+Startpunkt
+\end_layout
+
+\begin_layout Paragraph*
+Vector endp
+\end_layout
+
+\begin_layout Standard
+Endpunkt
+\end_layout
+
+\begin_layout Paragraph*
+double radius
+\end_layout
+
+\begin_layout Standard
+Prüfungsradius
+\end_layout
+
+\begin_layout Subsubsection*
+Rückgabewerte
+\end_layout
+
+\begin_layout Paragraph*
+boolean colliding
+\end_layout
+
+\begin_layout Standard
+true wenn im gegebenen Bereich Kollisionsobjekte sind - andernfalls false
+\end_layout
+
+\begin_layout Subsection
+ lineColliding
+\end_layout
+
+\begin_layout Subsubsection*
+Syntax
+\end_layout
+
+\begin_layout LyX-Code
+ 
+\shape italic
+boolean
+\shape default
+ colliding = lineColliding(
+\shape italic
+Vector 
+\shape default
+startp, 
+\shape italic
+Vector
+\shape default
+ endp, 
+\shape italic
+double
+\shape default
+ radius)
+\end_layout
+
+\begin_layout Subsubsection*
+Beschreibung
+\end_layout
+
+\begin_layout Standard
+Diese Überprüft den Abstand aller Minen zur gegebenen Linie zwischen 
+\begin_inset Quotes eld
+\end_inset
+
+startp
+\begin_inset Quotes erd
+\end_inset
+
+ und 
+\begin_inset Quotes eld
+\end_inset
+
+endp
+\begin_inset Quotes erd
+\end_inset
+
+.
+ Liegt eine Mine näher zur Linie als 
+\begin_inset Quotes eld
+\end_inset
+
+radius
+\begin_inset Quotes erd
+\end_inset
+
+, wird true zurückgegeben.
+ Andernfalls erhält man false.
+ Ähnlich zu 
+\begin_inset Quotes eld
+\end_inset
+
+corridorColliding
+\begin_inset Quotes erd
+\end_inset
+
+, nur dass corridorColliding die Punkte startp und endp entlang der Geraden
+ mit dem Betrag Radius auseinander setzt.
+\end_layout
+
+\begin_layout Subsubsection*
+Parameter
+\end_layout
+
+\begin_layout Paragraph*
+Vector startp
+\end_layout
+
+\begin_layout Standard
+Startpunkt
+\end_layout
+
+\begin_layout Paragraph*
+Vector endp
+\end_layout
+
+\begin_layout Standard
+Endpunkt
+\end_layout
+
+\begin_layout Paragraph*
+double radius
+\end_layout
+
+\begin_layout Standard
+Prüfungsradius
+\end_layout
+
+\begin_layout Subsubsection*
+Rückgabewerte
+\end_layout
+
+\begin_layout Paragraph*
+boolean colliding
+\end_layout
+
+\begin_layout Standard
+true wenn im gegebenen Bereich Kollisionsobjekte sind - andernfalls false
+\end_layout
+
+\begin_layout Subsection
+ distanceLinePoint
+\end_layout
+
+\begin_layout Subsubsection*
+Syntax
+\end_layout
+
+\begin_layout LyX-Code
+ 
+\shape italic
+double
+\shape default
+ distance = distanceLinePoint(
+\shape italic
+Vector 
+\shape default
+startp, 
+\shape italic
+Vector
+\shape default
+ endp, 
+\shape italic
+Vector
+\shape default
+ point)
+\end_layout
+
+\begin_layout Subsubsection*
+Beschreibung
+\end_layout
+
+\begin_layout Standard
+Berechnet den Abstand eines Punktes 
+\begin_inset Quotes eld
+\end_inset
+
+point
+\begin_inset Quotes erd
+\end_inset
+
+ zur gegebenen Linie zwischen 
+\begin_inset Quotes eld
+\end_inset
+
+startp
+\begin_inset Quotes erd
+\end_inset
+
+ und 
+\begin_inset Quotes eld
+\end_inset
+
+endp
+\begin_inset Quotes erd
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Subsubsection*
+Parameter
+\end_layout
+
+\begin_layout Paragraph*
+Vector startp
+\end_layout
+
+\begin_layout Standard
+Startpunkt
+\end_layout
+
+\begin_layout Paragraph*
+Vector endp
+\end_layout
+
+\begin_layout Standard
+Endpunkt
+\end_layout
+
+\begin_layout Paragraph*
+Vector point
+\end_layout
+
+\begin_layout Standard
+zu überprüfender Punkt
+\end_layout
+
+\begin_layout Subsubsection*
+Rückgabewerte
+\end_layout
+
+\begin_layout Paragraph*
+double distance
+\end_layout
+
+\begin_layout Standard
+die Distanz des Punktes 
+\begin_inset Quotes eld
+\end_inset
+
+point
+\begin_inset Quotes erd
+\end_inset
+
+ zur gegebenen Linie zwischen 
+\begin_inset Quotes eld
+\end_inset
+
+startp
+\begin_inset Quotes erd
+\end_inset
+
+ und 
+\begin_inset Quotes eld
+\end_inset
+
+endp
+\begin_inset Quotes erd
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsection
+ getPerpend
+\end_layout
+
+\begin_layout Subsubsection*
+Syntax
+\end_layout
+
+\begin_layout LyX-Code
+ 
+\shape italic
+Vector
+\shape default
+ norm = getPerpend(
+\shape italic
+Vector 
+\shape default
+vec)
+\end_layout
+
+\begin_layout Subsubsection*
+Beschreibung
+\end_layout
+
+\begin_layout Standard
+Berechnet einen rechtwinkligen Vektor zu 
+\begin_inset Quotes eld
+\end_inset
+
+vec
+\begin_inset Quotes erd
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Subsubsection*
+Parameter
+\end_layout
+
+\begin_layout Paragraph*
+Vector vec
+\end_layout
+
+\begin_layout Standard
+Eingangsvektor
+\end_layout
+
+\begin_layout Subsubsection*
+Rückgabewerte
+\end_layout
+
+\begin_layout Paragraph*
+Vector norm
+\end_layout
+
+\begin_layout Standard
+ein Vektor, der rechtwinklig zu 
+\begin_inset Quotes eld
+\end_inset
+
+vec
+\begin_inset Quotes erd
+\end_inset
+
+ ist.
+\end_layout
+
+\begin_layout Subsection
+ projectVectorNorm
+\end_layout
+
+\begin_layout Subsubsection*
+Syntax
+\end_layout
+
+\begin_layout LyX-Code
+ 
+\shape italic
+double
+\shape default
+ proj = projectVectorNorm(
+\shape italic
+Vector 
+\shape default
+vec1, 
+\shape italic
+Vector
+\shape default
+ vec2)
+\end_layout
+
+\begin_layout Subsubsection*
+Beschreibung
+\end_layout
+
+\begin_layout Standard
+Berechnet den Betrag der Projektion von 
+\begin_inset Quotes eld
+\end_inset
+
+vec1
+\begin_inset Quotes erd
+\end_inset
+
+ auf 
+\begin_inset Quotes eld
+\end_inset
+
+vec2
+\begin_inset Quotes erd
+\end_inset
+
+.
+ Falls sich die Richtungen von 
+\begin_inset Quotes eld
+\end_inset
+
+vec1
+\begin_inset Quotes erd
+\end_inset
+
+ und 
+\begin_inset Quotes eld
+\end_inset
+
+vec2
+\begin_inset Quotes erd
+\end_inset
+
+ um mehr als 90 Grad unterscheiden, ist der Rückgabewert negativ!
+\end_layout
+
+\begin_layout Subsubsection*
+Parameter
+\end_layout
+
+\begin_layout Paragraph*
+Vector vec1
+\end_layout
+
+\begin_layout Standard
+Eingangsvektor
+\end_layout
+
+\begin_layout Paragraph*
+Vector vec2
+\end_layout
+
+\begin_layout Standard
+Vektor, auf den Projeziert werden soll
+\end_layout
+
+\begin_layout Subsubsection*
+Rückgabewerte
+\end_layout
+
+\begin_layout Paragraph*
+Vector norm
+\end_layout
+
+\begin_layout Standard
+ein Vektor, der rechtwinklig zu 
+\begin_inset Quotes eld
+\end_inset
+
+vec
+\begin_inset Quotes erd
+\end_inset
+
+ ist.
+\end_layout
+
+\begin_layout Subsection
+ getTimeToAlignVelocity
+\end_layout
+
+\begin_layout Subsubsection*
+Syntax
+\end_layout
+
+\begin_layout LyX-Code
+ 
+\shape italic
+double
+\shape default
+ time = getTimeToAlignVelocity(
+\shape italic
+Vector 
+\shape default
+vel1, 
+\shape italic
+Vector
+\shape default
+ vec)
+\end_layout
+
+\begin_layout Subsubsection*
+Beschreibung
+\end_layout
+
+\begin_layout Standard
+Berechnet die Zeit, die benötigt wird, um den Geschwindigkeitsvektor 
+\begin_inset Quotes eld
+\end_inset
+
+vel1
+\begin_inset Quotes erd
+\end_inset
+
+ auf den Vektor 
+\begin_inset Quotes eld
+\end_inset
+
+vec
+\begin_inset Quotes erd
+\end_inset
+
+ mit dem selben Geschwindigkeitsbetrag auszurichten.
+ Hierfür wird angenommen, dass der Geschwindigkeitsvektor auf einer Kreisbahn
+ mit der konstanten Beschleunigung spiel.bes geändert wird.
+ Die dafür benötigte Zeit wird als Rückgabewert ausgegeben.
+\end_layout
+
+\begin_layout Subsubsection*
+Parameter
+\end_layout
+
+\begin_layout Paragraph*
+Vector vel1
+\end_layout
+
+\begin_layout Standard
+Geschwingigkeitsvektor
+\end_layout
+
+\begin_layout Paragraph*
+Vector vec
+\end_layout
+
+\begin_layout Standard
+neue Geschwindigkeitsrichtung
+\end_layout
+
+\begin_layout Subsubsection*
+Rückgabewerte
+\end_layout
+
+\begin_layout Paragraph*
+double time
+\end_layout
+
+\begin_layout Standard
+die Zeit, die benötigt wird, um den Geschwindigkeitsvektor 
+\begin_inset Quotes eld
+\end_inset
+
+vel1
+\begin_inset Quotes erd
+\end_inset
+
+ auf den Vektor 
+\begin_inset Quotes eld
+\end_inset
+
+vec
+\begin_inset Quotes erd
+\end_inset
+
+ mit dem selben Geschwindigkeitsbetrag auszurichten
+\end_layout
+
+\begin_layout Subsection
+ getMaxVelocityToAlignInTime
+\end_layout
+
+\begin_layout Subsubsection*
+Syntax
+\end_layout
+
+\begin_layout LyX-Code
+ 
+\shape italic
+double
+\shape default
+ vel = getMaxVelocityToAlignInTime(
+\shape italic
+Vector 
+\shape default
+vec1, 
+\shape italic
+Vector
+\shape default
+ vec2, 
+\shape italic
+double
+\shape default
+ time)
+\end_layout
+
+\begin_layout Subsubsection*
+Beschreibung
+\end_layout
+
+\begin_layout Standard
+Berechnet die maximale Geschwindigkeit auf Grundlage von getTimeToAlignVelocity(
+), die ein Spaceball noch haben darf um die Geschwindigkeitsrichtung von
+ vec1 auf vec2 in der vorgeschriebenen Zeit time zu ändern.
+ Diese Funktion ermittelt die sichere Geschwindigkeit beim Erreichen eines
+ Wegpunktes.
+\end_layout
+
+\begin_layout Subsubsection*
+Parameter
+\end_layout
+
+\begin_layout Paragraph*
+Vector vec1
+\end_layout
+
+\begin_layout Standard
+anfänglicher Geschwingigkeitsvektor
+\end_layout
+
+\begin_layout Paragraph*
+Vector vec2
+\end_layout
+
+\begin_layout Standard
+Zielgeschwingigkeitsvektor
+\end_layout
+
+\begin_layout Paragraph*
+double time
+\end_layout
+
+\begin_layout Standard
+die Zeit, die für die Beschleunigung zur Verfügung steht
+\end_layout
+
+\begin_layout Subsubsection*
+Rückgabewerte
+\end_layout
+
+\begin_layout Paragraph*
+double vel
+\end_layout
+
+\begin_layout Standard
+die maximal erlaubte Geschwindigkeit
+\end_layout
+
+\begin_layout Subsection
+ safeDeleteWaypoints
+\end_layout
+
+\begin_layout Subsubsection*
+Syntax
+\end_layout
+
+\begin_layout LyX-Code
+ safeDeleteWaypoints()
+\end_layout
+
+\begin_layout Subsubsection*
+Beschreibung
+\end_layout
+
+\begin_layout Standard
+Diese Funktion löscht alle Wegpunkte.
+ Um zu verhindern dass der Spaceball durch Ausbremsen und Erhalten neuer
+ Wegpunkte in ein Hindernis fährt, wird zusätzlich ein Wegpunkt erstellt,
+ bei dem der Spaceball auf eine sichere Geschwindigkeit abgebremst hat.
+ Somit bremst der Spaceball erst ab, um dann einer neue Route zu folgen.
+\end_layout
+
+\begin_layout Subsection
+ getNearestMineId
+\end_layout
+
+\begin_layout Subsubsection*
+Syntax
+\end_layout
+
+\begin_layout LyX-Code
+ 
+\shape italic
+double
+\shape default
+ id = getNearestMineId(
+\shape italic
+Vector
+\shape default
+ pos)
+\end_layout
+
+\begin_layout Subsubsection*
+Beschreibung
+\end_layout
+
+\begin_layout Standard
+Sucht in spiel.mine nach der nächsten Mine an der gegebenen Position.
+ Als Ergebnis erhält man den Arrayindex der Mine.
+\end_layout
+
+\begin_layout Subsubsection*
+Parameter
+\end_layout
+
+\begin_layout Paragraph*
+Vector pos
+\end_layout
+
+\begin_layout Standard
+die Referenzposition
+\end_layout
+
+\begin_layout Subsubsection*
+Rückgabewerte
+\end_layout
+
+\begin_layout Paragraph*
+double id
+\end_layout
+
+\begin_layout Standard
+die Minen-Id
+\end_layout
+
+\begin_layout Subsection
+ isWalkable
+\end_layout
+
+\begin_layout Subsubsection*
+Syntax
+\end_layout
+
+\begin_layout LyX-Code
+ 
+\shape italic
+boolean
+\shape default
+ walkable = isWalkable(
+\shape italic
+Vector
+\shape default
+ pos, 
+\shape italic
+double
+\shape default
+ radius)
+\end_layout
+
+\begin_layout Subsubsection*
+Beschreibung
+\end_layout
+
+\begin_layout Standard
+Prüft, ob diese Position mit dem Radius von einem Spaceball ohne Kollision
+ begehbar ist.
+\end_layout
+
+\begin_layout Subsubsection*
+Parameter
+\end_layout
+
+\begin_layout Paragraph*
+Vector pos
+\end_layout
+
+\begin_layout Standard
+die Referenzposition
+\end_layout
+
+\begin_layout Paragraph*
+double radius
+\end_layout
+
+\begin_layout Standard
+Überprüfungsradius
+\end_layout
+
+\begin_layout Subsubsection*
+Rückgabewerte
+\end_layout
+
+\begin_layout Paragraph*
+boolean walkable
+\end_layout
+
+\begin_layout Standard
+ist true, wenn sich keine Kollisionsobjekte im gegebenen Bereich befinden
+ - ansonsten false
+\end_layout
+
+\begin_layout Subsection
+ CreatePathAllTanken
+\end_layout
+
+\begin_layout Subsubsection*
+Syntax
+\end_layout
+
+\begin_layout LyX-Code
+ CreatePathAllTanken()
+\end_layout
+
+\begin_layout Subsubsection*
+Beschreibung
+\end_layout
+
+\begin_layout Standard
+Diese Funktion ruft die ausgelagerte Funktion esc_find_tanke auf, berechnet
+ den Weg zwischen den dort ausgegebenen Punkten und fügt diesen der p_waypointLi
+st Variable hinzu.
+ Außerdem wird geprüft, ob sich dadurch die erste Tankstelle ändert, was
+ bei Bedarf verhindert wird.
+\end_layout
+
+\begin_layout Subsection
+ doesEnemyGetTanke
+\end_layout
+
+\begin_layout Subsubsection*
+Syntax
+\end_layout
+
+\begin_layout LyX-Code
+ doesEnemyGetTanke()
+\end_layout
+
+\begin_layout Subsubsection*
+Beschreibung
+\end_layout
+
+\begin_layout Standard
+Solange wir im Tank-Modus sind wird diese Funktion in jedem Rechenschritt
+ aufgerufen.
+ Bei Bedarf wird in den competitionMode geschaltet oder eine Tankstelle
+ ignoriert.
+\end_layout
+
+\begin_layout Subsection
 
 \family typewriter
 defCornerTime
@@ -815,7 +3749,7 @@ name "sub:defCornerTime"
 
 \end_layout
 
-\begin_layout Description
+\begin_layout Subsubsection*
 Syntax
 \end_layout
 
@@ -827,7 +3761,7 @@ Vector
  pos)
 \end_layout
 
-\begin_layout Description
+\begin_layout Subsubsection*
 Beschreibung
 \end_layout
 
@@ -875,15 +3809,18 @@ reference "fig:Überprüfung:-Gegner-en"
 
 
 \begin_inset Float figure
+placement H
 wide false
 sideways false
 status open
 
 \begin_layout Plain Layout
 \noindent
-\align right
+\align center
 \begin_inset Graphics
-	filename C:/Users/Julian Wiggers/Documents/escalators/LaTex/Bilder/SpaceBalls CornerTricking.jpg
+	filename D:/Daten (D)/Dropbox/Privat/Hochschule Bremen/3. Semester/Informatik/GitHub/wedontcsharp/LaTex/Bilder/SpaceBalls CornerTricking.jpg
+	lyxscale 20
+	scale 70
 
 \end_inset
 
@@ -894,9 +3831,9 @@ status open
 \begin_inset Caption Standard
 
 \begin_layout Plain Layout
-
-\lang english
 Überprüfung: Gegner en Route? 
+\lang english
+
 \begin_inset CommandInset label
 LatexCommand label
 name "fig:Überprüfung:-Gegner-en"
@@ -916,30 +3853,35 @@ name "fig:Überprüfung:-Gegner-en"
 
 \end_layout
 
-\begin_layout Description
+\begin_layout Subsubsection*
 Parameter
 \end_layout
 
-\begin_layout Standard
+\begin_layout Paragraph
 
 \series bold
-Vector pos:
-\series default
- Position der Ecke.
- 
+Vector pos
 \end_layout
 
-\begin_layout Description
+\begin_layout Standard
+Position der Ecke 
+\end_layout
+
+\begin_layout Subsubsection*
 Rückgabewert 
 \end_layout
 
 \begin_layout Paragraph
-time:
-\series medium
- Zeitdifferenz aus meiner und der gegnerischen Zeit zur Ecke.
+time
 \end_layout
 
-\begin_layout Subsubsection
+\begin_layout Standard
+
+\series medium
+Zeitdifferenz aus meiner und der gegnerischen Zeit zur Ecke.
+\end_layout
+
+\begin_layout Subsection
 
 \family typewriter
 bestDefCorner
@@ -952,7 +3894,7 @@ name "sub:bestDefCorner"
 
 \end_layout
 
-\begin_layout Description
+\begin_layout Subsubsection*
 Syntax
 \end_layout
 
@@ -964,7 +3906,7 @@ vector
 tEcke = bestDefCorner()
 \end_layout
 
-\begin_layout Description
+\begin_layout Subsubsection*
 Beschreibung
 \end_layout
 
@@ -987,7 +3929,7 @@ reference "sub:defCornerTime"
  
 \end_layout
 
-\begin_layout Description
+\begin_layout Subsubsection*
 Parameter
 \end_layout
 
@@ -995,19 +3937,21 @@ Parameter
 -
 \end_layout
 
-\begin_layout Description
+\begin_layout Subsubsection*
 Rückgabewert 
 \end_layout
 
-\begin_layout Standard
+\begin_layout Paragraph
 
 \series bold
-vector tEcke: 
-\series default
+vector tEcke
+\end_layout
+
+\begin_layout Standard
 Koordinaten der besten Ecke
 \end_layout
 
-\begin_layout Subsubsection
+\begin_layout Subsection
 
 \family typewriter
 fleeEnemy
@@ -1022,7 +3966,7 @@ name "xy"
 
 \end_layout
 
-\begin_layout Description
+\begin_layout Subsubsection*
 Syntax
 \end_layout
 
@@ -1030,7 +3974,7 @@ Syntax
 fleeEnemy()
 \end_layout
 
-\begin_layout Description
+\begin_layout Subsubsection*
 Beschreibung
 \end_layout
 
@@ -1145,7 +4089,7 @@ eidigung.
  
 \end_layout
 
-\begin_layout Description
+\begin_layout Subsubsection*
 Parameter
 \end_layout
 
@@ -1153,7 +4097,7 @@ Parameter
 -
 \end_layout
 
-\begin_layout Description
+\begin_layout Subsubsection*
 Rückgabewert 
 \end_layout
 
@@ -1161,7 +4105,7 @@ Rückgabewert
 -
 \end_layout
 
-\begin_layout Subsubsection
+\begin_layout Subsection
 
 \family typewriter
 cornerTricking
@@ -1174,7 +4118,7 @@ name "sub:cornerTricking"
 
 \end_layout
 
-\begin_layout Description
+\begin_layout Subsubsection*
 Syntax
 \end_layout
 
@@ -1182,7 +4126,7 @@ Syntax
 cornerTricking()
 \end_layout
 
-\begin_layout Description
+\begin_layout Subsubsection*
 Beschreibung
 \end_layout
 
@@ -1340,7 +4284,7 @@ emergencyBreak
  
 \end_layout
 
-\begin_layout Description
+\begin_layout Subsubsection*
 Parameter
 \end_layout
 
@@ -1348,7 +4292,7 @@ Parameter
 -
 \end_layout
 
-\begin_layout Description
+\begin_layout Subsubsection*
 Rückgabewert 
 \end_layout
 
@@ -1356,7 +4300,7 @@ Rückgabewert
 -
 \end_layout
 
-\begin_layout Subsubsection
+\begin_layout Subsection
 
 \family typewriter
 defMineTime
@@ -1369,7 +4313,7 @@ name "sub:defMineTime"
 
 \end_layout
 
-\begin_layout Description
+\begin_layout Subsubsection*
 Syntax
 \end_layout
 
@@ -1381,7 +4325,7 @@ Vector
 pos)
 \end_layout
 
-\begin_layout Description
+\begin_layout Subsubsection*
 Beschreibung
 \end_layout
 
@@ -1398,32 +4342,36 @@ getTimeToAlginVelocity
  den Geschwindkeitsvektor ausgerichtet haben, bis zu Mine benötigen.
 \end_layout
 
-\begin_layout Description
+\begin_layout Subsubsection*
 Parameter
 \end_layout
 
-\begin_layout Standard
+\begin_layout Paragraph
 
 \series bold
-Vector pos: 
-\series default
+Vector pos
+\end_layout
+
+\begin_layout Standard
 Position der Mine.
  
 \end_layout
 
-\begin_layout Description
+\begin_layout Subsubsection*
 Rückgabewert 
 \end_layout
 
-\begin_layout Standard
+\begin_layout Paragraph
 
 \series bold
-time_m:
-\series default
- Zeitdifferenz aus meiner und der gegnerischen Zeit zur Mine.
+time_m
 \end_layout
 
-\begin_layout Subsubsection
+\begin_layout Standard
+Zeitdifferenz aus meiner und der gegnerischen Zeit zur Mine.
+\end_layout
+
+\begin_layout Subsection
 
 \family typewriter
 bestDefMine
@@ -1436,7 +4384,7 @@ name "sub:bestDefMine"
 
 \end_layout
 
-\begin_layout Description
+\begin_layout Subsubsection*
 Syntax
 \end_layout
 
@@ -1448,7 +4396,7 @@ Vector
 tMine = bestDefMine()
 \end_layout
 
-\begin_layout Description
+\begin_layout Subsubsection*
 Beschreibung
 \end_layout
 
@@ -1467,7 +4415,7 @@ reference "sub:defMineTime"
  
 \end_layout
 
-\begin_layout Description
+\begin_layout Subsubsection*
 Parameter
 \end_layout
 
@@ -1475,19 +4423,21 @@ Parameter
 -
 \end_layout
 
-\begin_layout Description
+\begin_layout Subsubsection*
 Rückgabewert 
 \end_layout
 
-\begin_layout Standard
+\begin_layout Paragraph*
 
 \series bold
-vector tMine: 
-\series default
+vector tMine
+\end_layout
+
+\begin_layout Standard
 Koordinaten der besten Mine
 \end_layout
 
-\begin_layout Subsubsection
+\begin_layout Subsection
 
 \family typewriter
 mineTricking
@@ -1500,7 +4450,7 @@ name "sub:mineTricking"
 
 \end_layout
 
-\begin_layout Description
+\begin_layout Subsubsection*
 Syntax
 \end_layout
 
@@ -1508,7 +4458,7 @@ Syntax
 mineTricking()
 \end_layout
 
-\begin_layout Description
+\begin_layout Subsubsection*
 Beschreibung
 \end_layout
 
@@ -1553,7 +4503,7 @@ Der Waypoint berechnet sich aus dem normierten, gespiegelten Vektors des
  
 \end_layout
 
-\begin_layout Description
+\begin_layout Subsubsection*
 Parameter
 \end_layout
 
@@ -1561,32 +4511,1779 @@ Parameter
 -
 \end_layout
 
-\begin_layout Description
+\begin_layout Subsubsection*
 Rückgabewert 
 \end_layout
 
 \begin_layout Standard
 -
+\begin_inset Newpage pagebreak
+\end_inset
+
+
 \end_layout
 
 \begin_layout Section
 Pathfinder - Tobias
 \end_layout
 
+\begin_layout Standard
+Der von uns geschriebene Pathfinder beruht auf dem A* Algorithmus, welcher
+ den effizientesten Weg zwischen zwei Knotenpunkten berechnet.
+ Im Folgenden wird die grundlegende Funktionsweise des Pathfinders erläutert:
+\end_layout
+
+\begin_layout Subsection
+Das Nodegrid
+\end_layout
+
+\begin_layout Standard
+Über das Spielfeld wird ein Raster aus kleinen Punkten gelegt, die gleiche
+ Abstände zueinander haben und gleich groß sind.
+ Dieses Raster wird von dem Pathfinder benötigt, welcher den günstigsten
+ Pfad zum Ziel berechnet.
+ 
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+placement H
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\align center
+\begin_inset Graphics
+	filename D:/Daten (D)/Dropbox/Privat/Hochschule Bremen/3. Semester/Informatik/GitHub/wedontcsharp/LaTex/Bilder/SpaceBalls NodeGrid 1.jpg
+	lyxscale 30
+	scale 70
+
+\end_inset
+
+
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+Nodegrid
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\begin_inset Newpage pagebreak
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Es ist außerdem notwendig unterscheiden zu können, ob ein Rasterpunkt (Gridnode)
+ auf der Koordinate einer Mine, Tankstelle oder auf der Bandenbegrenzung
+ liegt.
+ Die entsprechende 
+\emph on
+iswalkable
+\emph default
+ Information ist zu jedem Gridnode abrufbar.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+placement H
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\align center
+\begin_inset Graphics
+	filename D:/Daten (D)/Dropbox/Privat/Hochschule Bremen/3. Semester/Informatik/GitHub/wedontcsharp/LaTex/Bilder/SpaceBalls NodeGrid isWalkable.jpg
+	lyxscale 20
+	scale 50
+
+\end_inset
+
+
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+Node Informationen
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Um die schnellstmögliche und kürzeste Route zu fahren, werden die Gridnodes
+ nach individuellen Eigenschaften bewertet.
+ 
+\end_layout
+
+\begin_layout Description
+f-Kosten: Für jeden Knoten K beschreibt jeweils ein Wert die Pfadlänge zwischen
+ Start und Ziel unter Benutzung dieses Knotens.
+ Die g- und h-Kosten ergeben die f-Kosten
+\end_layout
+
+\begin_layout Description
+g-Kosten: Kosten vom Startpunkt bis zum Knoten K
+\end_layout
+
+\begin_layout Description
+h-Kosten: Geschätzte Kosten vom Knoten K bis zum Zielpunkt 
+\emph on
+(hier: Tankstelle)
+\emph default
+.
+\end_layout
+
+\begin_layout Standard
+Beispielsweise soll der Weg zwischen der Position des blauen Spaceballs
+ und der ersten Tankstelle berechnet werden:
+\begin_inset Newline newline
+\end_inset
+
+Zunächst einmal sind alle Rasterpunkte, bis auf den Startpunkt, unbekannt
+ (in schwarz dargestellt).
+ Mit laufender Berechnung werden diese zu bekannten Rasterpunkten und stellen
+ einen potenziellen Weg zum Ziel dar, der mit zunehmender Grünfärbung geeigneter
+ wird.
+ Alle bekannten Knoten werden in einer Liste gespeichert, von denen immer
+ der bestmögliche für weitere Pfaduntersuchungen herangezogen wird.
+ Sobald der abschließende und damit dem Ziel entsprechenden Knoten untersucht
+ wird, kann der Weg durch verbinden der einzelnen Knoten rekonstruiert werden.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+placement H
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\align center
+\begin_inset Graphics
+	filename D:/Daten (D)/Dropbox/Privat/Hochschule Bremen/3. Semester/Informatik/GitHub/wedontcsharp/LaTex/Bilder/SpaceBalls Pathfinder Detail.jpg
+	lyxscale 20
+	scale 70
+
+\end_inset
+
+
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+Kosten
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Newpage pagebreak
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsection
+Simplify Path
+\end_layout
+
+\begin_layout Standard
+Aufgrund dessen, dass unser Spaceball bei jedem Knoten um ein gewisses Maß
+ abbremst und neu beschleunigen muss, ist es notwendig den Knotenpfad zu
+ vereinfachen, um Geschwindigkeit generieren zu können.
+ Funktionsweise siehe Kapitel XXXX (Link zur Funktionsdoku einfügen)
+\end_layout
+
+\begin_layout Standard
+
+\lang english
+\begin_inset Float figure
+placement H
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\align center
+
+\lang english
+\begin_inset Graphics
+	filename D:/Daten (D)/Dropbox/Privat/Hochschule Bremen/3. Semester/Informatik/GitHub/wedontcsharp/LaTex/Bilder/SpaceBalls simplifyPath.jpg
+	lyxscale 20
+	scale 70
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+Wegpunktreduzierung des Pfades
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Newpage pagebreak
+\end_inset
+
+
+\end_layout
+
 \begin_layout Section
 Statistikprogramm - Tobias
 \end_layout
 
+\begin_layout Standard
+Das Statistikprogramm dient in erster Linie dazu, spaceballs.m beliebig oft
+ ausführen zu lassen, um dann im Anschluss eine aussagekräftige Spielstatistik
+ über Siege und Niederlagen zu erhalten.
+ Im Folgenden wird die Funktionsweise erläutert und die Verwendung des RNG
+\begin_inset Foot
+status open
+
+\begin_layout Plain Layout
+Random Number Generation
+\end_layout
+
+\end_inset
+
+-Befehls erklärt.
+\begin_inset Newline newline
+\end_inset
+
+Das Statistikprogramm gliedert sich in zwei Dateien.
+ Der eigentliche Programmcode der Statistik ist als Funktion in stats.m geschrieb
+en, welche über die statistics.m Datei aufgerufen wird.
+ Letztere dient zur Festlegung der Parameter, die vom Nutzer an die Funktion
+ übergeben werden.
+ Die Ausgabe der statistischen Erhebung geschieht über das Command Window
+ und sieht wie folgt aus:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+placement H
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+\align center
+\begin_inset Graphics
+	filename D:/Daten (D)/Dropbox/Privat/Hochschule Bremen/3. Semester/Informatik/GitHub/wedontcsharp/LaTex/Bilder/Statistikbeispiel.PNG
+	lyxscale 80
+	scale 60
+
+\end_inset
+
+
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+Ausgabedialog des Statistikprogramms
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsection
+Parameterdeklaration in 
+\noun on
+statistics.m
+\noun default
+ 
+\end_layout
+
+\begin_layout Standard
+Es ist zu empfehlen, dass in spaceballs.m die Zeitrafferfunktion aktiviert
+ wird, da ansonsten unnötig viel Zeit für den Durchlauf einer Statistik
+ aufgewendet werden muss.
+ Ebenfalls kann es nützlich sein die Zeichnung des Spielfeldes in Schritt.m
+ abzuschalten, um die Rechenzeit zu verkürzen:
+\end_layout
+
+\begin_layout LyX-Code
+\begin_inset listings
+inline false
+status open
+
+\begin_layout LyX-Code
+
+spiel.zeitraffer_checkbox_anfangswert = true;
+\end_layout
+
+\begin_layout LyX-Code
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Außerdem ist der komplette Initialisierungsabschnitt in spaceballs.m auszukomment
+ieren.
+\begin_inset Newline newline
+\end_inset
+
+Nachfolgend können zwischen drei unterschiedlichen Ansätzen zur Erhebung
+ einer Statistik entschieden werden.
+ Der gewünschte Ansatz ist in Matlab über Strg.
+ + Eingabe auszuführen.
+\begin_inset Newline newline
+\end_inset
+
+
+\end_layout
+
+\begin_layout Labeling
+\labelwidthstring 00.00.0000
+1.) Statistik über 
+\emph on
+beliebige
+\emph default
+ Zufallswerte, Parameter Deklaration.
+\begin_inset Newline newline
+\end_inset
+
+Es wird über den RNG ein Zufallswert erzeugt, aus dem dann ein reproduzierbarer
+ Wert für das Spielfeld resultiert.
+\begin_inset Newline newline
+\end_inset
+
+Die eigene Farbe und die Anzahl der spaceballs Durchläufe wird festgelegt:
+\end_layout
+
+\begin_layout LyX-Code
+\begin_inset listings
+inline false
+status open
+
+\begin_layout LyX-Code
+
+meineFarbe = 'blau';
+\end_layout
+
+\begin_layout LyX-Code
+
+Durchgaenge = 40;
+\end_layout
+
+\begin_layout LyX-Code
+
+\end_layout
+
+\begin_layout LyX-Code
+
+clc 
+\end_layout
+
+\begin_layout LyX-Code
+
+stats(Durchgaenge, meineFarbe, 2);
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Labeling
+\labelwidthstring 00.00.0000
+2.) Statistik über 
+\emph on
+alle
+\emph default
+ in 1.) genutzten Zufallswerte
+\begin_inset Newline newline
+\end_inset
+
+Dient z.b als Überprüfungsverfahren nach einer Veränderung in beschleunigung.m
+\end_layout
+
+\begin_layout LyX-Code
+\begin_inset listings
+inline false
+status open
+
+\begin_layout Plain Layout
+
+clc 
+\end_layout
+
+\begin_layout Plain Layout
+
+stats([], [], 1);
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Labeling
+\labelwidthstring 00.00.0000
+3.) Statistik über alle 
+\emph on
+problematischen
+\emph default
+ Seeds aus 1.)
+\begin_inset Newline newline
+\end_inset
+
+Hierbei werden explizit nur die Seeds, bei denen verloren oder unentschieden
+ gespielt wurde, betrachtet.
+\end_layout
+
+\begin_layout LyX-Code
+\begin_inset listings
+inline false
+status open
+
+\begin_layout Plain Layout
+
+clc 
+\end_layout
+
+\begin_layout Plain Layout
+
+stats([], [], 0);
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsection
+Arbeitsweise und Aufbau der Funktion stats.m
+\end_layout
+
+\begin_layout Standard
+Nach Eröffnung der Funktion mit den Eingangsparametern
+\begin_inset Foot
+status collapsed
+
+\begin_layout Plain Layout
+Durchgaenge, Farbe, seedSource
+\end_layout
+
+\end_inset
+
+, die in 1 festgelegt wurden, wird geprüft welche Spielfeldzufallswerte
+ (Seeds) für die laufende Statistikerhebung benötigt werden.
+\begin_inset Foot
+status collapsed
+
+\begin_layout Plain Layout
+Dazu sei hier schon vorweg erwähnt, dass zum Einen problematische Seeds,
+ zweitens aber auch alle verwendeten Seeds in jeweils einer .mat Datei gespeicher
+t werden.
+\end_layout
+
+\end_inset
+
+ Es werden die später benötigten Variablen definiert, welche auf den in
+ den .mat Dateien gespeicherten Daten beruhen.
+\end_layout
+
+\begin_layout LyX-Code
+\begin_inset listings
+inline false
+status open
+
+\begin_layout Plain Layout
+
+if seedSource == 0
+\end_layout
+
+\begin_layout Plain Layout
+
+   load('seedsFaulty.mat')
+\end_layout
+
+\begin_layout Plain Layout
+
+	if isempty(seedsFaulty)
+\end_layout
+
+\begin_layout Plain Layout
+
+    	disp ('Keine Seeds vorhanden')
+\end_layout
+
+\begin_layout Plain Layout
+
+    	return
+\end_layout
+
+\begin_layout Plain Layout
+
+ 	end
+\end_layout
+
+\begin_layout Plain Layout
+
+   seedNum = length(seedsFaulty);
+\end_layout
+
+\begin_layout Plain Layout
+
+   Durchgaenge = seedNum;
+\end_layout
+
+\begin_layout Plain Layout
+
+   Farbe = Farbe;
+\end_layout
+
+\begin_layout Plain Layout
+
+   rng(zw);
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+elseif seedSource == 1
+\end_layout
+
+\begin_layout Plain Layout
+
+   load('seedsAll.mat')
+\end_layout
+
+\begin_layout Plain Layout
+
+	if isempty(seedsAll)
+\end_layout
+
+\begin_layout Plain Layout
+
+    	disp ('Keine Seeds vorhanden')
+\end_layout
+
+\begin_layout Plain Layout
+
+    	return
+\end_layout
+
+\begin_layout Plain Layout
+
+ 	end
+\end_layout
+
+\begin_layout Plain Layout
+
+   seedNum = length(seedsAll);
+\end_layout
+
+\begin_layout Plain Layout
+
+   Durchgaenge = seedNum;
+\end_layout
+
+\begin_layout Plain Layout
+
+   Farbe = Farbe;    rng(zw);
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Lediglich bei der seedSource == 2 wird eine komplett unabhängige, 
+\emph on
+frische
+\emph default
+ Statistik erzeugt.
+ Dazu wird über den RNG ein Zufallswert erzeugt und gleichzeitig als Variable
+ definiert, damit diese anschließend in der .mat Datei gesichert werden kann.
+ Falls keine Seedquelle vom Nutzer angegeben wurde, resultiert eine Fehlermeldun
+g im Command-Window
+\begin_inset Foot
+status collapsed
+
+\begin_layout Plain Layout
+Dem wurde insofern vorgebeugt, dass der Nutzer in statistics.m nur noch seine
+ Farbe und die Anzahl der Durchläufe angeben muss, nicht aber die Seedquelle.
+\end_layout
+
+\end_inset
+
+.
+\end_layout
+
+\begin_layout LyX-Code
+\begin_inset listings
+inline false
+status open
+
+\begin_layout Plain Layout
+
+elseif seedSource == 2
+\end_layout
+
+\begin_layout Plain Layout
+
+   Durchgaenge = Durchgaenge;
+\end_layout
+
+\begin_layout Plain Layout
+
+   zwVar = rng('shuffle');
+\end_layout
+
+\begin_layout Plain Layout
+
+   zw = zwVar.Seed;
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+else
+\end_layout
+
+\begin_layout Plain Layout
+
+   disp('Fehler! Keine Seedquelle angegeben')
+\end_layout
+
+\begin_layout Plain Layout
+
+   return;
+\end_layout
+
+\begin_layout Plain Layout
+
+end
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Anschließend wird eine leere Datentabelle generiert, die stets eine Zeile
+ mehr hat, als Durchgänge definiert wurden.
+ Damit kann eine Spalten-beschreibende Kopfzeile untergebracht werden, die
+ sich wie folgt darstellt
+\begin_inset Foot
+status collapsed
+
+\begin_layout Plain Layout
+Für Spalte sechs ist keine Benennung nötig, da sie ohnehin nicht visuell
+ ausgegeben wird
+\end_layout
+
+\end_inset
+
+:
+\end_layout
+
+\begin_layout LyX-Code
+\begin_inset listings
+inline false
+status open
+
+\begin_layout Plain Layout
+
+data = cell(Durchgaenge+1,6);
+\end_layout
+
+\begin_layout Plain Layout
+
+data{1,1} = 'Durchlauf:';
+\end_layout
+
+\begin_layout Plain Layout
+
+data{1,2} = 'Ereignis:';
+\end_layout
+
+\begin_layout Plain Layout
+
+data{1,3} = 'Grund f.
+ Ergeinis:';
+\end_layout
+
+\begin_layout Plain Layout
+
+data{1,4} = 'Zeit:';
+\end_layout
+
+\begin_layout Plain Layout
+
+data{1,5} = 'Seed:';
+\end_layout
+
+\begin_layout Plain Layout
+
+% data{1,6}: 0=Verloren, 1=Gewonnen, 1.1=Gewonnen durch Gegner getroffen,
+ 2=Crash in Mine, 3=Crash in Bande, 4=me.getankt>enemy.getankt, 5=me.getankt<enemy.g
+etankt
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Da es durchaus interessant ist zu erfahren, wie lange Matlab in einem großen
+ Statistikdurchlauf über z.B 1000 Durchgänge bereits gerechnet hat, wird
+ eine Variable für die Gesamtzeit eingeführt.
+ Unter anderem diese Information wird am Ende eines jeden spaceball.m Aufrufs
+ ausgegeben.
+\end_layout
+
+\begin_layout LyX-Code
+\begin_inset listings
+inline false
+status open
+
+\begin_layout LyX-Code
+
+% Rechenzeitvariable einführen
+\end_layout
+
+\begin_layout LyX-Code
+
+totalTime = 0;
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Nachdem nun die vorerst benötigten Variablen deklariert wurden, wird folgend
+ die Hauptschleife geöffnet.
+ Einfach formuliert, wird dort spaceballs.m eben so oft ausgeführt, wie es
+ vom Nutzer gewünscht wurde.
+ Gleichzeitig werden die eingetretenen Ereignisse in die zuvor generierte
+ Datentabelle geschrieben.
+\end_layout
+
+\begin_layout LyX-Code
+\begin_inset listings
+inline false
+status open
+
+\begin_layout LyX-Code
+
+% Hauptschleife
+\end_layout
+
+\begin_layout LyX-Code
+
+for i = 1 : Durchgaenge
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Es ist noch zwingend erforderlich, die korrekten Seeds an den RNG zu übergeben.
+ Dazu wird wieder die Seedquelle herangezogen und geprüft, welcher Ansatz
+ zur Durchführung einer Statistik der Nutzer wünscht.
+ Aus den entsprechenden .mat Dateien werden die Seeds über den Laufindex
+ der For-Schleife gewählt und schließlich an den RNG übergeben.
+ Falls seedSource == 2 gewählt wurde, kann über den rand-Befehl ein entsprechend
+er zufälliger Seed generiert werden
+\begin_inset Foot
+status collapsed
+
+\begin_layout Plain Layout
+Da der RNG für diesen Ansatz zuvor auf 
+\emph on
+Shuffle
+\emph default
+ gesetzt wurde, entsteht tatsächlich ein komplett zufälliger Wert.
+ 
+\end_layout
+
+\end_inset
+
+.
+ Darauffolgend wird geprüft, welche Spieldaten die eigenen bzw.
+ die des Gegners sind.
+ 
+\end_layout
+
+\begin_layout LyX-Code
+\begin_inset listings
+inline false
+status open
+
+\begin_layout LyX-Code
+
+% Alle Fenster bis auf das letzte Spaceballspielfeldfenster schließen
+\end_layout
+
+\begin_layout LyX-Code
+
+close all
+\end_layout
+
+\begin_layout LyX-Code
+
+\end_layout
+
+\begin_layout LyX-Code
+
+% Wert für r ermitteln 
+\end_layout
+
+\begin_layout LyX-Code
+
+if seedSource == 0
+\end_layout
+
+\begin_layout LyX-Code
+
+	r = seedsFaulty(i,1);
+\end_layout
+
+\begin_layout LyX-Code
+
+elseif seedSource == 1
+\end_layout
+
+\begin_layout LyX-Code
+
+	r = seedsAll(i,1);
+\end_layout
+
+\begin_layout LyX-Code
+
+elseif seedSource == 2
+\end_layout
+
+\begin_layout LyX-Code
+
+	r = round(rand(1)*1000000);
+\end_layout
+
+\begin_layout LyX-Code
+
+end 
+\end_layout
+
+\begin_layout LyX-Code
+
+\end_layout
+
+\begin_layout LyX-Code
+
+rng(r)
+\end_layout
+
+\begin_layout LyX-Code
+
+spaceballs 
+\end_layout
+
+\begin_layout LyX-Code
+
+\end_layout
+
+\begin_layout LyX-Code
+
+% Zuweisung der Farbe 
+\end_layout
+
+\begin_layout LyX-Code
+
+if strcmp(Farbe,'rot')
+\end_layout
+
+\begin_layout LyX-Code
+
+	me = spiel.rot;
+\end_layout
+
+\begin_layout LyX-Code
+
+	enemy = spiel.blau;
+\end_layout
+
+\begin_layout LyX-Code
+
+	myName = spiel.rot.name;
+\end_layout
+
+\begin_layout LyX-Code
+
+	enemyName = spiel.blau.name;
+\end_layout
+
+\begin_layout LyX-Code
+
+else 
+\end_layout
+
+\begin_layout LyX-Code
+
+	me = spiel.blau;
+\end_layout
+
+\begin_layout LyX-Code
+
+	enemy = spiel.rot;
+\end_layout
+
+\begin_layout LyX-Code
+
+	myName = spiel.blau.name;
+\end_layout
+
+\begin_layout LyX-Code
+
+	enemyName = spiel.rot.name;
+\end_layout
+
+\begin_layout LyX-Code
+
+end
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+In jedem Aufruf von spaceballs.m wird nun die Datentabelle durch entsprechende
+ Abfragen mit Informationen wie z.B.
+ dem aktuellen Durchlauf gefüllt
+\begin_inset Foot
+status collapsed
+
+\begin_layout Plain Layout
+Die anfallenden Daten werden jeweils die i+1te Zeile geschrieben, weil die
+ Kopfzeile bereits 
+\begin_inset Quotes eld
+\end_inset
+
+belegt
+\begin_inset Quotes erd
+\end_inset
+
+ ist und die for-Schleife von 1 bis zur Anzahl der Durchgänge geht.
+\end_layout
+
+\end_inset
+
+.
+ Zur Veranschaulichung ist hier eine Beispielabfrage aufgeführt:
+\end_layout
+
+\begin_layout LyX-Code
+\begin_inset listings
+inline false
+status open
+
+\begin_layout LyX-Code
+
+% Datentabelle füllen
+\end_layout
+
+\begin_layout LyX-Code
+
+data{i+1,1} = num2str(i);
+\end_layout
+
+\begin_layout LyX-Code
+
+\end_layout
+
+\begin_layout LyX-Code
+
+if me.punkte == 1 && ~isError
+\end_layout
+
+\begin_layout LyX-Code
+
+           data{i+1,2} = 'Gewonnnen';
+\end_layout
+
+\begin_layout LyX-Code
+
+           data{i+1,3} = enemy.ereignis;
+\end_layout
+
+\begin_layout LyX-Code
+
+           data{i+1,4} = spiel.i_t/100;
+\end_layout
+
+\begin_layout LyX-Code
+
+           data{i+1,5} = r;
+\end_layout
+
+\begin_layout LyX-Code
+
+           data{i+1,6} = 1;
+\end_layout
+
+\begin_layout LyX-Code
+
+            if strcmp(me.ereignis,'Rot trifft Blau.') || strcmp(me.ereignis,'Blau
+ trifft Rot.')
+\end_layout
+
+\begin_layout LyX-Code
+
+            data{i+1,6} = 1.1;
+\end_layout
+
+\begin_layout LyX-Code
+
+           end
+\end_layout
+
+\begin_layout LyX-Code
+
+...
+\end_layout
+
+\begin_layout LyX-Code
+
+\end_layout
+
+\begin_layout LyX-Code
+
+end
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Für den Fall, dass ein Spiel durch klicken in das Spielfeld abgebrochen
+\begin_inset Foot
+status collapsed
+
+\begin_layout Plain Layout
+Durch klicken in das Spielfeld wird das laufende Spiel lediglich übersprungen,
+ der gesamte Statistikdurchlauf ließe sich z.B mit Strg.
+ + C beenden.
+\end_layout
+
+\end_inset
+
+ wird, ist dies in der Auswertung berücksichtigt und es wird ein Error vermerkt.
+ Außerdem wird über den try-and-catch Befehl, sichergestellt, dass die Statistik
+ weiterläuft, sofern ein Error in der beschleunigung.m vorliegt
+\begin_inset Foot
+status collapsed
+
+\begin_layout Plain Layout
+Normalerweise würde Matlab den kompletten Berechnungsvorgang abbrechen.
+\end_layout
+
+\end_inset
+
+.
+ 
+\end_layout
+
+\begin_layout LyX-Code
+\begin_inset listings
+inline false
+status open
+
+\begin_layout LyX-Code
+
+isError = false;
+\end_layout
+
+\begin_layout LyX-Code
+
+try spaceballs;
+\end_layout
+
+\begin_layout LyX-Code
+
+catch isError = true;
+\end_layout
+
+\begin_layout LyX-Code
+
+end
+\end_layout
+
+\begin_layout LyX-Code
+
+\end_layout
+
+\begin_layout LyX-Code
+
+else data{i+1,2} = 'Error';
+\end_layout
+
+\begin_layout LyX-Code
+
+data{i+1,3} = me.ereignis;
+\end_layout
+
+\begin_layout LyX-Code
+
+data{i+1,4} = spiel.i_t/100;
+\end_layout
+
+\begin_layout LyX-Code
+
+data{i+1,5} = r;
+\end_layout
+
+\begin_layout LyX-Code
+
+data{i+1,6} = 99;
+\end_layout
+
+\begin_layout LyX-Code
+
+end
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Am Ende der Hauptschleife werden Informationsanzeigen zum aktuellen Fortschritt
+ definiert.
+ Dazu gehört der aktuell verwendete Seed, die Rechenzeit und eine prozentuale
+ Fortschrittsanzeige.
+ Zudem werden - bis auf einige Ausnahmen - alle Variablen aus dem Workspace
+ gelöscht, da spaceballs.m ohne diese Bereinigung nicht erneut funktionieren
+ würde
+\begin_inset Foot
+status collapsed
+
+\begin_layout Plain Layout
+Dies ist nötig, da der komplette Initialisierungsteil in spaceballs.m auskommenti
+ert wurde.
+\end_layout
+
+\end_inset
+
+.
+\end_layout
+
+\begin_layout LyX-Code
+\begin_inset listings
+inline false
+status open
+
+\begin_layout Plain Layout
+
+clearvars -except data Durchgaenge Farbe myName enemyName zw zwVar totalTime
+ seedSource seedsFaulty seedsAll
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Damit die Ausnahmen des clearvars Befehls nicht überhandnehmen, werden erst
+ nach der Hauptforschleife weitere Variablen deklariert, die zur Auswertung
+ heran gezogen werden.
+\end_layout
+
+\begin_layout LyX-Code
+\begin_inset listings
+inline false
+status open
+
+\begin_layout Plain Layout
+
+sumWins = 0;
+\end_layout
+
+\begin_layout Plain Layout
+
+sumLose = 0;
+\end_layout
+
+\begin_layout Plain Layout
+
+sumAttack = 0;
+\end_layout
+
+\begin_layout Plain Layout
+
+sumDefense = 0;
+\end_layout
+
+\begin_layout Plain Layout
+
+sumERROR = 0;
+\end_layout
+
+\begin_layout Plain Layout
+
+gegErwischt = 0;
+\end_layout
+
+\begin_layout Plain Layout
+
+MineGetr = 0;
+\end_layout
+
+\begin_layout Plain Layout
+
+BandeGetr = 0;
+\end_layout
+
+\begin_layout Plain Layout
+
+time = 0;
+\end_layout
+
+\begin_layout Plain Layout
+
+loseSeeds = cell(sumLose,1);
+\end_layout
+
+\begin_layout Plain Layout
+
+unentDefense = cell(sumDefense,1);
+\end_layout
+
+\begin_layout Plain Layout
+
+unentAttack = cell(sumAttack,1);
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+In der anschließenden Auswertungsschleife werden die eingetretenen Ereignisse
+ jeweils aufsummiert, die Durchschnittszeit berechnet sowie problematische
+ Seeds gespeichert.
+\end_layout
+
+\begin_layout LyX-Code
+\begin_inset listings
+inline false
+status open
+
+\begin_layout LyX-Code
+
+% Auswertungsschleife 
+\end_layout
+
+\begin_layout LyX-Code
+
+for i = 1 : Durchgaenge % Ereignissummen Berechnen 
+\end_layout
+
+\begin_layout LyX-Code
+
+	if data{i+1,6} == 1
+\end_layout
+
+\begin_layout LyX-Code
+
+		sumWins = sumWins + 1;
+\end_layout
+
+\begin_layout LyX-Code
+
+	elseif data{i+1,6} == 1.1
+\end_layout
+
+\begin_layout LyX-Code
+
+		sumWins = sumWins + 1;
+\end_layout
+
+\begin_layout LyX-Code
+
+		gegErwischt = gegErwischt + 1;
+\end_layout
+
+\begin_layout LyX-Code
+
+	elseif data{i+1,6} == 0
+\end_layout
+
+\begin_layout LyX-Code
+
+		sumLose = sumLose + 1;
+\end_layout
+
+\begin_layout LyX-Code
+
+	elseif data{i+1,6} == 2
+\end_layout
+
+\begin_layout LyX-Code
+
+		sumLose = sumLose + 1;
+\end_layout
+
+\begin_layout LyX-Code
+
+		MineGetr = MineGetr + 1;
+\end_layout
+
+\begin_layout LyX-Code
+
+	elseif data{i+1,6} == 3
+\end_layout
+
+\begin_layout LyX-Code
+
+		sumLose = sumLose + 1;
+\end_layout
+
+\begin_layout LyX-Code
+
+		BandeGetr = BandeGetr + 1;
+\end_layout
+
+\begin_layout LyX-Code
+
+	elseif data{i+1,6} == 4
+\end_layout
+
+\begin_layout LyX-Code
+
+		sumAttack = sumAttack + 1;
+\end_layout
+
+\begin_layout LyX-Code
+
+	elseif data{i+1,6} == 5
+\end_layout
+
+\begin_layout LyX-Code
+
+		sumDefense = sumDefense + 1;
+\end_layout
+
+\begin_layout LyX-Code
+
+	elseif data{i+1,6} == 99
+\end_layout
+
+\begin_layout LyX-Code
+
+		sumERROR = sumERROR + 1;
+\end_layout
+
+\begin_layout LyX-Code
+
+	end 
+\end_layout
+
+\begin_layout LyX-Code
+
+	
+\end_layout
+
+\begin_layout LyX-Code
+
+	% Durchschnittszeit berechnen
+\end_layout
+
+\begin_layout LyX-Code
+
+	if data{i+1,6} == 1 || 1.1 
+\end_layout
+
+\begin_layout LyX-Code
+
+		time = time + data{i+1,4};
+\end_layout
+
+\begin_layout LyX-Code
+
+	end
+\end_layout
+
+\begin_layout LyX-Code
+
+	
+\end_layout
+
+\begin_layout LyX-Code
+
+	medianTime = time/sumWins;
+\end_layout
+
+\begin_layout LyX-Code
+
+	% Relevante Seeds speichern
+\end_layout
+
+\begin_layout LyX-Code
+
+	if data{i+1,6} == 0
+\end_layout
+
+\begin_layout LyX-Code
+
+		loseSeeds{i,1} = data{i+1,5};
+\end_layout
+
+\begin_layout LyX-Code
+
+	elseif data{i+1,6} == 2
+\end_layout
+
+\begin_layout LyX-Code
+
+		loseSeeds{i,1} = data{i+1,5};
+\end_layout
+
+\begin_layout LyX-Code
+
+	elseif data{i+1,6} == 3
+\end_layout
+
+\begin_layout LyX-Code
+
+		loseSeeds{i,1} = data{i+1,5};
+\end_layout
+
+\begin_layout LyX-Code
+
+	elseif data{i+1,6} == 4
+\end_layout
+
+\begin_layout LyX-Code
+
+		unentAttack{i,1} = data{i+1,5};
+\end_layout
+
+\begin_layout LyX-Code
+
+	elseif data{i+1,6} == 5
+\end_layout
+
+\begin_layout LyX-Code
+
+		unentDefense{i,1} = data{i+1,5};
+\end_layout
+
+\begin_layout LyX-Code
+
+	end 
+\end_layout
+
+\begin_layout LyX-Code
+
+end
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Sodann werden loseSeeds, unentDefense sowie unentAttack zu seedsFaulty zusammeng
+efasst und als seedsFaulty.mat abgespeichert.
+ Ferner werden alle Seeds als seedsAll.mat gespeichert.
+ In beide Dateien werden überdies Informationen über die Farbe und den übergeord
+neten Zufallswert zw gespeichert.
+ Am Ende des gesamten Statistikdurchlaufes werden nun noch die gesammelten
+ Informationen prosaisch dargestellt und dem Nutzer angezeigt:
+\end_layout
+
+\begin_layout LyX-Code
+\begin_inset listings
+inline false
+status open
+
+\begin_layout LyX-Code
+
+time = horzcat('Gesamtrechenzeit: ', num2str(round(totalTime/60,1)), ' Minuten')
+;
+\end_layout
+
+\begin_layout LyX-Code
+
+Gegner = horzcat(myName, ' VS ', enemyName);
+\end_layout
+
+\begin_layout LyX-Code
+
+SatzA = horzcat('Von ', num2str(Durchgaenge), ' Spielen wurden ', num2str(sumWin
+s), ' gewonnen');
+\end_layout
+
+\begin_layout LyX-Code
+
+SatzAB = horzcat('Von ', num2str(Durchgaenge), ' Spielen wurden ', num2str(sumWi
+ns), ' in durchschnittlich ', num2str(medianTime), ' Sekunden gewonnen.');
+\end_layout
+
+\begin_layout LyX-Code
+
+Quote1 = horzcat('Gewonnen: ', num2str(sumWins/Durchgaenge*100),' %');
+\end_layout
+
+\begin_layout LyX-Code
+
+Quote2 = horzcat(' davon den Gegner erwischt: ', num2str(gegErwischt/sumWins*100
+),' %');
+\end_layout
+
+\begin_layout LyX-Code
+
+Quote3 = horzcat('Verloren: ', num2str(sumLose/Durchgaenge*100),' %');
+\end_layout
+
+\begin_layout LyX-Code
+
+Quote4 = horzcat(' davon in Mine gefahren: ', num2str(MineGetr/sumLose*100),'
+ %');
+\end_layout
+
+\begin_layout LyX-Code
+
+Quote5 = horzcat(' davon in Bande gefahren: ', num2str(BandeGetr/sumLose*100),'
+ %');
+\end_layout
+
+\begin_layout LyX-Code
+
+Quote6 = horzcat('Unentschieden im Angriff: ', num2str(sumAttack/Durchgaenge*100
+),' %');
+\end_layout
+
+\begin_layout LyX-Code
+
+Quote7 = horzcat('Unentschieden in der Verteidigung: ', num2str(sumDefense/Durch
+gaenge*100),' %');
+\end_layout
+
+\begin_layout LyX-Code
+
+Quote8 = horzcat('Error: ', num2str(sumERROR/Durchgaenge*100),' %');
+\end_layout
+
+\begin_layout LyX-Code
+
+Statistische_Erhebung = data(:,1:5);
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Newpage pagebreak
+\end_inset
+
+
+\end_layout
+
 \begin_layout Section
-Website & Dokumentation 
+Website & Dokumentation
 \end_layout
 
 \begin_layout Subsection
 Website - Tobias
 \end_layout
 
+\begin_layout Standard
+Das Ziel der Internetseite ist zum Einen das Semesterprojekt - und viel
+ mehr den Fortschritt - zu dokumentieren.
+ Darüber hinaus soll nachfolgenden Kursen eine Möglichkeit geboten werden,
+ unsere Arbeiten als Informationsquelle heranziehen zu können, um eigene
+ Problematiken gezielter zu lösen.
+ Aufgrund dessen, dass Wordpress mit seinen vielfältigen Möglichkeiten bei
+ der Gestaltung einer Website besonders heraussticht, haben wir uns gegen
+ wix.com, stattdessen für Wordpress entschieden.
+ Wie es sich für professionelle Websites gehört, ist auch unsere Internetseite
+ für mobile Endgeräte ausgelegt.
+ So wird das Theme für Desktopcomputer, Tablets oder Smartphones optisch
+ entsprechend angepasst.
+\begin_inset Newline newline
+\end_inset
+
+Der grundlegende Aufbau der Website ist absichtlich schlicht gehalten.
+ Der Header ist mit unserem Teamnamen 
+\begin_inset Quotes gld
+\end_inset
+
+We don't C#, we MethLab
+\begin_inset Quotes grd
+\end_inset
+
+ versehen, welcher im Einklang mit dem Logo steht.
+ Der konische Farbverlauf von Magenta zu Cyan setzt den einzigen farblichen
+ Akzent.
+ Unter der horizontalen Navigationsleiste befindet sich der eigentliche
+ Content vor hellem Grund, welcher von dem anthraziten Footer geschlossen
+ wird.
+\begin_inset Newline newline
+\end_inset
+
+ Auf der rechten Seite befindet sich eine Suchmaske sowie eine Auflistung
+ der neusten Blogbeiträge, welche wir regelmäßig in Form von Statusupdates
+ veröffentlichten.
+ Ein Countdown timer zeigte die Tage bis zur Abgabe der KI an.
+ Außerdem richteten wir einen YouTube Kanal ein, auf dem wir unkompliziert
+ Videos unserer Spaceball KI hochladen konnten, um diese anschließend auf
+ unserer Internetseite einzubetten.
+ Neben Kontaktdaten und dem Impressum stehen außerdem Informationen über
+ das Spaceballsprojekt und über unser Team zum Abrufen bereit.
+ Selbstverständlich wird die Dokumentation nach Projektabschluss zum Download
+ bereit stehen.
+\end_layout
+
 \begin_layout Subsection
-Dokumentation - ? 
+Dokumentation - TK 
+\end_layout
+
+\begin_layout Standard
+Genau wie jede andere wissenschaftliche Arbeit, wird auch dieses Projekt
+ schriftlich in Form einer Dokumentation beschrieben und somit gesichert.
+ Die Dokumentation wird mit Hilfe des Programms LyX
+\begin_inset Foot
+status open
+
+\begin_layout Plain Layout
+http://www.lyx.org/
+\end_layout
+
+\end_inset
+
+ geschrieben, welches das Softwarepaket LaTeX
+\begin_inset Foot
+status open
+
+\begin_layout Plain Layout
+https://de.wikipedia.org/wiki/LaTeX
+\end_layout
+
+\end_inset
+
+ verarbeiten kann.
+ Unsere Grafiken erstellten wir mit dem Affinity Designer.
+ Uum die Codesnippets innerhalb dieses Dokuments ansprechend darzustellen,
+ ist der LyX Vorspann entsprechend bearbeitet.
+ Darüber hinaus verwenden wir zusätzlich das Listings- und hyperref-Paket.
+ 
+\end_layout
+
+\begin_layout Subsection
+Github
+\end_layout
+
+\begin_layout Standard
+\begin_inset Quotes gld
+\end_inset
+
+GitHub ist ein webbasierter Online-Dienst, der Software-Entwicklungsprojekte
+ auf seinen Servern bereitstellt (Filehosting).
+ Namensgebend war das Versionsverwaltungssystem Git.
+\begin_inset Quotes grd
+\end_inset
+
+
+\begin_inset Foot
+status open
+
+\begin_layout Plain Layout
+https://de.wikipedia.org/wiki/GitHub
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Newpage pagebreak
+\end_inset
+
+
 \end_layout
 
 \begin_layout Section
@@ -1594,19 +6291,151 @@ Logo & Sound
 \end_layout
 
 \begin_layout Subsection
-Logo - Chris
+Logo und Teamname - TK
+\end_layout
+
+\begin_layout Standard
+Das Logo basiert gänzlich auf den Informationen, die dem Teamnamen zu entnehmen
+ sind.
+ Im Grunde basiert das Logo auf einer Blindenplakette (
+\begin_inset Quotes gld
+\end_inset
+
+We don't see sharp
+\begin_inset Quotes grd
+\end_inset
+
+), wobei die gelb-orangefarbene Plakette mit einer Brille versehen ist,
+ sodass der mehrdeutige Name ("We don't C#, we MethLab") optimal im Logo
+ wieder erkennbar ist.
+ Dadurch erscheint das Logo nun in Smiley ähnlicher Gestalt.
+ Außerdem impliziert der Name, dass wir nicht in C# programmieren, sondern
+ in Matlabs Programmiersprache.
+ Gesprochen lässt der Name (Anfangsteil, Endteil) außerdem einen kausalen
+ Zusammenhang zu ("Wir programmieren nicht in C#, wir MatLab'ben"), wenn
+ man jedoch genau hinschaut, erweitert sich der Interpretationsspielraum
+ um ein Vielfaches.
+ Dazu haben wir dem Smiley die Strukturformel von 
+\emph on
+(S)-N-Methyl-1-phenylpropan-2-amin 
+\emph default
+oder kurz Chrystal Meth angefügt, welche den Korpus der Figur bildet.
+ Wir waren uns im Klaren darüber, dass der Name in Anlehnung an die Droge
+ zu Missverständnissen führen kann.
+ An dieser Stelle sei ausdrücklich gesagt, dass wir uns in jeglicher Form
+ von Crystal Meth und jeglichen anderen Drogen distanzieren und der Name
+ ausschließlich humoristisch zu verstehen ist.
+ 
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+placement H
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\align center
+\begin_inset Graphics
+	filename D:/Daten (D)/Dropbox/escalators/INFO/Logo/Logo Vector high res + alpha.png
+	lyxscale 5
+	scale 20
+
+\end_inset
+
+
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+Logo 
+\begin_inset Quotes gld
+\end_inset
+
+We don't C#, we MethLab
+\begin_inset Quotes grd
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Subsection
 Soundtrack - Chris 
 \end_layout
 
-\begin_layout Section
-Fazit - ? Julian/Tobias 
+\begin_layout Standard
+\begin_inset Newpage pagebreak
+\end_inset
+
+
 \end_layout
 
 \begin_layout Section
 Turnierergebnisse und -platzierung 
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+placement H
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\align center
+\begin_inset Graphics
+	filename D:/Daten (D)/Dropbox/Privat/Hochschule Bremen/3. Semester/Informatik/GitHub/wedontcsharp/LaTex/Bilder/Tunierergebnis.PNG
+	lyxscale 50
+	scale 50
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+Tunierergebnis Spaceballs 2015
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Newpage pagebreak
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section
+Fazit - ? Julian/Tobias
+\end_layout
+
+\begin_layout Standard
+\begin_inset Newpage pagebreak
+\end_inset
+
+
 \end_layout
 
 \begin_layout Section
