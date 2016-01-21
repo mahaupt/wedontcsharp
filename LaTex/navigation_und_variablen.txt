@@ -1,0 +1,162 @@
+#Minen und Banden - Navigationsstrategie
+
+Um uns möglichst schnell auf dem Spielfeld bewegen zu können und nicht blind vor Minen und Banden stecken bleiben haben wir uns für eine Navigation anhand von Wegpunkten entschieden. Die Wegpunkte können wenn gewünscht gesetzt werden und ein Navigationaslgorithmus steuert den Spaceball automatisch entlang dieser Wegpunkte über das Spielfeld. Eine detaillierte Beschreibung, wie diese Wegpunkte durch ein komplexes Spielfeld mit Hindernissen gefunden werden können befindet sich in dem Abschnitt Pathfinder. Hier geht es jedoch in erster Linie um die Umsetzung der Wegpunkte in Beschleunigungsinformationen. 
+Der Beschleunigungsalgorithmus besitzt zwei Funktionsweisen:
+1. Linienbeschleunigung
+Die Linienbeschleunigung wird auf "freiem Feld" angewendet und stellt sicher, dass sich der Geschwindigkeitsvektor genau auf dem gewünschten Wegvektor befindet. Ebenfalls wird rechtzeitig vor dem Erreichen eines Wegpunktes auf eine sichere Geschwindigkeit abgebremst. Die sichere Geschwindigkeit berechnet sich aus der maximalen Geschwindigkeit, die der Spaceball haben darf, um die Anpassung des Geschwindigeitsvektors an den neuen Wegvektor in einer vorgegebenen Zeit zu absolvieren. Vor dem letzten Wegpunkt wird bis zum Stillstand abgebremst. Sind keine Wegpunkte vorhanden so wird die momentane Position gehalten. Für zusätzliche Sicherheit war es notwendig eine Notbremsfunktion einzubauen, die potentielle Kollisionskurse frühzeitig erkennt und den Spaceball abbremst. Zusammen mit der Notbremsfunktion ist die Linienbeschleunigung absolut Zuverlässig und war mit optimierten Konstanten kein einiges Mal Ursache einer Kollision mit einer Bande oder Mine.
+
+2. Minenbeschleunigung
+Die Minenbeschleunigung wird immer dann aktiviert, wenn die nächsten zwei Wegpunkte innerhalb eines bestimmten Radius um eine Mine gelegen sind. Es wird ein Orbit ermittelt, auf dem die Mine möglichst effizient tangiert, umkreist und wieder in Richtung des nächsten Wegpunktes verlassen werden kann. Dieser Modus wurde eingeführt, da der Linienbeschleunigungsmodus von der Geschwindigkeit nicht ausreicht, um einen Gegner um Minen zu verfolgen. Die Beschleunigung setzt sich zusammen aus der momentan notwendigen Zentripetalbeschleunigung mit einer Korrekturkomponente und einer Beschleunigungs oder Verzögerungskomponente. Die Korrekturkomponente hat die Aufgabe den Orbitradius exakt zu halten. Dafür steuert diese Komponente lediglich durch Korrekturanpassungen der Zentripetalbeschleunigung den Geschwindigkeitsvektor auf die Tangente des Orbits. Für die Minenverteidigung gibt es auch in der Minenbeschleunigung die Fähigkeit vor dem Letzten Wegpunkt bis zum Stillstand abzubremsen oder mitten im Orbit die Richtung zu ändern.
+
+
+
+#Globale und statische Variablen
+
+
+Um das Verhalten des Spaceballs schnell anzupassen und zu optimieren, haben wir viele Konstanten eingeführt.
+Die meisten dieser Konstanten beeinflussen das Verhalten positiv und negativ, sodass stets eine goldene
+Mitte gefunden werden muss. 
+
+constSafeBorder = 0.001;
+
+Diese Konstante beschreibt den Abstand zu Minen und Banden, der mindestens eingehalten werden muss.
+Da unser Navigationaslgorithmus mit Pfadfinder und Notbremse ausgerüstet ist, kann dieser Wert sehr
+gering gesetzt werden und erlaubt äußerst galante Navigationsmanöver.
+
+
+constWayPointReachedRadius = 0.02;
+
+Diese Konstante steuert den Radius, innerhalb dessen ein Wegpunkt als erreicht deklariert wird.
+Dieser Radius wird anhand der momentanen Geschwindigkeit und dieser Konstante berechnet.
+Erhöht man diese Konstante, erhöht sich auch der Radius.
+
+
+constGridRadius = 0.003;
+
+Diese Konstante beschreibt die Größe eines Nodes im NodeGrid für den Pathfinder. Verkleinert man den Radius fährt der Spaceball genauer und langsamer.
+Erhöht man den Radius, fährt der Spaceball ungenauer und schneller. Bei dieser Konstante gilt es also die goldene Mitte zu finden.
+
+
+constNavSecurity = 0.02;
+
+Diese Konstante wird häufig als Sicherheitskorridor verwendet, in dem unser Spaceball voraussichtlich navigiert. Befinden sich Hindernisse innerhalb dieses Korridors
+zum nächsten Wegpunkt, so ist der Spaceball besonders vorsichtig. Dies kann man vor allem beim Angriff und beim Pathfinder beobachten. Erhöht man diesen 
+Wert, so fährt der Spaceball langsamer übers Spielfeld. Verringert man diese Konstante, dann erhöht sich das Kollisionsrisiko mit einer Bande oder Mine und der Spaceball
+fährt in vielen Situationen schneller. 
+
+
+constCornerBreaking = 0.50;
+
+Diese Konstante steuert das Maß der Geschwindigkeit um kurvige Wegpunkte. Wird der Wert zu hoch gesetzt, überschießt der Spaceball bei steilen Kurven.
+Ist diese Konstante zu klein, dann ist der Spaceball unnötig langsam.
+
+
+constEmrBrkAccFac = 0.2; 
+
+Dieser Faktor steuert die einbeziehung der Beschleunigung in die Notbremsfunktion. Erhöhung dieser Konstante führt zu frühzeigigem Bremsen.
+Verringert man diesen Wert erhöht sich das Kollisionsrisiko.
+
+
+constEmrBrkVelFac = 1.2;
+
+Dieser Faktor steuert die einbeziehung der Geschwindigkeit in die Notbremsfunktion. Erhöhung dieser Konstante führt zu frühzeigigem Bremsen.
+Verringert man diesen Wert erhöht sich das Kollisionsrisiko.
+
+
+constSkipSimplifyPath = false;
+
+Ist diese Konstante aktiviert, so werden die Wegpunkte direkt vom Pathfinder genommen und nicht erst durch simplifyPath vereinfacht.
+
+
+constMineProxRadius = spiel.mine_radius + spiel.spaceball_radius + 1.7*constNavSecurity;
+
+Diese Konstante gibt an, in welchem Radius die nächsten beiden Wegpunkte von einer Mine entfernt sein dürfen, damit der Minenbeschleunigungsmodus aktiviert wird.
+    
+
+constDecisionOfAttackAndDefense = 0.5;
+
+Diese Konstante gibt an, in welchen zeitlichen Abstand zum Gegner von Tankmodus in den Angriffsmodus gewechselt werden soll, falls unser Spaceball mehr getankt hat als der Gegner.
+    
+
+constAccInterpolationSmoothing = 10;
+
+Diese Konstante gibt an, über wie viele Rechenschritte die Beschleunigung der Spaceballs für Extrapolationsberechnungen gemittelt werden soll. Das Mitteln verhindert
+starkes Schwanken und erhöht die Genauigkeit.
+
+
+overrideBesCalculation = false;
+
+Dies ist eine Steuervariable, über die man die Beschleunigungsberechnung überbrücken kann. Dies wird vom LockOn Angriff gebraucht, da dort die Beschleunigung nicht
+über Wegpunkte berechnet wird.
+
+
+constIgnoreTankeTime = 1.5;
+
+Diese Konstante beschreibt den zeitlichen Abstand vom Gegner zu einer Tankstelle, ab der die Tankstelle als ignoriert markiert werden kann.
+    
+   
+constDebugMode = false;
+
+Diese Konstante aktiviert den "Debugmode" und schaltet die Text und Grafikausgabe ein.
+    
+
+constCompiling = false;
+
+Diese Konstante schaltet das Kompillieren der Mexdateien ein oder aus.
+    
+
+
+persistent p_waypointList;
+
+Diese Variable speichert die Wegpunkte, die automatisch abgefahren werden. Die meisten Funktionen beschreiben zum Navigieren nur diese Variable mit neuen
+Wegpunkten.
+
+persistent p_ArrayOfMines;
+
+Diese Variable speichert eine Arbeitskopie von spiel.mine. Der Vorteil daran ist, dass man durch einen einfachen Größenvergleich von spiel.mine und dieser Variable
+sagen kann, wann eine Mine verschwunden ist.
+
+
+persistent p_StartNumberOfTank;
+
+Diese Variable speichert die Anzahl der Tankstellen bei Spielbeginn.
+
+
+persistent p_currentNumberOfTank;
+
+Diese Variable speichert die Anzahl der Tanken beim letzten Berechnungsdurchlauf. Diese Variable wird gebraucht um herausfinden zu können, ob eine Tankstelle gerade eingesammelt wurde.
+
+
+persistent p_lastNumberOfMeTanke;
+
+Diese Variable speichert die Anzahl der Getankten Tankstellen unseres Spaceballs beim letzten Berechnungsdurchauf.
+
+
+persistent p_TankList;
+
+Diese Variable speichert die Tankstellen-IDs, die als nächstes getankt werden sollen.
+
+
+persistent p_tankeCompetition;
+
+Diese Variable speichert einen booleanischen Wert und sagt aus, ob sich unser Spaceball gerade im "Competition Mode" befindet.
+
+
+persistent p_cancelCompetition;
+
+Diese Variable speichert ebenfalls einen bolleanischen Wert und beschreibt ob der "Competition Mode" gerade abgebrochen wurde.
+
+
+persistent p_ignoreTanke;
+
+Diese Variable enthält die ID der Tankstelle, die unser Spaceball ignoriert.
+
+
+persistent p_dispWhatToDo; 
+
+Diese Variable enthält den aktuellen Modus, den der Spaceball Fährt. (1: Angriff, 2: Verteidigung, 3: Tanken)
+
+
+persistent p_mexHandle;
+
+Diese Variable speichert die Handles der externen Mexfunktionen.
