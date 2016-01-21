@@ -221,6 +221,90 @@ Einleitung
 Vorwort - check/JW
 \end_layout
 
+\begin_layout Standard
+Im Rahmen einer Projektarbeit im Modul Informatik
+\begin_inset Foot
+status open
+
+\begin_layout Plain Layout
+Im folgenden INFO genannt.
+\end_layout
+
+\end_inset
+
+ des „Internationalen Studiengangs Luftfahrtsystemtechnik und -management“
+\begin_inset Foot
+status open
+
+\begin_layout Plain Layout
+kurz: ILST
+\end_layout
+
+\end_inset
+
+ an der Hochschule Bremen ist es im Wintersemester 2015/2016 die Aufgabe
+ der Studenten eine KI 
+\begin_inset Foot
+status open
+
+\begin_layout Plain Layout
+künstliche Intelligenz
+\end_layout
+
+\end_inset
+
+ mit Hilfe von Matlab zu programmieren.
+ Hierzu haben wir uns in 14 Gruppen zu jeweils maximal vier Personen aufgeteilt
+ und werden am Ende des Semesters unsere KI's in Form eines Turnieres gegeneinan
+der antreten lassen.
+ Der Spielablauf sieht vor, dass immer zwei Teams – also zwei Spaceballs
+ mit den programmierten KI's – gegeneinander kämpfen.
+ Auf dem durch Banden begrenzten Spielfeld (Verlinken) befinden sich Tankstellen
+ und Minen.
+ Banden sowie Minen dürfen von den Spaceballs nicht berührt werden – geschieht
+ dies doch, ist das Spiel verloren.
+ Ziel des Spiels ist es, mehr zu tanken (verlinken) als der Gegner und ihn
+ mit einem volleren Tank zu treffen.
+ Um dieses Ziel zu erreichen entwickelt jedes Team eine Taktik (link), diese
+ können sehr unterschiedlich ausfallen.
+ Die Kombination aus Taktik und der Umwandlung dieser im Code entscheidet
+ am Ende über Sieg oder Niederlage.
+\begin_inset Newline newline
+\end_inset
+
+Anders als im Vorjahr muss zum tanken weder angehalten werden, noch vergrößert
+ sich der Spaceball hierbei oder wird träge.
+ Desweiteren sind alle Tankstellen gleich groß und es wird lediglich die
+ Anzahl der abgefahrenen Tankstellen gezählt, der Spaceball verbraucht also
+ während der Fortbewegung keinen „Sprit“.
+ Diese starken Unterschiede zum Wintersemester 2014/2015 befreit uns von
+ vielen Berechnungen und macht die Programmierung somit in einigen Teilen
+ wesentlich einfacher.
+\begin_inset Newline newline
+\end_inset
+
+Ebenfalls anders als beim ersten Spaceballsprojekt sind die Gruppengrößen
+ und die damit in Verbindung stehenden Aufgabenverteilungen, während es
+ letztes mal Gruppen von ca.
+ 7 Personen gab, in denen nur 3-4 Leute die KI programmiert haben und der
+ andere Teil sich um Animationen und Internetauftritt gekümmert hat, so
+ sind es in diesem Semester vierer Gruppen, in welchen jeder sich um die
+ Programmierung der KI kümmert.
+ Animationen müssen nicht mehr erstellt werden, lediglich eine Website (siehe...),
+ ein Logo (siehe...) sowie eine Dokumentation (siehe...) in Latex
+\begin_inset Foot
+status open
+
+\begin_layout Plain Layout
+Um die Komplexität zu senken verwenden wir LyX.
+\end_layout
+
+\end_inset
+
+.
+ 
+\end_layout
+
 \begin_layout Subsection
 Vorlesungen - check/JW
 \end_layout
@@ -351,7 +435,7 @@ Das Team - Jeder
 
 \begin_layout Standard
 \begin_inset Tabular
-<lyxtabular version="3" rows="6" columns="2">
+<lyxtabular version="3" rows="7" columns="2">
 <features rotate="0" tabularvalignment="middle">
 <column alignment="center" valignment="top" width="5cm">
 <column alignment="center" valignment="top" width="5cm">
@@ -421,6 +505,26 @@ Statistik & Website
 
 \end_inset
 
+
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
 
 \end_layout
 
@@ -678,7 +782,6 @@ Im Rahmen des Turniers am 19.01.2016 treten alle 14 Teams gegeneinander an,
  Die maximal zu erreichende Punktzahl sind 13 Punkte.
  Auf Basis der erreichten Punkte errechnet sich der Platz in der Wertung
  des Turniers.
- 
 \begin_inset Newpage pagebreak
 \end_inset
 
@@ -6371,6 +6474,108 @@ We don't C#, we MethLab
 
 \begin_layout Subsection
 Soundtrack - Chris 
+\end_layout
+
+\begin_layout Standard
+Für unser Intro haben wir uns überlegt, die Titelmusik der Fernsehserie
+ „Breaking Bad“ neu zu interpretieren.
+ Da unser Name ja unter anderem auf eine Methamphetamin-Produktionsstäte
+ hinweist, erschien uns das recht passend.
+ Die originale Melodie ist recht einfach, wir wollten unser Intro allerdings
+ ein wenig mehr upbeat haben, eher in Richtung Dubstep.
+ Zuerst musste ich die richtigen Noten und Akkorde heraussuchen und passende
+ Synthesizer finden.
+ Zum Arrangieren habe ich Apples Logic Pro X genutzt:
+\begin_inset Newline newline
+\end_inset
+
+
+\begin_inset Float figure
+placement H
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\align center
+\begin_inset Graphics
+	filename Bilder/Logic X Screenshot.jpg
+	lyxscale 20
+	scale 20
+
+\end_inset
+
+
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+Screenshot der Arbeitsoberfläche von Logic X
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Am Ende habe ich vier verschiedene Synthesizer-Spuren und einen Schlagzeug-Track
+ für den Mix verwendet: 
+\begin_inset Newline newline
+\end_inset
+
+
+\begin_inset Float figure
+placement H
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+\align center
+\begin_inset Graphics
+	filename Bilder/Breaking Bad Title Noten.jpg
+	lyxscale 30
+	scale 30
+
+\end_inset
+
+
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+Noten
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Leider war die Musik zwei Sekunden zu lang (10 s waren Vorgabe, unser Intro
+ ist etwa 12 s lang).
+ Schneller abspielen war unmöglich, da sich die ganze Interpretation zum
+ Negativen verändert hätte, also haben wir die letzten zwei Sekunden gekürzt
+ und das Intro ausgeblendet.
+ 
 \end_layout
 
 \begin_layout Standard
