@@ -1,6 +1,6 @@
 # We don't c#, we Methlab
 
-**Gewinner des Spaceballsturniers 15/16:** https://www.youtube.com/watch?v=LrBrI7F64LA
+**Gewinner des Spaceballsturniers 15/16:** https://youtu.be/LrBrI7F64LA
 
 Die KI befindet sich in teams/blau
 
