@@ -15,7 +15,7 @@ Authoren der KI:
 
 Abgabe: 12.01.2016
 
-##Spaceballs
+## Spaceballs
 Originales Spiel und Lehrprojekt von **J.J. Buchholz**
 
 http://prof.red/info/info.htm
